@@ -6,15 +6,15 @@ import {
   Group,
   Paper,
   Stack,
-  ActionIcon,
   Combobox,
   Pill,
   PillsInput,
   useCombobox,
   CheckIcon,
+  SegmentedControl,
 } from '@mantine/core'
 import { DatePickerInput, TimeInput } from '@mantine/dates'
-import { IconClock } from '@tabler/icons-react'
+import { IconCalendar, IconClock } from '@tabler/icons-react'
 import React, { useState, useEffect } from 'react'
 import type { Habit, HabitLog, MealType, LogValue, TimeOfDay } from './types'
 
@@ -34,7 +34,6 @@ function HabitCard({
   const [generalTime, setGeneralTime] = useState<TimeOfDay>(
     habit.defaultTime || 'anytime'
   )
-  const [showDatePicker, setShowDatePicker] = useState(false)
   const [mealType, setMealType] = useState<MealType | ''>('')
 
   // For creatable multi-select
@@ -118,7 +117,6 @@ function HabitCard({
       setGeneralTime(habit.defaultTime || 'anytime')
       setSelectedTime('')
       setSelectedDate(null)
-      setShowDatePicker(false)
       setMealType('')
     }
   }
@@ -247,11 +245,17 @@ function HabitCard({
             value={value?.toString()}
             onChange={(val) => setValue(Number(val))}
             data={[
-              { value: '1', label: '1 - Poor' },
+              { value: '0', label: '0' },
+              { value: '1', label: '1' },
               { value: '2', label: '2' },
-              { value: '3', label: '3 - Average' },
+              { value: '3', label: '3' },
               { value: '4', label: '4' },
-              { value: '5', label: '5 - Excellent' },
+              { value: '5', label: '5' },
+              { value: '6', label: '6' },
+              { value: '7', label: '7' },
+              { value: '8', label: '8' },
+              { value: '9', label: '9' },
+              { value: '10', label: '10' },
             ]}
           />
         )
@@ -284,60 +288,48 @@ function HabitCard({
   const renderTimeInput = () => {
     return (
       <Stack gap="xs">
-        <Group align="flex-end">
-          <Select
-            style={{ flex: 1 }}
-            label="Time tracking type"
-            value={timeType}
-            onChange={(value) => setTimeType(value as 'general' | 'exact')}
-            data={[
-              { value: 'general', label: 'General time' },
-              { value: 'exact', label: 'Exact time' },
-            ]}
-          />
+        <SegmentedControl
+          fullWidth
+          data={[
+            { value: 'general', label: 'Time of Day' },
+            { value: 'exact', label: 'Specific Time' },
+          ]}
+          value={timeType}
+          onChange={(value) => setTimeType(value as 'general' | 'exact')}
+        />
 
+        <Stack grow>
           {timeType === 'exact' ? (
             <TimeInput
               label="Time"
               value={selectedTime}
               onChange={(event) => setSelectedTime(event.currentTarget.value)}
-              style={{ flex: 1 }}
+              leftSection={<IconClock size={16} />}
             />
           ) : (
             <Select
-              label="Time of day"
+              label="When did this happen?"
               value={generalTime}
               onChange={(v) => setGeneralTime((v ?? 'anytime') as TimeOfDay)}
               data={[
                 { value: 'anytime', label: 'Anytime' },
-                { value: 'morning', label: 'Morning' },
-                { value: 'afternoon', label: 'Afternoon' },
-                { value: 'night', label: 'Night' },
+                { value: 'morning', label: 'Morning ☀️' },
+                { value: 'afternoon', label: 'Afternoon 🌤️' },
+                { value: 'night', label: 'Night 🌙' },
               ]}
-              style={{ flex: 1 }}
             />
           )}
 
-          <ActionIcon
-            variant="subtle"
-            color="gray"
-            onClick={() => setShowDatePicker(!showDatePicker)}
-            mb={8}
-          >
-            <IconClock size={16} />
-          </ActionIcon>
-        </Group>
-
-        {showDatePicker && (
           <DatePickerInput
             label="Date"
-            placeholder="Pick a date"
+            placeholder="Today"
             value={selectedDate}
             onChange={setSelectedDate}
+            leftSection={<IconCalendar size={16} />}
             clearable
             maxDate={new Date()}
           />
-        )}
+        </Stack>
       </Stack>
     )
   }
@@ -349,9 +341,8 @@ function HabitCard({
   }
 
   return (
-    <Paper p="md" withBorder>
+    <Paper p="md">
       <Stack>
-        <Text>{habit.question}</Text>
         {renderInput()}
         {renderMealTypeInput()}
         {renderTimeInput()}

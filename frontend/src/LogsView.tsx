@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import {
   Stack,
   Text,
@@ -10,14 +10,20 @@ import {
 } from '@mantine/core'
 import { IconTrash } from '@tabler/icons-react'
 import type { HabitLog, Habit } from './types'
+import { getFromLocalStorage, saveToLocalStorage } from './helpers'
 
-interface LogsViewProps {
-  logs: HabitLog[]
-  habits: Habit[]
-  onDeleteLog: (logTimestamp: number) => void
-}
+interface LogsViewProps {}
 
-const LogsView = ({ logs, habits, onDeleteLog }: LogsViewProps) => {
+const LogsView = (props: LogsViewProps) => {
+  const [logs, setLogs] = useState<HabitLog[]>(
+    () => getFromLocalStorage('logs') || []
+  )
+  const [habits, _] = useState<Habit[]>(() => getFromLocalStorage('habits'))
+
+  const deleteLog = (timestamp: number) => {
+    setLogs(logs.filter((log) => log.timestamp !== timestamp))
+  }
+
   const formatDate = (timestamp: number) => {
     const date = new Date(timestamp)
     return date.toLocaleString()
@@ -62,6 +68,9 @@ const LogsView = ({ logs, habits, onDeleteLog }: LogsViewProps) => {
 
   const sortedLogs = [...logs].sort((a, b) => b.timestamp - a.timestamp)
 
+  useEffect(() => {
+    saveToLocalStorage('logs', logs)
+  }, [logs])
   return (
     <Stack>
       <Text size="xl">Habit Logs</Text>
@@ -119,7 +128,7 @@ const LogsView = ({ logs, habits, onDeleteLog }: LogsViewProps) => {
                 <ActionIcon
                   variant="subtle"
                   color="red"
-                  onClick={() => onDeleteLog(log.timestamp)}
+                  onClick={() => deleteLog(log.timestamp)}
                 >
                   <IconTrash size={16} />
                 </ActionIcon>

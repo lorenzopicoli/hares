@@ -39,7 +39,7 @@ function AddHabitForm({
           onChange={(value) => setType(value as QuestionType)}
           data={[
             { value: 'number', label: 'Number' },
-            { value: 'scale', label: 'Scale (1-5)' },
+            { value: 'scale', label: 'Scale (0-10)' },
             { value: 'boolean', label: 'Yes/No' },
             { value: 'mood', label: 'Mood Tracking' },
             { value: 'food', label: 'Food Tracking' },

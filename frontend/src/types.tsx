@@ -21,6 +21,8 @@ export interface Habit {
   type: QuestionType
   defaultTime?: TimeOfDay
   options?: string[] // Used for storing previously used options for mood/food
+  isPinned?: boolean // Whether this habit is pinned to quick access
+  order?: number // For controlling the order in the quick access grid
 }
 
 export interface HabitLog {
@@ -40,4 +42,5 @@ export interface Survey {
   id: string
   name: string
   habits: string[]
+  isPinned?: boolean // Added isPinned property
 }
