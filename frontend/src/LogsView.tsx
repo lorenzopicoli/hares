@@ -34,7 +34,7 @@ const LogsView = ({ logs, habits, onDeleteLog }: LogsViewProps) => {
     return value.toString()
   }
 
-  const sortedLogs = [...logs].sort((a, b) => b.timestamp - a.timestamp)
+  const sortedLogs = [...logs].sort((a, b) => a.timestamp - b.timestamp)
 
   return (
     <Stack>
@@ -48,14 +48,14 @@ const LogsView = ({ logs, habits, onDeleteLog }: LogsViewProps) => {
                   <Text fw={500}>{getHabitQuestion(log.habitId)}</Text>
                   <Group gap="xs">
                     <Text size="sm">Value: {formatValue(log.value)}</Text>
-                    {log.recordedTime && (
-                      <Text size="sm">Time of day: {log.recordedTime}</Text>
+                    {log.generalTime && (
+                      <Text size="sm">Time of day: {log.generalTime}</Text>
                     )}
-                    {log.exactTime && (
-                      <Text size="sm">
-                        Exact time: {new Date(log.exactTime).toLocaleString()}
-                      </Text>
-                    )}
+                    <Text size="sm">
+                      Date: {log.date.toLocaleDateString()}
+                      {log.isExactTime &&
+                        ` at ${log.date.toLocaleTimeString()}`}
+                    </Text>
                   </Group>
                   <Text size="sm" c="dimmed">
                     Logged at: {formatDate(log.timestamp)}

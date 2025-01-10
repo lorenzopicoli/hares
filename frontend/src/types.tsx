@@ -17,8 +17,9 @@ export interface HabitLog {
   habitId: string
   timestamp: number // When the log was created
   value: any
-  recordedTime?: string // General time of day
-  exactTime?: Date // Exact time when the habit occurred
+  generalTime?: string // General time of day
+  isExactTime: boolean // if true, the date parameter is the exact time it happened
+  date: Date // This is either the exact time the habit occurred or the date for which the generalTime is referring to
   surveyId?: string
 }
 

@@ -13,6 +13,8 @@ import { IconClock } from '@tabler/icons-react'
 import React, { useState } from 'react'
 import type { Habit, HabitLog } from './types'
 
+localStorage.clear()
+
 function HabitCard({
   habit,
   surveyId,
@@ -23,18 +25,18 @@ function HabitCard({
   onLog: (log: HabitLog) => void
 }) {
   const [value, setValue] = useState<any>(null)
-  const [recordedTime, setRecordedTime] = useState<string>()
   const [selectedTime, setSelectedTime] = useState<string>('')
   const [selectedDate, setSelectedDate] = useState<Date | null>(null)
+  const [generalTime, setGeneralTime] = useState<string>()
   const [showDatePicker, setShowDatePicker] = useState(false)
 
   const handleSubmit = () => {
     if (value !== null) {
-      if (habit.timeTracking.type === 'exact') {
-        // Create a base date - either the selected date or today
-        const baseDate = selectedDate || new Date()
+      const now = new Date()
+      const baseDate = selectedDate || now
 
-        // If we have a selected time, parse and set it
+      if (habit.timeTracking.type === 'exact') {
+        // If we have a selected time, parse and set it on the base date
         if (selectedTime) {
           const [hours, minutes] = selectedTime.split(':').map(Number)
           baseDate.setHours(hours || 0)
@@ -43,9 +45,10 @@ function HabitCard({
 
         const log: HabitLog = {
           habitId: habit.id,
-          timestamp: new Date().valueOf(),
+          timestamp: now.valueOf(),
           value,
-          exactTime: baseDate,
+          isExactTime: true,
+          date: baseDate,
           surveyId,
         }
 
@@ -53,9 +56,11 @@ function HabitCard({
       } else {
         const log: HabitLog = {
           habitId: habit.id,
-          timestamp: new Date().valueOf(),
+          timestamp: now.valueOf(),
           value,
-          recordedTime: recordedTime || habit.timeTracking.defaultTime,
+          isExactTime: false,
+          generalTime: generalTime || habit.timeTracking.defaultTime,
+          date: baseDate,
           surveyId,
         }
         onLog(log)
@@ -63,7 +68,7 @@ function HabitCard({
 
       // Reset form
       setValue(null)
-      setRecordedTime(undefined)
+      setGeneralTime(undefined)
       setSelectedTime('')
       setSelectedDate(null)
       setShowDatePicker(false)
@@ -118,51 +123,53 @@ function HabitCard({
   }
 
   const renderTimeInput = () => {
-    if (habit.timeTracking.type === 'exact') {
-      return (
-        <Stack gap="xs">
-          <Group align="flex-end">
+    return (
+      <Stack gap="xs">
+        <Group align="flex-end">
+          {habit.timeTracking.type === 'exact' && (
             <TimeInput
               label="Time"
               value={selectedTime}
               onChange={(event) => setSelectedTime(event.currentTarget.value)}
               style={{ flex: 1 }}
             />
-            <ActionIcon
-              variant="subtle"
-              color="gray"
-              onClick={() => setShowDatePicker(!showDatePicker)}
-              mb={8}
-            >
-              <IconClock size={16} />
-            </ActionIcon>
-          </Group>
+          )}
 
-          {showDatePicker && (
-            <DatePickerInput
-              label="Date"
-              placeholder="Pick a date"
-              value={selectedDate}
-              onChange={setSelectedDate}
-              clearable
-              maxDate={new Date()}
+          {habit.timeTracking.type === 'general' && (
+            <Select
+              label="Time of day"
+              value={generalTime || habit.timeTracking.defaultTime}
+              onChange={(v) => setGeneralTime(v ?? '')}
+              data={[
+                { value: 'morning', label: 'Morning' },
+                { value: 'afternoon', label: 'Afternoon' },
+                { value: 'night', label: 'Night' },
+              ]}
+              style={{ flex: 1 }}
             />
           )}
-        </Stack>
-      )
-    }
 
-    return (
-      <Select
-        label="Time of day"
-        value={recordedTime || habit.timeTracking.defaultTime}
-        onChange={(v) => setRecordedTime(v ?? '')}
-        data={[
-          { value: 'morning', label: 'Morning' },
-          { value: 'afternoon', label: 'Afternoon' },
-          { value: 'night', label: 'Night' },
-        ]}
-      />
+          <ActionIcon
+            variant="subtle"
+            color="gray"
+            onClick={() => setShowDatePicker(!showDatePicker)}
+            mb={8}
+          >
+            <IconClock size={16} />
+          </ActionIcon>
+        </Group>
+
+        {showDatePicker && (
+          <DatePickerInput
+            label="Date"
+            placeholder="Pick a date"
+            value={selectedDate}
+            onChange={setSelectedDate}
+            clearable
+            maxDate={new Date()}
+          />
+        )}
+      </Stack>
     )
   }
 
