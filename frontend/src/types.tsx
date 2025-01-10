@@ -1,6 +1,20 @@
-export type QuestionType = 'number' | 'scale' | 'boolean' | 'text'
+export type QuestionType =
+  | 'number'
+  | 'scale'
+  | 'boolean'
+  | 'text'
+  | 'mood'
+  | 'food'
+  | 'text_list'
 export type TimeOfDay = 'morning' | 'afternoon' | 'night' | 'anytime'
 export type TimeTrackingType = 'general' | 'exact'
+export type MealType = 'breakfast' | 'lunch' | 'dinner' | 'snack'
+
+export type LogValue =
+  | number // for 'number' and 'scale' types
+  | boolean // for 'boolean' type
+  | string[] // for 'mood', 'food', and 'text_list' types
+  | string // for 'text' type
 
 export interface Habit {
   id: string
@@ -8,23 +22,25 @@ export interface Habit {
   type: QuestionType
   timeTracking: {
     type: TimeTrackingType
-    defaultTime?: TimeOfDay // Only used when type is 'general'
+    defaultTime?: TimeOfDay
   }
-  options?: string[]
+  options?: string[] // Used for storing previously used options for mood/food
 }
 
 export interface HabitLog {
   habitId: string
-  timestamp: number // When the log was created
-  value: any
-  generalTime?: string // General time of day
-  isExactTime: boolean // if true, the date parameter is the exact time it happened
-  date: Date // This is either the exact time the habit occurred or the date for which the generalTime is referring to
+  timestamp: number
+  value: LogValue
+  valueType: QuestionType
+  generalTime?: TimeOfDay
+  isExactTime: boolean
+  date: Date
   surveyId?: string
+  mealType?: MealType // Only used for food habits
 }
 
 export interface Survey {
   id: string
   name: string
-  habits: string[] // Array of habit IDs
+  habits: string[]
 }

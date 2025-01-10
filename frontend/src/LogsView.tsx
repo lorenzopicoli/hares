@@ -6,6 +6,7 @@ import {
   Group,
   ActionIcon,
   ScrollArea,
+  Badge,
 } from '@mantine/core'
 import { IconTrash } from '@tabler/icons-react'
 import type { HabitLog, Habit } from './types'
@@ -27,14 +28,39 @@ const LogsView = ({ logs, habits, onDeleteLog }: LogsViewProps) => {
     return habit?.question || 'Unknown Habit'
   }
 
-  const formatValue = (value: any) => {
-    if (typeof value === 'boolean') {
-      return value ? 'Yes' : 'No'
+  const formatValue = (log: HabitLog) => {
+    switch (log.valueType) {
+      case 'boolean':
+        return (log.value as boolean) ? 'Yes' : 'No'
+      case 'mood':
+      case 'food':
+      case 'text_list':
+        return (log.value as string[]).join(', ')
+      case 'scale':
+        return `${log.value}/5`
+      default:
+        return log.value.toString()
     }
-    return value.toString()
   }
 
-  const sortedLogs = [...logs].sort((a, b) => a.timestamp - b.timestamp)
+  const getMealTypeBadge = (mealType?: string) => {
+    if (!mealType) return null
+
+    const colors = {
+      breakfast: 'yellow',
+      lunch: 'green',
+      dinner: 'blue',
+      snack: 'grape',
+    }
+
+    return (
+      <Badge color={colors[mealType as keyof typeof colors]} variant="light">
+        {mealType.charAt(0).toUpperCase() + mealType.slice(1)}
+      </Badge>
+    )
+  }
+
+  const sortedLogs = [...logs].sort((a, b) => b.timestamp - a.timestamp)
 
   return (
     <Stack>
@@ -44,23 +70,52 @@ const LogsView = ({ logs, habits, onDeleteLog }: LogsViewProps) => {
           {sortedLogs.map((log) => (
             <Paper key={log.timestamp} p="md" withBorder>
               <Group justify="space-between" align="flex-start">
-                <Stack gap="xs">
-                  <Text fw={500}>{getHabitQuestion(log.habitId)}</Text>
-                  <Group gap="xs">
-                    <Text size="sm">Value: {formatValue(log.value)}</Text>
+                <Stack gap="xs" style={{ flex: 1 }}>
+                  <Group justify="space-between" align="center">
+                    <Text fw={500}>{getHabitQuestion(log.habitId)}</Text>
+                    {log.mealType && getMealTypeBadge(log.mealType)}
+                  </Group>
+
+                  <Group gap="lg">
+                    <Text size="sm" fw={500}>
+                      Value:{' '}
+                      <Text span c="dimmed">
+                        {formatValue(log)}
+                      </Text>
+                    </Text>
+
                     {log.generalTime && (
-                      <Text size="sm">Time of day: {log.generalTime}</Text>
+                      <Text size="sm" fw={500}>
+                        Time of day:{' '}
+                        <Text span c="dimmed">
+                          {log.generalTime}
+                        </Text>
+                      </Text>
                     )}
-                    <Text size="sm">
-                      Date: {log.date.toLocaleDateString()}
-                      {log.isExactTime &&
-                        ` at ${log.date.toLocaleTimeString()}`}
+                  </Group>
+
+                  <Group gap="lg">
+                    <Text size="sm" fw={500}>
+                      Date:{' '}
+                      <Text span c="dimmed">
+                        {log.date.toLocaleDateString()}
+                        {log.isExactTime &&
+                          ` at ${new Date(log.date).toLocaleTimeString()}`}
+                      </Text>
+                    </Text>
+
+                    <Text size="sm" c="dimmed">
+                      Logged: {formatDate(log.timestamp)}
                     </Text>
                   </Group>
-                  <Text size="sm" c="dimmed">
-                    Logged at: {formatDate(log.timestamp)}
-                  </Text>
+
+                  {log.surveyId && (
+                    <Text size="sm" c="blue">
+                      Part of survey
+                    </Text>
+                  )}
                 </Stack>
+
                 <ActionIcon
                   variant="subtle"
                   color="red"

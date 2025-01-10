@@ -1,4 +1,4 @@
-import { Stack, TextInput, Select, Button, Group, Text } from '@mantine/core'
+import { Stack, TextInput, Select, Button } from '@mantine/core'
 import React, { useState } from 'react'
 import type { Habit, QuestionType, TimeTrackingType, TimeOfDay } from './types'
 
@@ -22,6 +22,7 @@ function AddHabitForm({
         type: timeTrackingType,
         defaultTime: timeTrackingType === 'general' ? defaultTime : undefined,
       },
+      options: [],
     })
   }
 
@@ -33,6 +34,7 @@ function AddHabitForm({
           required
           value={question}
           onChange={(e) => setQuestion(e.target.value)}
+          placeholder="e.g., How many glasses of water did you drink?"
         />
 
         <Select
@@ -44,6 +46,9 @@ function AddHabitForm({
             { value: 'number', label: 'Number' },
             { value: 'scale', label: 'Scale (1-5)' },
             { value: 'boolean', label: 'Yes/No' },
+            { value: 'mood', label: 'Mood Tracking' },
+            { value: 'food', label: 'Food Tracking' },
+            { value: 'text_list', label: 'Multiple Text Selection' },
           ]}
         />
 
