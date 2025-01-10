@@ -29,16 +29,8 @@ function SurveyFlow({ survey, habits, onComplete, onClose }: SurveyFlowProps) {
   const currentHabit = surveyHabits[currentQuestionIndex]
   const progress = (currentQuestionIndex / surveyHabits.length) * 100
 
-  const handleResponse = (value: any, recordedTime?: string) => {
-    const newResponses = [
-      ...responses,
-      {
-        habitId: currentHabit.id,
-        value,
-        recordedTime,
-        timestamp: new Date().valueOf(),
-      },
-    ]
+  const handleResponse = (value: HabitLog) => {
+    const newResponses = [...responses, value]
 
     setResponses(newResponses)
 

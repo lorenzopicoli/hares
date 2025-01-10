@@ -6,17 +6,15 @@ import {
   Stack,
   ColorSchemeScript,
   Modal,
-  TextInput,
-  Select,
   Group,
   Paper,
   ScrollArea,
   Burger,
   rem,
   Notification,
-  MultiSelect,
   Divider,
   Title,
+  ActionIcon,
 } from '@mantine/core'
 import { useDisclosure } from '@mantine/hooks'
 import {
@@ -25,13 +23,16 @@ import {
   IconSettings,
   IconChartBar,
   IconCheck,
+  IconHistory,
+  IconTrash,
 } from '@tabler/icons-react'
 import AddSurveyForm from './AddSurveyForm'
-import type { Habit, HabitLog, Survey, QuestionType } from './types'
+import type { Habit, HabitLog, Survey } from './types'
 import AddHabitForm from './AddHabitForm'
 import HabitCard from './HabitCard'
 import SurveyFlow from './SurveyFlow'
 import SurveyList from './SurveyList'
+import LogsView from './LogsView'
 
 // Local Storage helpers
 const saveToLocalStorage = (key: string, data: any) => {
@@ -84,6 +85,7 @@ function Home() {
   ] = useDisclosure(false)
   const [activeTab, setActiveTab] = useState<string>('track')
   const [showSuccessNotification, setShowSuccessNotification] = useState(false)
+  const [activeSurvey, setActiveSurvey] = useState<Survey | null>(null)
 
   // Save to localStorage whenever data changes
   useEffect(() => {
@@ -106,8 +108,29 @@ function Home() {
     setHabits([...habits, newHabit])
   }
 
-  const changeTab = (activeTab) => {
-    setActiveTab(activeTab)
+  const deleteHabit = (habitId: string) => {
+    // Remove habit from habits list
+    setHabits(habits.filter((h) => h.id !== habitId))
+
+    // Remove habit from all surveys
+    setSurveys(
+      surveys.map((survey) => ({
+        ...survey,
+        habits: survey.habits.filter((id) => id !== habitId),
+      }))
+    )
+  }
+
+  const deleteSurvey = (surveyId: string) => {
+    setSurveys(surveys.filter((s) => s.id !== surveyId))
+  }
+
+  const deleteLog = (timestamp: number) => {
+    setLogs(logs.filter((log) => log.timestamp !== timestamp))
+  }
+
+  const changeTab = (tab: string) => {
+    setActiveTab(tab)
     toggleSidebar()
   }
 
@@ -119,7 +142,6 @@ function Home() {
     }
     setSurveys([...surveys, newSurvey])
   }
-  const [activeSurvey, setActiveSurvey] = useState<Survey | null>(null)
 
   const logHabits = (data: HabitLog[]) => {
     setLogs([...logs, ...data])
@@ -158,6 +180,7 @@ function Home() {
               fullWidth
               variant={activeTab === 'track' ? 'filled' : 'subtle'}
               onClick={() => changeTab('track')}
+              justify="start"
             >
               Track
             </Button>
@@ -167,8 +190,19 @@ function Home() {
               fullWidth
               variant={activeTab === 'habits' ? 'filled' : 'subtle'}
               onClick={() => changeTab('habits')}
+              justify="start"
             >
               Habits
+            </Button>
+
+            <Button
+              leftSection={<IconHistory size={20} />}
+              fullWidth
+              variant={activeTab === 'logs' ? 'filled' : 'subtle'}
+              onClick={() => changeTab('logs')}
+              justify="start"
+            >
+              Logs
             </Button>
 
             <Button
@@ -176,6 +210,7 @@ function Home() {
               fullWidth
               variant={activeTab === 'stats' ? 'filled' : 'subtle'}
               onClick={() => changeTab('stats')}
+              justify="start"
             >
               Stats
             </Button>
@@ -185,6 +220,7 @@ function Home() {
               fullWidth
               variant={activeTab === 'settings' ? 'filled' : 'subtle'}
               onClick={() => changeTab('settings')}
+              justify="start"
             >
               Settings
             </Button>
@@ -251,6 +287,11 @@ function Home() {
                 ))}
               </Stack>
             )}
+
+            {activeTab === 'logs' && (
+              <LogsView logs={logs} habits={habits} onDeleteLog={deleteLog} />
+            )}
+
             {activeTab === 'habits' && (
               <Stack>
                 <Group justify="space-between">
@@ -269,10 +310,21 @@ function Home() {
                     </Title>
                     {surveys.map((survey) => (
                       <Paper key={survey.id} p="md" withBorder>
-                        <Text fw={500}>{survey.name}</Text>
-                        <Text size="sm" color="dimmed">
-                          Habits: {survey.habits.length}
-                        </Text>
+                        <Group justify="space-between" align="flex-start">
+                          <div>
+                            <Text fw={500}>{survey.name}</Text>
+                            <Text size="sm" color="dimmed">
+                              Habits: {survey.habits.length}
+                            </Text>
+                          </div>
+                          <ActionIcon
+                            variant="subtle"
+                            color="red"
+                            onClick={() => deleteSurvey(survey.id)}
+                          >
+                            <IconTrash size={16} />
+                          </ActionIcon>
+                        </Group>
                       </Paper>
                     ))}
                     <Divider my="md" />
@@ -285,10 +337,21 @@ function Home() {
                 </Title>
                 {habits.map((habit) => (
                   <Paper key={habit.id} p="md" withBorder>
-                    <Text>{habit.question}</Text>
-                    <Text size="sm" color="dimmed">
-                      Type: {habit.type}
-                    </Text>
+                    <Group justify="space-between" align="flex-start">
+                      <div>
+                        <Text>{habit.question}</Text>
+                        <Text size="sm" color="dimmed">
+                          Type: {habit.type}
+                        </Text>
+                      </div>
+                      <ActionIcon
+                        variant="subtle"
+                        color="red"
+                        onClick={() => deleteHabit(habit.id)}
+                      >
+                        <IconTrash size={16} />
+                      </ActionIcon>
+                    </Group>
                   </Paper>
                 ))}
               </Stack>
