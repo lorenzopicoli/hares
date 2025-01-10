@@ -50,19 +50,11 @@ const defaultHabits: Habit[] = [
     id: '1',
     question: 'How many showers did you take?',
     type: 'number',
-    timeTracking: {
-      type: 'general',
-      defaultTime: 'anytime',
-    },
   },
   {
     id: '2',
     question: 'What is your brain fog score?',
     type: 'scale',
-    timeTracking: {
-      type: 'general',
-      defaultTime: 'anytime',
-    },
   },
 ]
 
@@ -169,7 +161,7 @@ function Home() {
               hiddenFrom="sm"
               size="sm"
             />
-            <Text>Habit Tracker</Text>
+            <Text>🐰 Hares</Text>
           </Group>
         </AppShell.Header>
 
@@ -228,7 +220,7 @@ function Home() {
         </AppShell.Navbar>
 
         <AppShell.Main>
-          <ScrollArea h={`calc(100vh - ${rem(60)})`}>
+          <ScrollArea h={`calc(100vh - ${rem(60)})`} pb={'md'}>
             {activeTab === 'track' && (
               <Stack>
                 <Text size="xl">Track Habits</Text>

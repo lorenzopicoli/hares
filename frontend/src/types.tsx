@@ -7,7 +7,6 @@ export type QuestionType =
   | 'food'
   | 'text_list'
 export type TimeOfDay = 'morning' | 'afternoon' | 'night' | 'anytime'
-export type TimeTrackingType = 'general' | 'exact'
 export type MealType = 'breakfast' | 'lunch' | 'dinner' | 'snack'
 
 export type LogValue =
@@ -20,10 +19,7 @@ export interface Habit {
   id: string
   question: string
   type: QuestionType
-  timeTracking: {
-    type: TimeTrackingType
-    defaultTime?: TimeOfDay
-  }
+  defaultTime?: TimeOfDay
   options?: string[] // Used for storing previously used options for mood/food
 }
 
@@ -32,8 +28,9 @@ export interface HabitLog {
   timestamp: number
   value: LogValue
   valueType: QuestionType
+  timeType: 'general' | 'exact'
   generalTime?: TimeOfDay
-  isExactTime: boolean
+  exactTime?: string
   date: Date
   surveyId?: string
   mealType?: MealType // Only used for food habits

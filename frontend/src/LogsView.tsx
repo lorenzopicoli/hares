@@ -98,8 +98,8 @@ const LogsView = ({ logs, habits, onDeleteLog }: LogsViewProps) => {
                     <Text size="sm" fw={500}>
                       Date:{' '}
                       <Text span c="dimmed">
-                        {log.date.toLocaleDateString()}
-                        {log.isExactTime &&
+                        {new Date(log.date).toLocaleDateString()}
+                        {log.timeType === 'exact' &&
                           ` at ${new Date(log.date).toLocaleTimeString()}`}
                       </Text>
                     </Text>

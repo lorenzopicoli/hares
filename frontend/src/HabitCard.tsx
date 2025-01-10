@@ -28,9 +28,12 @@ function HabitCard({
   onLog: (log: HabitLog) => void
 }) {
   const [value, setValue] = useState<LogValue | null>(null)
+  const [timeType, setTimeType] = useState<'general' | 'exact'>('general')
   const [selectedTime, setSelectedTime] = useState<string>('')
   const [selectedDate, setSelectedDate] = useState<Date | null>(null)
-  const [generalTime, setGeneralTime] = useState<string>()
+  const [generalTime, setGeneralTime] = useState<TimeOfDay>(
+    habit.defaultTime || 'anytime'
+  )
   const [showDatePicker, setShowDatePicker] = useState(false)
   const [mealType, setMealType] = useState<MealType | ''>('')
 
@@ -86,8 +89,8 @@ function HabitCard({
       const now = new Date()
       const baseDate = selectedDate || now
 
-      // Set time if exact time tracking
-      if (habit.timeTracking.type === 'exact' && selectedTime) {
+      // Set time if exact time tracking is selected
+      if (timeType === 'exact' && selectedTime) {
         const [hours, minutes] = selectedTime.split(':').map(Number)
         baseDate.setHours(hours || 0)
         baseDate.setMinutes(minutes || 0)
@@ -98,13 +101,11 @@ function HabitCard({
         timestamp: now.valueOf(),
         value,
         valueType: habit.type,
-        isExactTime: habit.timeTracking.type === 'exact',
+        timeType,
         date: baseDate,
         surveyId,
-        ...(habit.timeTracking.type === 'general' && {
-          generalTime: (generalTime ||
-            habit.timeTracking.defaultTime) as TimeOfDay,
-        }),
+        ...(timeType === 'general' && { generalTime }),
+        ...(timeType === 'exact' && { exactTime: selectedTime }),
         ...(habit.type === 'food' &&
           mealType && { mealType: mealType as MealType }),
       }
@@ -114,7 +115,7 @@ function HabitCard({
       // Reset form
       setValue(null)
       setSelectedValues([])
-      setGeneralTime(undefined)
+      setGeneralTime(habit.defaultTime || 'anytime')
       setSelectedTime('')
       setSelectedDate(null)
       setShowDatePicker(false)
@@ -284,21 +285,31 @@ function HabitCard({
     return (
       <Stack gap="xs">
         <Group align="flex-end">
-          {habit.timeTracking.type === 'exact' && (
+          <Select
+            style={{ flex: 1 }}
+            label="Time tracking type"
+            value={timeType}
+            onChange={(value) => setTimeType(value as 'general' | 'exact')}
+            data={[
+              { value: 'general', label: 'General time' },
+              { value: 'exact', label: 'Exact time' },
+            ]}
+          />
+
+          {timeType === 'exact' ? (
             <TimeInput
               label="Time"
               value={selectedTime}
               onChange={(event) => setSelectedTime(event.currentTarget.value)}
               style={{ flex: 1 }}
             />
-          )}
-
-          {habit.timeTracking.type === 'general' && (
+          ) : (
             <Select
               label="Time of day"
-              value={generalTime || habit.timeTracking.defaultTime}
-              onChange={(v) => setGeneralTime(v ?? '')}
+              value={generalTime}
+              onChange={(v) => setGeneralTime((v ?? 'anytime') as TimeOfDay)}
               data={[
+                { value: 'anytime', label: 'Anytime' },
                 { value: 'morning', label: 'Morning' },
                 { value: 'afternoon', label: 'Afternoon' },
                 { value: 'night', label: 'Night' },

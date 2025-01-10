@@ -1,6 +1,6 @@
 import { Stack, TextInput, Select, Button } from '@mantine/core'
 import React, { useState } from 'react'
-import type { Habit, QuestionType, TimeTrackingType, TimeOfDay } from './types'
+import type { Habit, QuestionType, TimeOfDay } from './types'
 
 function AddHabitForm({
   onSubmit,
@@ -9,8 +9,6 @@ function AddHabitForm({
 }) {
   const [question, setQuestion] = useState('')
   const [type, setType] = useState<QuestionType>('number')
-  const [timeTrackingType, setTimeTrackingType] =
-    useState<TimeTrackingType>('general')
   const [defaultTime, setDefaultTime] = useState<TimeOfDay>('anytime')
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -18,10 +16,7 @@ function AddHabitForm({
     onSubmit({
       question,
       type,
-      timeTracking: {
-        type: timeTrackingType,
-        defaultTime: timeTrackingType === 'general' ? defaultTime : undefined,
-      },
+      defaultTime,
       options: [],
     })
   }
@@ -53,33 +48,17 @@ function AddHabitForm({
         />
 
         <Select
-          label="Time Tracking"
+          label="Default Time"
           required
-          value={timeTrackingType}
-          onChange={(value) => setTimeTrackingType(value as TimeTrackingType)}
+          value={defaultTime}
+          onChange={(value) => setDefaultTime(value as TimeOfDay)}
           data={[
-            {
-              value: 'general',
-              label: 'General time of day (Morning, Afternoon, etc.)',
-            },
-            { value: 'exact', label: 'Exact time' },
+            { value: 'anytime', label: 'Anytime' },
+            { value: 'morning', label: 'Morning' },
+            { value: 'afternoon', label: 'Afternoon' },
+            { value: 'night', label: 'Night' },
           ]}
         />
-
-        {timeTrackingType === 'general' && (
-          <Select
-            label="Default Time"
-            required
-            value={defaultTime}
-            onChange={(value) => setDefaultTime(value as TimeOfDay)}
-            data={[
-              { value: 'anytime', label: 'Anytime' },
-              { value: 'morning', label: 'Morning' },
-              { value: 'afternoon', label: 'Afternoon' },
-              { value: 'night', label: 'Night' },
-            ]}
-          />
-        )}
 
         <Button type="submit">Add Habit</Button>
       </Stack>
