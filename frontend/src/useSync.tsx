@@ -15,6 +15,8 @@ interface PendingSync {
   habits: Habit[]
   surveys: Survey[]
   logs: HabitLog[]
+  habitPins: Record<string, boolean>
+  surveyPins: Record<string, boolean>
 }
 
 export function useSync() {
@@ -39,7 +41,13 @@ export function useSync() {
   // Track items created while offline that need to be synced
   const [pendingSync, setPendingSync] = useLocalStorage<PendingSync>({
     key: 'pendingSync',
-    defaultValue: { habits: [], surveys: [], logs: [] },
+    defaultValue: {
+      habits: [],
+      surveys: [],
+      logs: [],
+      habitPins: {},
+      surveyPins: {},
+    },
   })
 
   // TRPC mutations
@@ -49,6 +57,8 @@ export function useSync() {
   const deleteHabitMutation = trpc.deleteHabit.useMutation()
   const deleteHabitLogMutation = trpc.deleteHabitLog.useMutation()
   const deleteSurveyMutation = trpc.deleteSurvey.useMutation()
+  const toggleHabitPinMutation = trpc.toggleHabitPin.useMutation()
+  const toggleSurveyPinMutation = trpc.toggleSurveyPin.useMutation()
 
   // TRPC queries
   const habitsQuery = trpc.getAllHabits.useQuery(
@@ -115,7 +125,7 @@ export function useSync() {
     setIsSyncing(true)
     try {
       // Sync pending habits
-      for (const habit of Object.values(pendingSync.habits)) {
+      for (const habit of pendingSync.habits) {
         await createHabitMutation.mutateAsync({
           deviceId,
           habit: {
@@ -131,7 +141,7 @@ export function useSync() {
       }
 
       // Sync pending surveys
-      for (const survey of Object.values(pendingSync.surveys)) {
+      for (const survey of pendingSync.surveys) {
         await createSurveyMutation.mutateAsync({
           deviceId,
           survey: {
@@ -144,7 +154,7 @@ export function useSync() {
       }
 
       // Sync pending logs in batches
-      const pendingLogs = Object.values(pendingSync.logs)
+      const pendingLogs = pendingSync.logs
       const BATCH_SIZE = 50
       for (let i = 0; i < pendingLogs.length; i += BATCH_SIZE) {
         const batch = pendingLogs.slice(i, i + BATCH_SIZE)
@@ -154,8 +164,30 @@ export function useSync() {
         })
       }
 
+      for (const surveyId of Object.keys(pendingSync.surveyPins)) {
+        await toggleSurveyPinMutation.mutateAsync({
+          deviceId,
+          surveyId,
+          isPinned: pendingSync.surveyPins[surveyId],
+        })
+      }
+
+      for (const habitId of Object.keys(pendingSync.habitPins)) {
+        await toggleHabitPinMutation.mutateAsync({
+          deviceId,
+          habitId,
+          isPinned: pendingSync.habitPins[habitId],
+        })
+      }
+
       // Clear pending items
-      setPendingSync({ habits: [], surveys: [], logs: [] })
+      setPendingSync({
+        habits: [],
+        surveys: [],
+        logs: [],
+        habitPins: {},
+        surveyPins: {},
+      })
       setLastSyncTime(new Date())
     } catch (error) {
       console.error('Sync failed:', error)
@@ -246,6 +278,53 @@ export function useSync() {
     }
   }
 
+  const toggleSurveyPin = async (surveyId: string, isPinned: boolean) => {
+    if (isConnected) {
+      try {
+        await toggleSurveyPinMutation.mutateAsync({
+          deviceId,
+          surveyId,
+          isPinned,
+        })
+        // Good enough for now
+        surveysQuery.refetch()
+      } catch (error) {
+        setPendingSync((prev) => ({
+          ...prev,
+          surveyPins: { ...prev.surveyPins, surveyId: isPinned },
+        }))
+      }
+    } else {
+      setPendingSync((prev) => ({
+        ...prev,
+        surveyPins: { ...prev.surveyPins, surveyId: isPinned },
+      }))
+    }
+  }
+
+  const toggleHabitPin = async (habitId: string, isPinned: boolean) => {
+    if (isConnected) {
+      try {
+        await toggleHabitPinMutation.mutateAsync({
+          deviceId,
+          habitId,
+          isPinned,
+        })
+        habitsQuery.refetch()
+      } catch (error) {
+        setPendingSync((prev) => ({
+          ...prev,
+          habitPins: { ...prev.habitPins, habitId: isPinned },
+        }))
+      }
+    } else {
+      setPendingSync((prev) => ({
+        ...prev,
+        habitPins: { ...prev.habitPins, habitId: isPinned },
+      }))
+    }
+  }
+
   // Delete operations - only allowed when online
   const deleteHabit = async (habitId: string) => {
     if (!isConnected) {
@@ -274,24 +353,6 @@ export function useSync() {
     surveysQuery.refetch()
   }
 
-  // Effect to handle initial data load and subsequent syncs
-  //   useEffect(() => {
-  //     if (isConnected && isInitialSync) {
-  //       // Load initial data from server
-  //       if (habitsQuery.data) {
-  //         setHabits(habitsQuery.data)
-  //       }
-  //       if (surveysQuery.data) {
-  //         setSurveys(surveysQuery.data)
-  //       }
-  //       if (logsQuery.data) {
-  //         setLogs((prev) => [...prev, ...logsQuery.data])
-  //       }
-  //       setIsInitialSync(false)
-  //     }
-  //   }, [isConnected, habitsQuery.data, surveysQuery.data, logsQuery.data])
-
-  // Effect to trigger sync when connection is restored
   useEffect(() => {
     if (
       isConnected &&
@@ -304,12 +365,18 @@ export function useSync() {
   }, [isConnected, pendingSync])
 
   const habits = useMemo(() => {
-    const data: Habit[] = []
-    data.push(...habitsCache)
+    const data: Habit[] = habitsCache.map((habit) => ({
+      ...habit,
+      isPinned: pendingSync.habitPins[habit.id] ?? habit.isPinned,
+    }))
 
     if (pendingSync.habits && pendingSync.habits.length > 0) {
       data.push(
-        ...pendingSync.habits.map((h) => ({ ...h, isPendingSync: true }))
+        ...pendingSync.habits.map((h) => ({
+          ...h,
+          isPendingSync: true,
+          isPinned: pendingSync.habitPins[h.id] ?? h.isPinned,
+        }))
       )
     }
 
@@ -317,26 +384,29 @@ export function useSync() {
   }, [habitsCache, pendingSync.habits])
 
   const surveys = useMemo(() => {
-    const data: Survey[] = []
-    data.push(...surveysCache)
+    const data: Survey[] = surveysCache.map((survey) => ({
+      ...survey,
+      isPinned: pendingSync.surveyPins[survey.id] ?? survey.isPinned,
+    }))
 
     if (pendingSync.surveys && pendingSync.surveys.length > 0) {
       data.push(
-        ...pendingSync.surveys.map((h) => ({ ...h, isPendingSync: true }))
+        ...pendingSync.surveys.map((h) => ({
+          ...h,
+          isPendingSync: true,
+          isPinned: pendingSync.surveyPins[h.id] ?? h.isPinned,
+        }))
       )
     }
 
     return data
-  }, [surveysCache, pendingSync.surveys])
+  }, [surveysCache, pendingSync.surveys, pendingSync.surveyPins])
 
-  console.log(pendingSync)
   const logs = useMemo(() => {
     const data: HabitLog[] = []
     data.push(...logsCache)
 
-    console.log('here', pendingSync.logs)
     if (pendingSync.logs && pendingSync.logs.length > 0) {
-      console.log('here')
       data.push(...pendingSync.logs.map((h) => ({ ...h, isPendingSync: true })))
     }
 
@@ -353,6 +423,8 @@ export function useSync() {
     deleteLog,
     deleteHabit,
     deleteSurvey,
+    toggleHabitPin,
+    toggleSurveyPin,
     isSyncing,
     lastSyncTime,
     pendingChanges:

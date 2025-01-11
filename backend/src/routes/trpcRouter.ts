@@ -271,34 +271,42 @@ export const appRouter = t.router({
       }))
     }),
 
-  updateHabit: loggedProcedure
+  toggleHabitPin: loggedProcedure
     .input(
       z.object({
         deviceId: z.string().uuid(),
         habitId: z.string(),
-        updates: z.object({
-          question: z.string().optional(),
-          type: questionTypeSchema.optional(),
-          defaultTime: timeOfDaySchema.optional(),
-          options: z.array(z.string()).optional(),
-          isPinned: z.boolean().optional(),
-          order: z.number().optional(),
-        }),
+        isPinned: z.boolean(),
       })
     )
     .mutation(async ({ input }) => {
-      const updates = {
-        ...input.updates,
-        options: input.updates.options
-          ? JSON.stringify(input.updates.options)
-          : undefined,
-      }
-
       await db
         .update(habits)
-        .set(updates)
+        .set({ isPinned: input.isPinned })
         .where(
           and(eq(habits.id, input.habitId), eq(habits.deviceId, input.deviceId))
+        )
+
+      return { success: true }
+    }),
+
+  toggleSurveyPin: loggedProcedure
+    .input(
+      z.object({
+        deviceId: z.string().uuid(),
+        surveyId: z.string(),
+        isPinned: z.boolean(),
+      })
+    )
+    .mutation(async ({ input }) => {
+      await db
+        .update(surveys)
+        .set({ isPinned: input.isPinned })
+        .where(
+          and(
+            eq(surveys.id, input.surveyId),
+            eq(surveys.deviceId, input.deviceId)
+          )
         )
 
       return { success: true }

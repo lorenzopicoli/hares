@@ -28,6 +28,8 @@ function Habits() {
     addHabit,
     addSurvey,
     addLog,
+    toggleHabitPin,
+    toggleSurveyPin,
   } = useSync()
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedHabit, setSelectedHabit] = useState<Habit | null>(null)
@@ -39,22 +41,6 @@ function Habits() {
   ] = useDisclosure(false)
   const [habitModalOpened, { open: openHabitModal, close: closeHabitModal }] =
     useDisclosure(false)
-
-  const toggleHabitPin = (habitId: string) => {
-    // setHabits(
-    //   habits.map((h) =>
-    //     h.id === habitId ? { ...h, isPinned: !h.isPinned } : h
-    //   )
-    // )
-  }
-
-  const toggleSurveyPin = (surveyId: string) => {
-    // setSurveys(
-    //   surveys.map((s) =>
-    //     s.id === surveyId ? { ...s, isPinned: !s.isPinned } : s
-    //   )
-    // )
-  }
 
   const filteredHabits = habits.filter((habit) =>
     habit.question.toLowerCase().includes(searchQuery.toLowerCase())
@@ -106,7 +92,7 @@ function Habits() {
                     <ActionIcon
                       variant="subtle"
                       color="yellow"
-                      onClick={() => toggleHabitPin(habit.id)}
+                      onClick={() => toggleHabitPin(habit.id, !habit.isPinned)}
                       title={
                         habit.isPinned
                           ? 'Remove from quick access'
@@ -149,7 +135,9 @@ function Habits() {
                     <ActionIcon
                       variant="subtle"
                       color="yellow"
-                      onClick={() => toggleSurveyPin(survey.id)}
+                      onClick={() =>
+                        toggleSurveyPin(survey.id, !survey.isPinned)
+                      }
                       title={
                         survey.isPinned
                           ? 'Remove from quick access'
