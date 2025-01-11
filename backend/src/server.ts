@@ -28,7 +28,8 @@ export class Server {
           return
         }
         const hostname = new URL(origin ?? '').hostname
-        if (hostname === 'localhost') {
+        // TEMP REMOVE THE OR
+        if (hostname === 'localhost' || hostname) {
           //  Request from localhost will pass
           cb(null, true)
           return

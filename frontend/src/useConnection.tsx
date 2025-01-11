@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { trpc } from './api/trpc'
 import { useLocalStorage } from '@mantine/hooks'
+import { v4 } from 'uuid'
 
 export function useConnection() {
   const [isConnected, setIsConnected] = useState(false)
@@ -11,8 +12,9 @@ export function useConnection() {
   })
   const [deviceId] = useLocalStorage<string>({
     key: 'deviceId',
-    defaultValue: '',
+    defaultValue: v4(),
   })
+
   // Check server connection only if we have a server URL
   const { data, isLoading } = trpc.health.useQuery(
     { deviceId },

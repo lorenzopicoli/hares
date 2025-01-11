@@ -10,6 +10,7 @@ import type {
   MealType,
 } from './types'
 import { useConnection } from './useConnection'
+import { v4 } from 'uuid'
 
 export interface PendingSync {
   habits: Habit[]
@@ -198,7 +199,7 @@ export function useSync() {
   const addHabit = async (habit: Omit<Habit, 'id'>) => {
     const newHabit: Habit = {
       ...habit,
-      id: crypto.randomUUID(),
+      id: v4(),
     }
 
     if (isConnected) {
@@ -226,7 +227,7 @@ export function useSync() {
   const addSurvey = async (survey: Omit<Survey, 'id'>) => {
     const newSurvey: Survey = {
       ...survey,
-      id: crypto.randomUUID(),
+      id: v4(),
     }
 
     if (isConnected) {
@@ -253,7 +254,7 @@ export function useSync() {
   const addLog = async (log: Omit<HabitLog, 'id'>) => {
     const newLog: HabitLog = {
       ...log,
-      id: crypto.randomUUID(),
+      id: v4(),
     }
 
     if (isConnected) {

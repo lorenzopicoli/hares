@@ -7,6 +7,7 @@ import { MantineProvider, createTheme, rem } from '@mantine/core'
 import Home from './Home'
 import React from 'react'
 import { TrpcProvider } from './TrpcProvider'
+import { ErrorBoundary } from 'react-error-boundary'
 
 const theme = createTheme({
   colors: {
@@ -50,13 +51,26 @@ const theme = createTheme({
   },
 })
 
+function Fallback({ error, resetErrorBoundary }) {
+  // Call resetErrorBoundary() to reset the error boundary and retry the render.
+
+  return (
+    <div role="alert">
+      <p>Something went wrong:</p>
+      <pre style={{ color: 'red' }}>{error.message}</pre>
+    </div>
+  )
+}
+
 function App() {
   return (
-    <TrpcProvider>
-      <MantineProvider theme={theme} defaultColorScheme="dark">
-        <Home />
-      </MantineProvider>
-    </TrpcProvider>
+    <ErrorBoundary FallbackComponent={Fallback}>
+      <TrpcProvider>
+        <MantineProvider theme={theme} defaultColorScheme="dark">
+          <Home />
+        </MantineProvider>
+      </TrpcProvider>
+    </ErrorBoundary>
   )
 }
 

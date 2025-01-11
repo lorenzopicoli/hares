@@ -80,10 +80,9 @@ export function Settings() {
   const handleClearCache = () => {
     showConfirmDialog(
       'Clear Local Cache',
-      "This will remove all local data. Your pending changes won't be lost. Are you sure you want to continue?",
+      'This will remove all local data including any pending syncs. Are you sure you want to continue?',
       () => {
-        // Function to be implemented
-        console.log('Clear cache')
+        localStorage.clear()
       }
     )
   }
