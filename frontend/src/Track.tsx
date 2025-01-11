@@ -6,9 +6,11 @@ import React, { useState } from 'react'
 import type { HabitLog, Survey } from './types'
 import { IconCheck } from '@tabler/icons-react'
 import { useSync } from './useSync'
+import { useConnection } from './useConnection'
 
 function Track() {
-  const { logs, habits, surveys, addLog } = useSync()
+  const { habits, surveys, addLog } = useSync()
+  const { isConnected } = useConnection()
   const [activeSurvey, setActiveSurvey] = useState<Survey | null>(null)
 
   // Filter for quick access items only
@@ -87,11 +89,13 @@ function Track() {
             zIndex: 1000,
           }}
           icon={<IconCheck size={20} />}
-          color="green"
+          color={isConnected ? 'green' : 'yellow'}
           title="Success"
           onClose={() => setShowSuccessNotification(false)}
         >
-          Habit logged successfully!
+          {isConnected
+            ? 'Habit logged successfully!'
+            : 'Habit stored locally. Connect to a server to sync'}
         </Notification>
       )}
     </Stack>

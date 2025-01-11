@@ -11,7 +11,7 @@ import type {
 } from './types'
 import { useConnection } from './useConnection'
 
-interface PendingSync {
+export interface PendingSync {
   habits: Habit[]
   surveys: Survey[]
   logs: HabitLog[]
@@ -21,7 +21,7 @@ interface PendingSync {
 
 export function useSync() {
   const [isSyncing, setIsSyncing] = useState(false)
-  const [lastSyncTime, setLastSyncTime] = useState<Date | null>(null)
+  const [lastSyncFailed, setLastSyncFailed] = useState(false)
   const { isConnected, deviceId } = useConnection()
 
   // Local cache of data
@@ -188,7 +188,6 @@ export function useSync() {
         habitPins: {},
         surveyPins: {},
       })
-      setLastSyncTime(new Date())
     } catch (error) {
       console.error('Sync failed:', error)
     } finally {
@@ -291,13 +290,13 @@ export function useSync() {
       } catch (error) {
         setPendingSync((prev) => ({
           ...prev,
-          surveyPins: { ...prev.surveyPins, surveyId: isPinned },
+          surveyPins: { ...prev.surveyPins, [surveyId]: isPinned },
         }))
       }
     } else {
       setPendingSync((prev) => ({
         ...prev,
-        surveyPins: { ...prev.surveyPins, surveyId: isPinned },
+        surveyPins: { ...prev.surveyPins, [surveyId]: isPinned },
       }))
     }
   }
@@ -314,13 +313,13 @@ export function useSync() {
       } catch (error) {
         setPendingSync((prev) => ({
           ...prev,
-          habitPins: { ...prev.habitPins, habitId: isPinned },
+          habitPins: { ...prev.habitPins, [habitId]: isPinned },
         }))
       }
     } else {
       setPendingSync((prev) => ({
         ...prev,
-        habitPins: { ...prev.habitPins, habitId: isPinned },
+        habitPins: { ...prev.habitPins, [habitId]: isPinned },
       }))
     }
   }
@@ -354,15 +353,10 @@ export function useSync() {
   }
 
   useEffect(() => {
-    if (
-      isConnected &&
-      (Object.keys(pendingSync.habits).length > 0 ||
-        Object.keys(pendingSync.surveys).length > 0 ||
-        Object.keys(pendingSync.logs).length > 0)
-    ) {
+    if (isConnected) {
       syncPendingItems()
     }
-  }, [isConnected, pendingSync])
+  }, [isConnected])
 
   const habits = useMemo(() => {
     const data: Habit[] = habitsCache.map((habit) => ({
@@ -381,7 +375,7 @@ export function useSync() {
     }
 
     return data
-  }, [habitsCache, pendingSync.habits])
+  }, [habitsCache, pendingSync.habits, pendingSync.habitPins])
 
   const surveys = useMemo(() => {
     const data: Survey[] = surveysCache.map((survey) => ({
@@ -426,10 +420,12 @@ export function useSync() {
     toggleHabitPin,
     toggleSurveyPin,
     isSyncing,
-    lastSyncTime,
+    lastSyncFailed,
     pendingChanges:
       Object.keys(pendingSync.habits).length +
       Object.keys(pendingSync.surveys).length +
       Object.keys(pendingSync.logs).length,
+    syncPendingItems,
+    pendingSync,
   }
 }
