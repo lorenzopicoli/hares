@@ -21,6 +21,7 @@ import {
 import LogsView from './LogsView'
 import Track from './Track'
 import Habits from './Habits'
+import { Settings } from './Settings'
 
 function Home() {
   const [sideBarOpened, { toggle: toggleSidebar }] = useDisclosure()
@@ -113,8 +114,8 @@ function Home() {
           <ScrollArea h={`calc(100vh - ${rem(60)})`} pb={'md'}>
             {activeTab === 'track' && <Track />}
             {activeTab === 'logs' && <LogsView />}
-
             {activeTab === 'habits' && <Habits />}
+            {activeTab === 'settings' && <Settings />}
           </ScrollArea>
         </AppShell.Main>
       </AppShell>

@@ -10,24 +10,26 @@ import {
   Tabs,
 } from '@mantine/core'
 import { IconTrash, IconPinned, IconPin, IconNotes } from '@tabler/icons-react'
-import React, { useState, useEffect } from 'react'
-import { getFromLocalStorage, saveToLocalStorage } from './helpers'
+import React, { useState } from 'react'
 import type { Habit, Survey, HabitLog } from './types'
-import { useDisclosure } from '@mantine/hooks'
+import { useDisclosure, useLocalStorage } from '@mantine/hooks'
 import AddHabitForm from './AddHabitForm'
 import AddSurveyForm from './AddSurveyForm'
 import HabitCard from './HabitCard'
 
 function Habits() {
-  const [habits, setHabits] = useState<Habit[]>(() =>
-    getFromLocalStorage('habits')
-  )
-  const [surveys, setSurveys] = useState<Survey[]>(
-    () => getFromLocalStorage('surveys') || []
-  )
-  const [logs, setLogs] = useState<HabitLog[]>(
-    () => getFromLocalStorage('logs') || []
-  )
+  const [logs, setLogs] = useLocalStorage<HabitLog[]>({
+    key: 'logs',
+    defaultValue: [],
+  })
+  const [habits, setHabits] = useLocalStorage<Habit[]>({
+    key: 'habits',
+    defaultValue: [],
+  })
+  const [surveys, setSurveys] = useLocalStorage<Survey[]>({
+    key: 'surveys',
+    defaultValue: [],
+  })
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedHabit, setSelectedHabit] = useState<Habit | null>(null)
   const [activeTab, setActiveTab] = useState<string | null>('habits')
@@ -90,18 +92,6 @@ function Habits() {
   const filteredHabits = habits.filter((habit) =>
     habit.question.toLowerCase().includes(searchQuery.toLowerCase())
   )
-
-  useEffect(() => {
-    saveToLocalStorage('habits', habits)
-  }, [habits])
-
-  useEffect(() => {
-    saveToLocalStorage('surveys', surveys)
-  }, [surveys])
-
-  useEffect(() => {
-    saveToLocalStorage('logs', logs)
-  }, [logs])
 
   return (
     <Stack>

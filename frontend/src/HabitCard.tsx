@@ -298,7 +298,7 @@ function HabitCard({
           onChange={(value) => setTimeType(value as 'general' | 'exact')}
         />
 
-        <Stack grow>
+        <Stack>
           {timeType === 'exact' ? (
             <TimeInput
               label="Time"

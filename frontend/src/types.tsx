@@ -26,6 +26,7 @@ export interface Habit {
 }
 
 export interface HabitLog {
+  id: string
   habitId: string
   timestamp: number
   value: LogValue

@@ -10,15 +10,19 @@ import {
 } from '@mantine/core'
 import { IconTrash } from '@tabler/icons-react'
 import type { HabitLog, Habit } from './types'
-import { getFromLocalStorage, saveToLocalStorage } from './helpers'
+import { useLocalStorage } from '@mantine/hooks'
 
 interface LogsViewProps {}
 
 const LogsView = (props: LogsViewProps) => {
-  const [logs, setLogs] = useState<HabitLog[]>(
-    () => getFromLocalStorage('logs') || []
-  )
-  const [habits, _] = useState<Habit[]>(() => getFromLocalStorage('habits'))
+  const [logs, setLogs] = useLocalStorage<HabitLog[]>({
+    key: 'logs',
+    defaultValue: [],
+  })
+  const [habits] = useLocalStorage<Habit[]>({
+    key: 'habits',
+    defaultValue: [],
+  })
 
   const deleteLog = (timestamp: number) => {
     setLogs(logs.filter((log) => log.timestamp !== timestamp))
@@ -68,9 +72,6 @@ const LogsView = (props: LogsViewProps) => {
 
   const sortedLogs = [...logs].sort((a, b) => b.timestamp - a.timestamp)
 
-  useEffect(() => {
-    saveToLocalStorage('logs', logs)
-  }, [logs])
   return (
     <Stack>
       <Text size="xl">Habit Logs</Text>

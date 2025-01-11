@@ -1,5 +1,3 @@
-// Import styles of packages that you've installed.
-// All packages except `@mantine/hooks` require styles imports
 import '@mantine/core/styles.css'
 import '@mantine/dates/styles.css'
 import '@mantine/code-highlight/styles.css'
@@ -8,6 +6,7 @@ import '@mantine/spotlight/styles.css'
 import { MantineProvider, createTheme, rem } from '@mantine/core'
 import Home from './Home'
 import React from 'react'
+import { TrpcProvider } from './TrpcProvider'
 
 const theme = createTheme({
   colors: {
@@ -53,12 +52,11 @@ const theme = createTheme({
 
 function App() {
   return (
-    <>
-      {' '}
+    <TrpcProvider>
       <MantineProvider theme={theme} defaultColorScheme="dark">
         <Home />
       </MantineProvider>
-    </>
+    </TrpcProvider>
   )
 }
 

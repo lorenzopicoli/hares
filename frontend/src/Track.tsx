@@ -2,22 +2,25 @@ import { Stack, Modal, Title, Text, Notification } from '@mantine/core'
 import QuickAccessGrid from './QuickAccessGrid'
 import SurveyFlow from './SurveyFlow'
 import SurveyList from './SurveyList'
-import React, { useEffect, useState } from 'react'
-import { getFromLocalStorage, saveToLocalStorage } from './helpers'
+import React, { useState } from 'react'
 import type { Habit, HabitLog, Survey } from './types'
 import { IconCheck } from '@tabler/icons-react'
+import { useLocalStorage } from '@mantine/hooks'
 
 function Track() {
-  const [logs, setLogs] = useState<HabitLog[]>(
-    () => getFromLocalStorage('logs') || []
-  )
+  const [logs, setLogs] = useLocalStorage<HabitLog[]>({
+    key: 'logs',
+    defaultValue: [],
+  })
+  const [habits, setHabits] = useLocalStorage<Habit[]>({
+    key: 'habits',
+    defaultValue: [],
+  })
+  const [surveys, _setSurveys] = useLocalStorage<Survey[]>({
+    key: 'surveys',
+    defaultValue: [],
+  })
   const [activeSurvey, setActiveSurvey] = useState<Survey | null>(null)
-  const [habits, setHabits] = useState<Habit[]>(() =>
-    getFromLocalStorage('habits')
-  )
-  const [surveys, _] = useState<Survey[]>(
-    () => getFromLocalStorage('surveys') || []
-  )
 
   // Filter for quick access items only
   const quickAccessHabits = habits.filter((h) => h.isPinned)
@@ -30,18 +33,6 @@ function Track() {
   }
 
   const [showSuccessNotification, setShowSuccessNotification] = useState(false)
-
-  useEffect(() => {
-    saveToLocalStorage('logs', logs)
-  }, [logs])
-
-  useEffect(() => {
-    saveToLocalStorage('habits', habits)
-  }, [habits])
-
-  useEffect(() => {
-    saveToLocalStorage('surveys', surveys)
-  }, [surveys])
 
   return (
     <Stack>
