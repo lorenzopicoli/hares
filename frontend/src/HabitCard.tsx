@@ -25,7 +25,7 @@ function HabitCard({
 }: {
   habit: Habit
   surveyId?: string
-  onLog: (log: HabitLog) => void
+  onLog: (log: Omit<HabitLog, 'id'>) => void
 }) {
   const [value, setValue] = useState<LogValue | null>(null)
   const [timeType, setTimeType] = useState<'general' | 'exact'>('general')
@@ -95,13 +95,13 @@ function HabitCard({
         baseDate.setMinutes(minutes || 0)
       }
 
-      const log: HabitLog = {
+      const log: Omit<HabitLog, 'id'> = {
         habitId: habit.id,
         timestamp: now.valueOf(),
         value,
         valueType: habit.type,
         timeType,
-        date: baseDate,
+        date: baseDate.toISOString(),
         surveyId,
         ...(timeType === 'general' && { generalTime }),
         ...(timeType === 'exact' && { exactTime: selectedTime }),

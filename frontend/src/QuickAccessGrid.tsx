@@ -7,7 +7,7 @@ import HabitCard from './HabitCard'
 interface QuickAccessGridProps {
   habits: Habit[]
   onTogglePin: (habitId: string) => void
-  onLog: (log: HabitLog) => void
+  onLog: (log: Omit<HabitLog, 'id'>) => void
 }
 
 function QuickAccessGrid({ habits, onTogglePin, onLog }: QuickAccessGridProps) {

@@ -1,33 +1,22 @@
-import { Stack, Modal, Title, Text, Notification } from '@mantine/core'
+import { Stack, Modal, Text, Notification } from '@mantine/core'
 import QuickAccessGrid from './QuickAccessGrid'
 import SurveyFlow from './SurveyFlow'
 import SurveyList from './SurveyList'
 import React, { useState } from 'react'
-import type { Habit, HabitLog, Survey } from './types'
+import type { HabitLog, Survey } from './types'
 import { IconCheck } from '@tabler/icons-react'
-import { useLocalStorage } from '@mantine/hooks'
+import { useSync } from './useSync'
 
 function Track() {
-  const [logs, setLogs] = useLocalStorage<HabitLog[]>({
-    key: 'logs',
-    defaultValue: [],
-  })
-  const [habits, setHabits] = useLocalStorage<Habit[]>({
-    key: 'habits',
-    defaultValue: [],
-  })
-  const [surveys, _setSurveys] = useLocalStorage<Survey[]>({
-    key: 'surveys',
-    defaultValue: [],
-  })
+  const { logs, habits, surveys, addLog } = useSync()
   const [activeSurvey, setActiveSurvey] = useState<Survey | null>(null)
 
   // Filter for quick access items only
   const quickAccessHabits = habits.filter((h) => h.isPinned)
   const quickAccessSurveys = surveys.filter((s) => s.isPinned)
 
-  const logHabits = (data: HabitLog[]) => {
-    setLogs([...logs, ...data])
+  const logHabits = (data: Omit<HabitLog, 'id'>[]) => {
+    data.map(addLog)
     setShowSuccessNotification(true)
     setTimeout(() => setShowSuccessNotification(false), 3000)
   }
@@ -64,11 +53,11 @@ function Track() {
         <QuickAccessGrid
           habits={habits}
           onTogglePin={(habitId) => {
-            setHabits(
-              habits.map((h) =>
-                h.id === habitId ? { ...h, isPinned: !h.isPinned } : h
-              )
-            )
+            // setHabits(
+            //   habits.map((h) =>
+            //     h.id === habitId ? { ...h, isPinned: !h.isPinned } : h
+            //   )
+            // )
           }}
           onLog={(log) => logHabits([log])}
         />

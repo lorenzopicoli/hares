@@ -10,23 +10,12 @@ import {
 } from '@mantine/core'
 import { IconTrash } from '@tabler/icons-react'
 import type { HabitLog, Habit } from './types'
-import { useLocalStorage } from '@mantine/hooks'
+import { useSync } from './useSync'
 
 interface LogsViewProps {}
 
 const LogsView = (props: LogsViewProps) => {
-  const [logs, setLogs] = useLocalStorage<HabitLog[]>({
-    key: 'logs',
-    defaultValue: [],
-  })
-  const [habits] = useLocalStorage<Habit[]>({
-    key: 'habits',
-    defaultValue: [],
-  })
-
-  const deleteLog = (timestamp: number) => {
-    setLogs(logs.filter((log) => log.timestamp !== timestamp))
-  }
+  const { logs, habits, deleteLog } = useSync()
 
   const formatDate = (timestamp: number) => {
     const date = new Date(timestamp)
@@ -70,20 +59,23 @@ const LogsView = (props: LogsViewProps) => {
     )
   }
 
-  const sortedLogs = [...logs].sort((a, b) => b.timestamp - a.timestamp)
-
   return (
     <Stack>
       <Text size="xl">Habit Logs</Text>
       <ScrollArea h="calc(100vh - 180px)">
         <Stack gap="md">
-          {sortedLogs.map((log) => (
+          {logs.map((log) => (
             <Paper key={log.timestamp} p="md" withBorder>
               <Group justify="space-between" align="flex-start">
                 <Stack gap="xs" style={{ flex: 1 }}>
                   <Group justify="space-between" align="center">
                     <Text fw={500}>{getHabitQuestion(log.habitId)}</Text>
                     {log.mealType && getMealTypeBadge(log.mealType)}
+                    {log.isPendingSync && (
+                      <Badge color="yellow" variant="light">
+                        Pending sync
+                      </Badge>
+                    )}
                   </Group>
 
                   <Group gap="lg">
@@ -129,7 +121,7 @@ const LogsView = (props: LogsViewProps) => {
                 <ActionIcon
                   variant="subtle"
                   color="red"
-                  onClick={() => deleteLog(log.timestamp)}
+                  onClick={() => deleteLog(log.id)}
                 >
                   <IconTrash size={16} />
                 </ActionIcon>

@@ -1,8 +1,8 @@
 import { initTRPC } from '@trpc/server'
 import { z } from 'zod'
-import { eq, and, or, gte, lte, inArray } from 'drizzle-orm'
+import { eq, and } from 'drizzle-orm'
 import { db } from '../db/connection'
-import { devices, habits, logs, surveys } from '../schema'
+import { habits, logs, surveys } from '../schema'
 import { randomUUID } from 'crypto'
 
 // Define validation schemas based on frontend types
@@ -44,33 +44,17 @@ export const appRouter = t.router({
   health: loggedProcedure
     .input(z.object({ deviceId: z.string().uuid() }))
     .query(async ({ input }) => {
-      const device = await db.query.devices.findFirst({
-        where: eq(devices.id, input.deviceId),
-      })
-      return { status: 'ok', deviceExists: !!device }
+      return { status: 'ok' }
     }),
 
   getHabitLogs: loggedProcedure
     .input(
       z.object({
         deviceId: z.string().uuid(),
-        startDate: z.date().optional(),
-        endDate: z.date().optional(),
-        habitIds: z.array(z.string()).optional(),
       })
     )
     .query(async ({ input }) => {
       const conditions = [eq(logs.deviceId, input.deviceId)]
-
-      if (input.startDate) {
-        conditions.push(gte(logs.date, input.startDate))
-      }
-      if (input.endDate) {
-        conditions.push(lte(logs.date, input.endDate))
-      }
-      if (input.habitIds?.length) {
-        conditions.push(inArray(logs.habitId, input.habitIds))
-      }
 
       const results = await db
         .select()
@@ -91,6 +75,7 @@ export const appRouter = t.router({
         deviceId: z.string().uuid(),
         logs: z.array(
           z.object({
+            id: z.string().uuid().optional(),
             habitId: z.string(),
             timestamp: z.number(),
             value: logValueSchema,
@@ -98,7 +83,7 @@ export const appRouter = t.router({
             timeType: z.enum(['general', 'exact']),
             generalTime: timeOfDaySchema.optional(),
             exactTime: z.string().optional(),
-            date: z.date(),
+            date: z.string().datetime(),
             surveyId: z.string().optional(),
             mealType: mealTypeSchema.optional(),
           })
@@ -107,7 +92,7 @@ export const appRouter = t.router({
     )
     .mutation(async ({ input }) => {
       const logsToInsert = input.logs.map((log) => ({
-        id: randomUUID(),
+        id: log.id ?? randomUUID(),
         deviceId: input.deviceId,
         habitId: log.habitId,
         timestamp: log.timestamp,
@@ -116,9 +101,10 @@ export const appRouter = t.router({
         timeType: log.timeType,
         generalTime: log.generalTime,
         exactTime: log.exactTime,
-        date: log.date,
+        date: new Date(log.date),
         surveyId: log.surveyId,
         mealType: log.mealType,
+        createdAt: new Date(),
       }))
 
       await db.insert(logs).values(logsToInsert)
@@ -130,6 +116,7 @@ export const appRouter = t.router({
       z.object({
         deviceId: z.string().uuid(),
         habit: z.object({
+          id: z.string().uuid().optional(),
           question: z.string(),
           type: questionTypeSchema,
           defaultTime: timeOfDaySchema.optional(),
@@ -141,12 +128,13 @@ export const appRouter = t.router({
     )
     .mutation(async ({ input }) => {
       const habitToInsert = {
-        id: randomUUID(),
+        id: input.habit.id ?? randomUUID(),
         deviceId: input.deviceId,
         ...input.habit,
         options: input.habit.options
           ? JSON.stringify(input.habit.options)
           : null,
+        createdAt: new Date(),
       }
 
       await db.insert(habits).values(habitToInsert)
@@ -201,6 +189,7 @@ export const appRouter = t.router({
       z.object({
         deviceId: z.string().uuid(),
         survey: z.object({
+          id: z.string().uuid().optional(),
           name: z.string(),
           habits: z.array(z.string()),
           isPinned: z.boolean().optional(),
@@ -209,11 +198,12 @@ export const appRouter = t.router({
     )
     .mutation(async ({ input }) => {
       const surveyToInsert = {
-        id: randomUUID(),
+        id: input.survey.id ?? randomUUID(),
         deviceId: input.deviceId,
         name: input.survey.name,
         habits: JSON.stringify(input.survey.habits),
         isPinned: input.survey.isPinned,
+        createdAt: new Date(),
       }
 
       await db.insert(surveys).values(surveyToInsert)
@@ -277,7 +267,7 @@ export const appRouter = t.router({
 
       return results.map((survey) => ({
         ...survey,
-        habits: JSON.parse(survey.habits),
+        habits: JSON.parse(survey.habits) as string[],
       }))
     }),
 

@@ -21,6 +21,7 @@ export function Settings() {
     key: 'deviceId',
     defaultValue: uuidv4(),
   })
+
   const [serverUrl, setServerUrl] = useLocalStorage<string>({
     key: 'serverUrl',
     defaultValue: '',
@@ -29,7 +30,7 @@ export function Settings() {
   const [isSaving, setIsSaving] = useState(false)
 
   // Use our connection hook
-  const { isConnected, isCheckingConnection } = useConnection(deviceId)
+  const { isConnected, isCheckingConnection } = useConnection()
 
   // Save URL with validation
   const handleServerUrlChange = async (url: string) => {

@@ -23,6 +23,7 @@ export interface Habit {
   options?: string[] // Used for storing previously used options for mood/food
   isPinned?: boolean // Whether this habit is pinned to quick access
   order?: number // For controlling the order in the quick access grid
+  isPendingSync?: boolean
 }
 
 export interface HabitLog {
@@ -34,9 +35,10 @@ export interface HabitLog {
   timeType: 'general' | 'exact'
   generalTime?: TimeOfDay
   exactTime?: string
-  date: Date
+  date: string
   surveyId?: string
   mealType?: MealType // Only used for food habits
+  isPendingSync?: boolean
 }
 
 export interface Survey {
@@ -44,4 +46,5 @@ export interface Survey {
   name: string
   habits: string[]
   isPinned?: boolean // Added isPinned property
+  isPendingSync?: boolean
 }

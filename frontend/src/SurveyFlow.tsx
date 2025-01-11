@@ -14,13 +14,13 @@ import HabitCard from './HabitCard'
 interface SurveyFlowProps {
   survey: Survey
   habits: Habit[]
-  onComplete: (responses: HabitLog[]) => void
+  onComplete: (responses: Omit<HabitLog, 'id'>[]) => void
   onClose: () => void
 }
 
 function SurveyFlow({ survey, habits, onComplete, onClose }: SurveyFlowProps) {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0)
-  const [responses, setResponses] = useState<HabitLog[]>([])
+  const [responses, setResponses] = useState<Omit<HabitLog, 'id'>[]>([])
 
   const surveyHabits = survey.habits
     .map((id) => habits.find((h) => h.id === id))
@@ -29,7 +29,7 @@ function SurveyFlow({ survey, habits, onComplete, onClose }: SurveyFlowProps) {
   const currentHabit = surveyHabits[currentQuestionIndex]
   const progress = (currentQuestionIndex / surveyHabits.length) * 100
 
-  const handleResponse = (value: HabitLog) => {
+  const handleResponse = (value: Omit<HabitLog, 'id'>) => {
     const newResponses = [...responses, value]
 
     setResponses(newResponses)

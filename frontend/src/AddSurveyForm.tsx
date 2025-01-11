@@ -1,13 +1,13 @@
 import { Stack, TextInput, MultiSelect, Button } from '@mantine/core'
 import React, { useState } from 'react'
-import type { Habit } from './types'
+import type { Habit, Survey } from './types'
 
 function AddSurveyForm({
   habits,
   onSubmit,
 }: {
   habits: Habit[]
-  onSubmit: (name: string, habitIds: string[]) => void
+  onSubmit: (survey: Survey) => void
 }) {
   const [name, setName] = useState('')
   const [selectedHabits, setSelectedHabits] = useState<string[]>([])
@@ -15,7 +15,14 @@ function AddSurveyForm({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     if (name && selectedHabits.length > 0) {
-      onSubmit(name, selectedHabits)
+      const newSurvey: Survey = {
+        id: Date.now().toString(),
+        name,
+        habits: selectedHabits,
+        isPinned: false, // Add isPinned property
+      }
+
+      onSubmit(newSurvey)
       setName('')
       setSelectedHabits([])
     }

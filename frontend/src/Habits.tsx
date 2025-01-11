@@ -11,25 +11,24 @@ import {
 } from '@mantine/core'
 import { IconTrash, IconPinned, IconPin, IconNotes } from '@tabler/icons-react'
 import React, { useState } from 'react'
-import type { Habit, Survey, HabitLog } from './types'
-import { useDisclosure, useLocalStorage } from '@mantine/hooks'
+import type { Habit } from './types'
+import { useDisclosure } from '@mantine/hooks'
 import AddHabitForm from './AddHabitForm'
 import AddSurveyForm from './AddSurveyForm'
 import HabitCard from './HabitCard'
+import { useSync } from './useSync'
 
 function Habits() {
-  const [logs, setLogs] = useLocalStorage<HabitLog[]>({
-    key: 'logs',
-    defaultValue: [],
-  })
-  const [habits, setHabits] = useLocalStorage<Habit[]>({
-    key: 'habits',
-    defaultValue: [],
-  })
-  const [surveys, setSurveys] = useLocalStorage<Survey[]>({
-    key: 'surveys',
-    defaultValue: [],
-  })
+  const {
+    habits,
+    surveys,
+    logs,
+    deleteHabit,
+    deleteSurvey,
+    addHabit,
+    addSurvey,
+    addLog,
+  } = useSync()
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedHabit, setSelectedHabit] = useState<Habit | null>(null)
   const [activeTab, setActiveTab] = useState<string | null>('habits')
@@ -41,52 +40,20 @@ function Habits() {
   const [habitModalOpened, { open: openHabitModal, close: closeHabitModal }] =
     useDisclosure(false)
 
-  const addHabit = (habit: Omit<Habit, 'id'>) => {
-    const newHabit = {
-      ...habit,
-      id: Date.now().toString(),
-    }
-    setHabits([...habits, newHabit])
-  }
-
-  const addSurvey = (name: string, habitIds: string[]) => {
-    const newSurvey: Survey = {
-      id: Date.now().toString(),
-      name,
-      habits: habitIds,
-      isPinned: false, // Add isPinned property
-    }
-    setSurveys([...surveys, newSurvey])
-  }
-
-  const deleteHabit = (habitId: string) => {
-    setHabits(habits.filter((h) => h.id !== habitId))
-    setSurveys(
-      surveys.map((survey) => ({
-        ...survey,
-        habits: survey.habits.filter((id) => id !== habitId),
-      }))
-    )
-  }
-
-  const deleteSurvey = (surveyId: string) => {
-    setSurveys(surveys.filter((s) => s.id !== surveyId))
-  }
-
   const toggleHabitPin = (habitId: string) => {
-    setHabits(
-      habits.map((h) =>
-        h.id === habitId ? { ...h, isPinned: !h.isPinned } : h
-      )
-    )
+    // setHabits(
+    //   habits.map((h) =>
+    //     h.id === habitId ? { ...h, isPinned: !h.isPinned } : h
+    //   )
+    // )
   }
 
   const toggleSurveyPin = (surveyId: string) => {
-    setSurveys(
-      surveys.map((s) =>
-        s.id === surveyId ? { ...s, isPinned: !s.isPinned } : s
-      )
-    )
+    // setSurveys(
+    //   surveys.map((s) =>
+    //     s.id === surveyId ? { ...s, isPinned: !s.isPinned } : s
+    //   )
+    // )
   }
 
   const filteredHabits = habits.filter((habit) =>
@@ -233,8 +200,8 @@ function Habits() {
       >
         <AddSurveyForm
           habits={habits}
-          onSubmit={(name, habitIds) => {
-            addSurvey(name, habitIds)
+          onSubmit={(survey) => {
+            addSurvey(survey)
             closeSurveyModal()
           }}
         />
@@ -250,7 +217,7 @@ function Habits() {
           <HabitCard
             habit={selectedHabit}
             onLog={(log) => {
-              setLogs([...logs, log])
+              addLog(log)
               setSelectedHabit(null)
             }}
           />

@@ -2,11 +2,15 @@ import { useState, useEffect } from 'react'
 import { trpc } from './api/trpc'
 import { useLocalStorage } from '@mantine/hooks'
 
-export function useConnection(deviceId: string) {
+export function useConnection() {
   const [isConnected, setIsConnected] = useState(false)
 
   const [serverUrl] = useLocalStorage<string>({
     key: 'serverUrl',
+    defaultValue: '',
+  })
+  const [deviceId] = useLocalStorage<string>({
+    key: 'deviceId',
     defaultValue: '',
   })
   // Check server connection only if we have a server URL
@@ -33,5 +37,6 @@ export function useConnection(deviceId: string) {
     isConnected,
     isCheckingConnection: isLoading,
     serverUrl,
+    deviceId,
   }
 }
