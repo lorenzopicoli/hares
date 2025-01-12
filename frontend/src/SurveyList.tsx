@@ -2,9 +2,10 @@ import React from 'react'
 import { Paper, Text, Group, Button, Stack } from '@mantine/core'
 import { IconChevronRight } from '@tabler/icons-react'
 import type { Survey } from './types'
+import type { SurveyDoc } from './useDb'
 
 interface SurveyListProps {
-  surveys: Survey[]
+  surveys: SurveyDoc[]
   onStartSurvey: (surveyId: string) => void
 }
 
@@ -13,11 +14,11 @@ function SurveyList({ surveys, onStartSurvey }: SurveyListProps) {
     <Stack>
       {surveys.map((survey) => (
         <Paper
-          key={survey.id}
+          key={survey._id}
           p="md"
           withBorder
           className="hover:bg-gray-800 transition-colors cursor-pointer"
-          onClick={() => onStartSurvey(survey.id)}
+          onClick={() => onStartSurvey(survey._id)}
         >
           <Group justify="space-between" align="center">
             <div>

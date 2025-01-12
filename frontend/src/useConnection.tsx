@@ -1,44 +1,85 @@
 import { useState, useEffect } from 'react'
-import { trpc } from './api/trpc'
 import { useLocalStorage } from '@mantine/hooks'
 import { v4 } from 'uuid'
+import PouchDB from 'pouchdb-browser'
+import { useDB } from './useDb'
 
 export function useConnection() {
   const [isConnected, setIsConnected] = useState(false)
+  const [isCheckingConnection, setIsCheckingConnection] = useState(false)
+  const { db } = useDB()
 
-  const [serverUrl] = useLocalStorage<string>({
-    key: 'serverUrl',
+  const [serverHost] = useLocalStorage<string>({
+    key: 'serverHost',
     defaultValue: '',
   })
+
+  const [username] = useLocalStorage<string>({
+    key: 'dbUsername',
+    defaultValue: '',
+  })
+
+  const [password] = useLocalStorage<string>({
+    key: 'dbPassword',
+    defaultValue: '',
+  })
+
   const [deviceId] = useLocalStorage<string>({
     key: 'deviceId',
     defaultValue: v4(),
   })
 
-  // Check server connection only if we have a server URL
-  const { data, isLoading } = trpc.health.useQuery(
-    { deviceId },
-    {
-      queryKeyHashFn: () => serverUrl,
-      // Refresh connection status every 30 seconds
-      refetchInterval: 30000,
-      // Only enable if we have a server URL
-      enabled: !!serverUrl,
-    }
-  )
-
+  // Check server connection when URL changes
   useEffect(() => {
-    if (data?.status === 'ok') {
-      setIsConnected(true)
-    } else {
+    if (!serverHost || !username || !password) {
       setIsConnected(false)
+      return
     }
-  }, [data])
+
+    const checkConnection = async () => {
+      setIsCheckingConnection(true)
+      try {
+        const remoteDB = new PouchDB(`${serverHost}/hares_db`, {
+          auth: {
+            username,
+            password,
+          },
+        })
+        await remoteDB.info()
+        const sync = db
+          .sync(remoteDB, {
+            live: true,
+            retry: true,
+          })
+          .on('error', console.error)
+        setIsConnected(true)
+
+        // Cleanup on unmount
+        return () => {
+          sync.cancel()
+          remoteDB.close()
+        }
+      } catch (err) {
+        console.error('Connection check failed:', err)
+        setIsConnected(false)
+      } finally {
+        setIsCheckingConnection(false)
+      }
+    }
+
+    checkConnection()
+
+    // Check connection every 30 seconds
+    const interval = setInterval(checkConnection, 30000)
+
+    return () => {
+      clearInterval(interval)
+    }
+  }, [serverHost, username, password, db])
 
   return {
     isConnected,
-    isCheckingConnection: isLoading,
-    serverUrl,
+    isCheckingConnection,
     deviceId,
   }
 }

@@ -8,23 +8,23 @@ import {
   Group,
   Badge,
   Tooltip,
-  Divider,
   ActionIcon,
   FileButton,
   Modal,
+  PasswordInput,
 } from '@mantine/core'
 import {
-  IconRefresh,
   IconCloud,
   IconCloudOff,
   IconDownload,
   IconUpload,
   IconTrash,
 } from '@tabler/icons-react'
-import { v4 as uuidv4 } from 'uuid'
 import { useConnection } from './useConnection'
+import { useDB } from './useDb'
+import { v4 as uuidv4 } from 'uuid'
 import { useLocalStorage } from '@mantine/hooks'
-import { useSync } from './useSync'
+import PouchDB from 'pouchdb-browser'
 
 export function Settings() {
   const [deviceId, setDeviceId] = useLocalStorage<string>({
@@ -32,11 +32,20 @@ export function Settings() {
     defaultValue: uuidv4(),
   })
 
-  const [serverUrl, setServerUrl] = useLocalStorage<string>({
-    key: 'serverUrl',
+  const [serverHost, setServerHost] = useLocalStorage<string>({
+    key: 'serverHost',
     defaultValue: '',
   })
-  const { pendingSync, syncPendingItems, lastSyncFailed } = useSync()
+
+  const [username, setUsername] = useLocalStorage<string>({
+    key: 'dbUsername',
+    defaultValue: '',
+  })
+
+  const [password, setPassword] = useLocalStorage<string>({
+    key: 'dbPassword',
+    defaultValue: '',
+  })
 
   const [confirmModalOpen, setConfirmModalOpen] = useState(false)
   const [confirmAction, setConfirmAction] = useState<{
@@ -45,8 +54,8 @@ export function Settings() {
     action: () => void
   } | null>(null)
 
-  // Use our connection hook
   const { isConnected, isCheckingConnection } = useConnection()
+  const { db } = useDB()
 
   const handleServerUrlChange = async (url: string) => {
     try {
@@ -54,7 +63,7 @@ export function Settings() {
       if (url && !url.startsWith('http')) {
         validUrl = `http://${url}`
       }
-      setServerUrl(validUrl)
+      setServerHost(validUrl)
     } catch (error) {
       console.error('Error saving server URL:', error)
     }
@@ -80,32 +89,60 @@ export function Settings() {
   const handleClearCache = () => {
     showConfirmDialog(
       'Clear Local Cache',
-      'This will remove all local data including any pending syncs. Are you sure you want to continue?',
-      () => {
-        localStorage.clear()
+      'This will remove all local data. Are you sure you want to continue?',
+      async () => {
+        try {
+          await db.destroy()
+          localStorage.clear()
+          window.location.reload()
+        } catch (error) {
+          console.error('Error clearing cache:', error)
+        }
       }
     )
   }
 
-  const handleClearPendingSync = () => {
+  const handleExportData = async () => {
+    try {
+      const allDocs = await db.allDocs({ include_docs: true })
+      const data = allDocs.rows.map((row) => row.doc)
+      const blob = new Blob([JSON.stringify(data, null, 2)], {
+        type: 'application/json',
+      })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `hares-backup-${new Date().toISOString()}.json`
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+      URL.revokeObjectURL(url)
+    } catch (error) {
+      console.error('Error exporting data:', error)
+    }
+  }
+
+  const handleImportData = async (file: File | null) => {
+    if (!file) return
+
     showConfirmDialog(
-      'Clear Pending Sync',
-      'This will remove all pending sync items. They will be gone forever. Are you sure you want to continue?',
-      () => {
-        // Function to be implemented
-        console.log('Clear pending sync')
+      'Import Data',
+      'This will replace all existing data. Are you sure you want to continue?',
+      async () => {
+        try {
+          const content = await file.text()
+          const data = JSON.parse(content)
+          await db.destroy()
+          const newDb = new PouchDB('hares_db')
+          for (const doc of data) {
+            await newDb.put(doc)
+          }
+          window.location.reload()
+        } catch (error) {
+          console.error('Error importing data:', error)
+        }
       }
     )
-  }
-
-  const handleExportData = () => {
-    // Function to be implemented
-    console.log('Export data')
-  }
-
-  const handleImportData = (file: File | null) => {
-    // Function to be implemented
-    console.log('Import data', file)
   }
 
   return (
@@ -115,21 +152,18 @@ export function Settings() {
         <Tooltip
           label={
             isConnected
-              ? 'Sync with server'
+              ? 'Connected to server'
               : 'Connect to a server to enable sync'
           }
         >
-          <Button
-            variant="subtle"
-            onClick={syncPendingItems}
-            disabled={!isConnected}
-            loading={isCheckingConnection}
+          <Badge
+            color={isConnected ? 'green' : 'red'}
             leftSection={
-              isConnected ? <IconCloud size={20} /> : <IconCloudOff size={20} />
+              isConnected ? <IconCloud size={16} /> : <IconCloudOff size={16} />
             }
           >
-            Sync Now
-          </Button>
+            {isConnected ? 'Connected' : 'Disconnected'}
+          </Badge>
         </Tooltip>
       </Group>
 
@@ -139,12 +173,12 @@ export function Settings() {
           <Text fw={500}>Server Connection</Text>
           <TextInput
             label="Server URL"
-            placeholder="http://localhost:3010"
-            value={serverUrl}
+            placeholder="http://localhost:5984"
+            value={serverHost}
             onChange={(e) => handleServerUrlChange(e.currentTarget.value)}
             rightSection={
               isCheckingConnection ? (
-                <IconRefresh size={20} className="animate-spin" />
+                <ActionIcon loading variant="transparent" />
               ) : isConnected ? (
                 <IconCloud size={20} color="var(--mantine-color-green-6)" />
               ) : (
@@ -152,51 +186,18 @@ export function Settings() {
               )
             }
           />
-
-          <Group>
-            <Text size="sm" fw={500}>
-              Status:
-            </Text>
-            {isCheckingConnection ? (
-              <Badge color="yellow">Checking...</Badge>
-            ) : isConnected ? (
-              <Badge color="green">Connected</Badge>
-            ) : (
-              <Badge color="red">Disconnected</Badge>
-            )}
-          </Group>
-        </Stack>
-      </Paper>
-
-      {/* Sync Status */}
-      <Paper p="md" withBorder>
-        <Stack>
-          <Text fw={500}>Sync Status</Text>
-          {lastSyncFailed ? <Badge color="red">Last Sync Failed</Badge> : null}
-          <Group>
-            <Text size="sm">Pending Items:</Text>
-            <Badge color="blue">{pendingSync.habits.length} Habits</Badge>
-            <Badge color="violet">{pendingSync.surveys.length} Surveys</Badge>
-            <Badge color="green">{pendingSync.logs.length} Logs</Badge>
-            <Badge color="grape">
-              {Object.keys(pendingSync.habitPins).length +
-                Object.keys(pendingSync.surveyPins).length}{' '}
-              Others
-            </Badge>
-          </Group>
-          <Button
-            variant="light"
-            color="red"
-            leftSection={<IconTrash size={16} />}
-            onClick={() => handleClearPendingSync()}
-            disabled={
-              !pendingSync.habits.length &&
-              !pendingSync.surveys.length &&
-              !pendingSync.logs.length
-            }
-          >
-            Clear Pending Sync
-          </Button>
+          <TextInput
+            label="Username"
+            placeholder="Enter database username"
+            value={username}
+            onChange={(e) => setUsername(e.currentTarget.value)}
+          />
+          <PasswordInput
+            label="Password"
+            placeholder="Enter database password"
+            value={password}
+            onChange={(e) => setPassword(e.currentTarget.value)}
+          />
         </Stack>
       </Paper>
 
@@ -232,7 +233,7 @@ export function Settings() {
               variant="light"
               color="red"
               leftSection={<IconTrash size={16} />}
-              onClick={() => handleClearCache()}
+              onClick={handleClearCache}
             >
               Clear Cache
             </Button>

@@ -17,6 +17,7 @@ import AddHabitForm from './AddHabitForm'
 import AddSurveyForm from './AddSurveyForm'
 import HabitCard from './HabitCard'
 import { useSync } from './useSync'
+import type { HabitDoc } from './useDb'
 
 function Habits() {
   const {
@@ -32,7 +33,7 @@ function Habits() {
     toggleSurveyPin,
   } = useSync()
   const [searchQuery, setSearchQuery] = useState('')
-  const [selectedHabit, setSelectedHabit] = useState<Habit | null>(null)
+  const [selectedHabit, setSelectedHabit] = useState<HabitDoc | null>(null)
   const [activeTab, setActiveTab] = useState<string | null>('habits')
 
   const [
@@ -72,7 +73,7 @@ function Habits() {
         <Tabs.Panel value="habits">
           <Stack mt="md">
             {filteredHabits.map((habit) => (
-              <Paper key={habit.id} p="md" withBorder>
+              <Paper key={habit._id} p="md" withBorder>
                 <Group justify="space-between" align="flex-start">
                   <Stack gap="xs" style={{ flex: 1 }}>
                     <Text>{habit.question}</Text>
@@ -92,7 +93,7 @@ function Habits() {
                     <ActionIcon
                       variant="subtle"
                       color="yellow"
-                      onClick={() => toggleHabitPin(habit.id, !habit.isPinned)}
+                      onClick={() => toggleHabitPin(habit._id, !habit.isPinned)}
                       title={
                         habit.isPinned
                           ? 'Remove from quick access'
@@ -108,7 +109,7 @@ function Habits() {
                     <ActionIcon
                       variant="subtle"
                       color="red"
-                      onClick={() => deleteHabit(habit.id)}
+                      onClick={() => deleteHabit(habit._id)}
                       title="Delete habit"
                     >
                       <IconTrash size={16} />
@@ -123,7 +124,7 @@ function Habits() {
         <Tabs.Panel value="surveys">
           <Stack mt="md">
             {surveys.map((survey) => (
-              <Paper key={survey.id} p="md" withBorder>
+              <Paper key={survey._id} p="md" withBorder>
                 <Group justify="space-between" align="flex-start">
                   <div>
                     <Text fw={500}>{survey.name}</Text>
@@ -136,7 +137,7 @@ function Habits() {
                       variant="subtle"
                       color="yellow"
                       onClick={() =>
-                        toggleSurveyPin(survey.id, !survey.isPinned)
+                        toggleSurveyPin(survey._id, !survey.isPinned)
                       }
                       title={
                         survey.isPinned
@@ -153,7 +154,7 @@ function Habits() {
                     <ActionIcon
                       variant="subtle"
                       color="red"
-                      onClick={() => deleteSurvey(survey.id)}
+                      onClick={() => deleteSurvey(survey._id)}
                       title="Delete survey"
                     >
                       <IconTrash size={16} />

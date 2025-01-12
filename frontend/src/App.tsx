@@ -6,7 +6,6 @@ import '@mantine/spotlight/styles.css'
 import { MantineProvider, createTheme, rem } from '@mantine/core'
 import Home from './Home'
 import React from 'react'
-import { TrpcProvider } from './TrpcProvider'
 import { ErrorBoundary } from 'react-error-boundary'
 
 const theme = createTheme({
@@ -52,8 +51,6 @@ const theme = createTheme({
 })
 
 function Fallback({ error, resetErrorBoundary }) {
-  // Call resetErrorBoundary() to reset the error boundary and retry the render.
-
   return (
     <div role="alert">
       <p>Something went wrong:</p>
@@ -65,11 +62,9 @@ function Fallback({ error, resetErrorBoundary }) {
 function App() {
   return (
     <ErrorBoundary FallbackComponent={Fallback}>
-      <TrpcProvider>
-        <MantineProvider theme={theme} defaultColorScheme="dark">
-          <Home />
-        </MantineProvider>
-      </TrpcProvider>
+      <MantineProvider theme={theme} defaultColorScheme="dark">
+        <Home />
+      </MantineProvider>
     </ErrorBoundary>
   )
 }

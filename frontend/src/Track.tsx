@@ -4,26 +4,43 @@ import SurveyFlow from './SurveyFlow'
 import SurveyList from './SurveyList'
 import React, { useState } from 'react'
 import type { HabitLog, Survey } from './types'
-import { IconCheck } from '@tabler/icons-react'
+import { IconCloudOff, IconCloud } from '@tabler/icons-react'
 import { useSync } from './useSync'
 import { useConnection } from './useConnection'
+import type { SurveyDoc } from './useDb'
 
 function Track() {
   const { habits, surveys, addLog } = useSync()
   const { isConnected } = useConnection()
-  const [activeSurvey, setActiveSurvey] = useState<Survey | null>(null)
+  const [activeSurvey, setActiveSurvey] = useState<SurveyDoc | null>(null)
+  const [notification, setNotification] = useState<{
+    show: boolean
+    message: string
+    type: 'success' | 'warning'
+  }>({ show: false, message: '', type: 'success' })
 
   // Filter for quick access items only
   const quickAccessHabits = habits.filter((h) => h.isPinned)
   const quickAccessSurveys = surveys.filter((s) => s.isPinned)
 
   const logHabits = (data: Omit<HabitLog, 'id'>[]) => {
-    data.map(addLog)
-    setShowSuccessNotification(true)
-    setTimeout(() => setShowSuccessNotification(false), 3000)
+    Promise.all(data.map(addLog)).then(() => {
+      showNotification(
+        isConnected
+          ? 'Habit logged and synced!'
+          : 'Habit stored locally (offline mode)',
+        isConnected ? 'success' : 'warning'
+      )
+    })
   }
 
-  const [showSuccessNotification, setShowSuccessNotification] = useState(false)
+  const showNotification = (message: string, type: 'success' | 'warning') => {
+    setNotification({ show: true, message, type })
+    setTimeout(
+      () => setNotification((prev) => ({ ...prev, show: false })),
+      3000
+    )
+  }
 
   return (
     <Stack>
@@ -70,7 +87,7 @@ function Track() {
           <SurveyList
             surveys={quickAccessSurveys}
             onStartSurvey={(surveyId) => {
-              const survey = surveys.find((s) => s.id === surveyId)
+              const survey = surveys.find((s) => s._id === surveyId)
               if (survey) {
                 setActiveSurvey(survey)
               }
@@ -80,7 +97,7 @@ function Track() {
       )}
 
       {/* Success Notification */}
-      {showSuccessNotification && (
+      {notification.show && (
         <Notification
           style={{
             position: 'fixed',
@@ -88,14 +105,18 @@ function Track() {
             right: '20px',
             zIndex: 1000,
           }}
-          icon={<IconCheck size={20} />}
-          color={isConnected ? 'green' : 'yellow'}
-          title="Success"
-          onClose={() => setShowSuccessNotification(false)}
+          icon={
+            notification.type === 'success' ? (
+              <IconCloud size={20} />
+            ) : (
+              <IconCloudOff size={20} />
+            )
+          }
+          color={notification.type === 'success' ? 'green' : 'yellow'}
+          title={notification.type === 'success' ? 'Success' : 'Offline Mode'}
+          onClose={() => setNotification((prev) => ({ ...prev, show: false }))}
         >
-          {isConnected
-            ? 'Habit logged successfully!'
-            : 'Habit stored locally. Connect to a server to sync'}
+          {notification.message}
         </Notification>
       )}
     </Stack>

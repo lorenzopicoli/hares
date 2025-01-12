@@ -6,4 +6,5 @@ export default defineConfig({
   server: {
     port: 5172,
   },
+  define: { global: 'window' },
 })

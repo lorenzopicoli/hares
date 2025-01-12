@@ -10,10 +10,11 @@ import {
 } from '@mantine/core'
 import type { Habit, HabitLog, Survey } from './types'
 import HabitCard from './HabitCard'
+import type { HabitDoc, SurveyDoc } from './useDb'
 
 interface SurveyFlowProps {
-  survey: Survey
-  habits: Habit[]
+  survey: SurveyDoc
+  habits: HabitDoc[]
   onComplete: (responses: Omit<HabitLog, 'id'>[]) => void
   onClose: () => void
 }
@@ -23,8 +24,8 @@ function SurveyFlow({ survey, habits, onComplete, onClose }: SurveyFlowProps) {
   const [responses, setResponses] = useState<Omit<HabitLog, 'id'>[]>([])
 
   const surveyHabits = survey.habits
-    .map((id) => habits.find((h) => h.id === id))
-    .filter((habit): habit is Habit => habit !== undefined)
+    .map((id) => habits.find((h) => h._id === id))
+    .filter((habit): habit is HabitDoc => habit !== undefined)
 
   const currentHabit = surveyHabits[currentQuestionIndex]
   const progress = (currentQuestionIndex / surveyHabits.length) * 100
@@ -55,7 +56,7 @@ function SurveyFlow({ survey, habits, onComplete, onClose }: SurveyFlowProps) {
 
         {currentHabit && (
           <HabitCard
-            surveyId={survey.id}
+            surveyId={survey._id}
             habit={currentHabit}
             onLog={handleResponse}
           />

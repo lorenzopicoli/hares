@@ -17,13 +17,14 @@ import { DatePickerInput, TimeInput } from '@mantine/dates'
 import { IconCalendar, IconClock } from '@tabler/icons-react'
 import React, { useState, useEffect } from 'react'
 import type { Habit, HabitLog, MealType, LogValue, TimeOfDay } from './types'
+import type { HabitDoc } from './useDb'
 
 function HabitCard({
   habit,
   surveyId,
   onLog,
 }: {
-  habit: Habit
+  habit: HabitDoc
   surveyId?: string
   onLog: (log: Omit<HabitLog, 'id'>) => void
 }) {
@@ -44,7 +45,7 @@ function HabitCard({
   })
 
   // Load previously used options from localStorage
-  const storageKey = `habit-${habit.id}-options`
+  const storageKey = `habit-${habit._id}-options`
   const [options, setOptions] = useState<string[]>(() => {
     const stored = localStorage.getItem(storageKey)
     return stored ? JSON.parse(stored) : habit.options || []
@@ -96,16 +97,16 @@ function HabitCard({
       }
 
       const log: Omit<HabitLog, 'id'> = {
-        habitId: habit.id,
+        habitId: habit._id,
         timestamp: now.valueOf(),
         value,
-        valueType: habit.type,
+        valueType: habit.habitType,
         timeType,
         date: baseDate.toISOString(),
         surveyId,
         ...(timeType === 'general' && { generalTime }),
         ...(timeType === 'exact' && { exactTime: selectedTime }),
-        ...(habit.type === 'food' &&
+        ...(habit.habitType === 'food' &&
           mealType && { mealType: mealType as MealType }),
       }
 
@@ -169,9 +170,9 @@ function HabitCard({
                   onBlur={() => combobox.closeDropdown()}
                   value={search}
                   placeholder={`Search ${
-                    habit.type === 'mood'
+                    habit.habitType === 'mood'
                       ? 'moods'
-                      : habit.type === 'food'
+                      : habit.habitType === 'food'
                       ? 'food items'
                       : 'options'
                   }`}
@@ -209,7 +210,7 @@ function HabitCard({
   }
 
   const renderMealTypeInput = () => {
-    if (habit.type === 'food') {
+    if (habit.habitType === 'food') {
       return (
         <Select
           label="Meal Type"
@@ -229,7 +230,7 @@ function HabitCard({
   }
 
   const renderInput = () => {
-    switch (habit.type) {
+    switch (habit.habitType) {
       case 'number':
         return (
           <TextInput
@@ -336,7 +337,7 @@ function HabitCard({
 
   const isSubmitDisabled = () => {
     if (!value) return true
-    if (habit.type === 'food' && !mealType) return true
+    if (habit.habitType === 'food' && !mealType) return true
     return false
   }
 

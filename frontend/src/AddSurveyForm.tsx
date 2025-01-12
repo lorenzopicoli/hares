@@ -1,12 +1,13 @@
 import { Stack, TextInput, MultiSelect, Button } from '@mantine/core'
 import React, { useState } from 'react'
 import type { Habit, Survey } from './types'
+import type { HabitDoc } from './useDb'
 
 function AddSurveyForm({
   habits,
   onSubmit,
 }: {
-  habits: Habit[]
+  habits: HabitDoc[]
   onSubmit: (survey: Survey) => void
 }) {
   const [name, setName] = useState('')
@@ -42,7 +43,7 @@ function AddSurveyForm({
           label="Select Habits"
           required
           data={habits.map((habit) => ({
-            value: habit.id,
+            value: habit._id,
             label: habit.question,
           }))}
           value={selectedHabits}

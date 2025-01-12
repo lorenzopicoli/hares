@@ -11,15 +11,16 @@ import {
 import { IconPin, IconPinnedOff, IconPlus } from '@tabler/icons-react'
 import type { Habit, HabitLog } from './types'
 import HabitCard from './HabitCard'
+import type { HabitDoc } from './useDb'
 
 interface QuickAccessGridProps {
-  habits: Habit[]
+  habits: HabitDoc[]
   onTogglePin: (habitId: string) => void
   onLog: (log: Omit<HabitLog, 'id'>) => void
 }
 
 function QuickAccessGrid({ habits, onTogglePin, onLog }: QuickAccessGridProps) {
-  const [selectedHabit, setSelectedHabit] = useState<Habit | null>(null)
+  const [selectedHabit, setSelectedHabit] = useState<HabitDoc | null>(null)
 
   const pinnedHabits = habits
     .filter((h) => h.isPinned)
@@ -27,11 +28,11 @@ function QuickAccessGrid({ habits, onTogglePin, onLog }: QuickAccessGridProps) {
 
   return (
     <>
-      <Container fluid>
+      <Container fluid m={0} p={0}>
         <Grid gutter="md" m={0}>
           {pinnedHabits.map((habit) => (
             <Grid.Col
-              key={habit.id}
+              key={habit._id}
               m={0}
               span={{ base: 12, sm: 6, md: 4, lg: 3 }}
             >
@@ -50,7 +51,7 @@ function QuickAccessGrid({ habits, onTogglePin, onLog }: QuickAccessGridProps) {
                     color="yellow"
                     onClick={(e) => {
                       e.stopPropagation()
-                      onTogglePin(habit.id)
+                      onTogglePin(habit._id)
                     }}
                   >
                     <IconPinnedOff size={16} />

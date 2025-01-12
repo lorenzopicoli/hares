@@ -11,6 +11,7 @@ import {
 import { IconTrash } from '@tabler/icons-react'
 import type { HabitLog, Habit } from './types'
 import { useSync } from './useSync'
+import type { LogDoc } from './useDb'
 
 interface LogsViewProps {}
 
@@ -23,11 +24,11 @@ const LogsView = (props: LogsViewProps) => {
   }
 
   const getHabitQuestion = (habitId: string) => {
-    const habit = habits.find((h) => h.id === habitId)
+    const habit = habits.find((h) => h._id === habitId)
     return habit?.question || 'Unknown Habit'
   }
 
-  const formatValue = (log: HabitLog) => {
+  const formatValue = (log: LogDoc) => {
     switch (log.valueType) {
       case 'boolean':
         return (log.value as boolean) ? 'Yes' : 'No'
@@ -36,7 +37,7 @@ const LogsView = (props: LogsViewProps) => {
       case 'text_list':
         return (log.value as string[]).join(', ')
       case 'scale':
-        return `${log.value}/5`
+        return `${log.value}/10`
       default:
         return log.value.toString()
     }
@@ -65,17 +66,12 @@ const LogsView = (props: LogsViewProps) => {
       <ScrollArea h="calc(100vh - 180px)">
         <Stack gap="md">
           {logs.map((log) => (
-            <Paper key={log.timestamp} p="md" withBorder>
+            <Paper key={log._id} p="md" withBorder>
               <Group justify="space-between" align="flex-start">
                 <Stack gap="xs" style={{ flex: 1 }}>
                   <Group justify="space-between" align="center">
                     <Text fw={500}>{getHabitQuestion(log.habitId)}</Text>
                     {log.mealType && getMealTypeBadge(log.mealType)}
-                    {log.isPendingSync && (
-                      <Badge color="yellow" variant="light">
-                        Pending sync
-                      </Badge>
-                    )}
                   </Group>
 
                   <Group gap="lg">
@@ -107,7 +103,7 @@ const LogsView = (props: LogsViewProps) => {
                     </Text>
 
                     <Text size="sm" c="dimmed">
-                      Logged: {formatDate(log.timestamp)}
+                      Logged: {formatDate(log.createdAt)}
                     </Text>
                   </Group>
 
@@ -121,7 +117,7 @@ const LogsView = (props: LogsViewProps) => {
                 <ActionIcon
                   variant="subtle"
                   color="red"
-                  onClick={() => deleteLog(log.id)}
+                  onClick={() => deleteLog(log._id)}
                 >
                   <IconTrash size={16} />
                 </ActionIcon>
