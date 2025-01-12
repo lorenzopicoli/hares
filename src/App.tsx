@@ -6,6 +6,8 @@ import "@mantine/spotlight/styles.css";
 import { MantineProvider, createTheme, rem } from "@mantine/core";
 import Home from "./Home";
 import { ErrorBoundary } from "react-error-boundary";
+import { WatchChangesProvider } from "./database/WatchChangesContext";
+import { DBProvider } from "./database/DBContext";
 
 const theme = createTheme({
   colors: {
@@ -52,7 +54,11 @@ function App() {
   return (
     <ErrorBoundary FallbackComponent={Fallback}>
       <MantineProvider theme={theme} defaultColorScheme="dark">
-        <Home />
+        <DBProvider>
+          <WatchChangesProvider>
+            <Home />
+          </WatchChangesProvider>
+        </DBProvider>
       </MantineProvider>
     </ErrorBoundary>
   );

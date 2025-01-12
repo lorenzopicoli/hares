@@ -14,11 +14,10 @@ import {
   PasswordInput,
 } from "@mantine/core";
 import { IconCloud, IconCloudOff, IconDownload, IconUpload, IconTrash } from "@tabler/icons-react";
-import { useConnection } from "./useConnection";
-import { useDB } from "./useDb";
 import { v4 as uuidv4 } from "uuid";
 import { useLocalStorage } from "@mantine/hooks";
 import PouchDB from "pouchdb-browser";
+import { useDB } from "./database/DBContext";
 
 export function Settings() {
   const [deviceId, setDeviceId] = useLocalStorage<string>({
@@ -48,8 +47,7 @@ export function Settings() {
     action: () => void;
   } | null>(null);
 
-  const { isConnected, isCheckingConnection } = useConnection();
-  const { db } = useDB();
+  const { db, isConnected, isCheckingConnection } = useDB();
 
   const handleServerUrlChange = async (url: string) => {
     try {

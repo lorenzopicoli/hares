@@ -15,24 +15,21 @@ import {
 import { DatePickerInput, TimeInput } from "@mantine/dates";
 import { IconCalendar, IconClock } from "@tabler/icons-react";
 import { useState, useEffect } from "react";
-import type { HabitLog, MealType, LogValue, TimeOfDay } from "./types";
-import type { HabitDoc } from "./useDb";
+import type { Entry, TimeOfDay, TrackerDoc } from "../database/models";
 
-function HabitCard({
-  habit,
-  surveyId,
-  onLog,
+function AddEntryForm({
+  tracker,
+  onEntryAdded,
 }: {
-  habit: HabitDoc;
-  surveyId?: string;
-  onLog: (log: Omit<HabitLog, "id">) => void;
+  tracker: TrackerDoc;
+  onEntryAdded: (entry: Entry) => void;
 }) {
-  const [value, setValue] = useState<LogValue | null>(null);
+  const [value, setValue] = useState<Entry["value"] | null>(null);
   const [timeType, setTimeType] = useState<"general" | "exact">("general");
   const [selectedTime, setSelectedTime] = useState<string>("");
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
-  const [generalTime, setGeneralTime] = useState<TimeOfDay>(habit.defaultTime || "anytime");
-  const [mealType, setMealType] = useState<MealType | "">("");
+  const [generalTime, setGeneralTime] = useState<TimeOfDay>("all_day");
+  //   const [mealType, setMealType] = useState<MealType | "">("");
 
   // For creatable multi-select
   const [search, setSearch] = useState("");
@@ -42,10 +39,10 @@ function HabitCard({
   });
 
   // Load previously used options from localStorage
-  const storageKey = `habit-${habit._id}-options`;
+  const storageKey = `tracker-${tracker._id}-options`;
   const [options, setOptions] = useState<string[]>(() => {
     const stored = localStorage.getItem(storageKey);
-    return stored ? JSON.parse(stored) : habit.options || [];
+    return stored ? JSON.parse(stored) : tracker.options || [];
   });
 
   // For multi-select values
@@ -93,28 +90,25 @@ function HabitCard({
         baseDate.setMinutes(minutes || 0);
       }
 
-      const log: Omit<HabitLog, "id"> = {
-        habitId: habit._id,
-        timestamp: now.valueOf(),
+      const entry: Entry = {
+        type: "trackerEntry",
+        trackerId: tracker._id,
         value,
-        valueType: habit.habitType,
-        timeType,
-        date: baseDate.toISOString(),
-        surveyId,
+        trackerType: tracker.trackerType,
+        date: baseDate,
         ...(timeType === "general" && { generalTime }),
         ...(timeType === "exact" && { exactTime: selectedTime }),
-        ...(habit.habitType === "food" && mealType && { mealType: mealType as MealType }),
+        // ...(tracker.trackerType === "food" && mealType && { mealType: mealType as MealType }),
       };
 
-      onLog(log);
-
+      onEntryAdded(entry);
       // Reset form
       setValue(null);
       setSelectedValues([]);
-      setGeneralTime(habit.defaultTime || "anytime");
       setSelectedTime("");
+      setGeneralTime("all_day");
       setSelectedDate(null);
-      setMealType("");
+      //   setMealType("");
     }
   };
 
@@ -149,9 +143,7 @@ function HabitCard({
                   onFocus={() => combobox.openDropdown()}
                   onBlur={() => combobox.closeDropdown()}
                   value={search}
-                  placeholder={`Search ${
-                    habit.habitType === "mood" ? "moods" : habit.habitType === "food" ? "food items" : "options"
-                  }`}
+                  placeholder={"Search options"}
                   onChange={(event) => {
                     combobox.updateSelectedOptionIndex();
                     setSearch(event.currentTarget.value);
@@ -181,28 +173,8 @@ function HabitCard({
     );
   };
 
-  const renderMealTypeInput = () => {
-    if (habit.habitType === "food") {
-      return (
-        <Select
-          label="Meal Type"
-          required
-          value={mealType}
-          onChange={(val) => setMealType((val || "") as MealType)}
-          data={[
-            { value: "breakfast", label: "Breakfast" },
-            { value: "lunch", label: "Lunch" },
-            { value: "dinner", label: "Dinner" },
-            { value: "snack", label: "Snack" },
-          ]}
-        />
-      );
-    }
-    return null;
-  };
-
   const renderInput = () => {
-    switch (habit.habitType) {
+    switch (tracker.trackerType) {
       case "number":
         return (
           <TextInput
@@ -243,8 +215,6 @@ function HabitCard({
             </Button>
           </Group>
         );
-      case "mood":
-      case "food":
       case "text_list":
         return renderMultiSelect();
       default:
@@ -303,7 +273,6 @@ function HabitCard({
 
   const isSubmitDisabled = () => {
     if (!value) return true;
-    if (habit.habitType === "food" && !mealType) return true;
     return false;
   };
 
@@ -311,14 +280,13 @@ function HabitCard({
     <Paper p="md">
       <Stack>
         {renderInput()}
-        {renderMealTypeInput()}
         {renderTimeInput()}
         <Button onClick={handleSubmit} disabled={isSubmitDisabled()}>
-          Log
+          Entry
         </Button>
       </Stack>
     </Paper>
   );
 }
 
-export default HabitCard;
+export default AddEntryForm;

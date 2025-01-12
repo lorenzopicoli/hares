@@ -1,23 +1,22 @@
 import { Stack, TextInput, Select, Button } from "@mantine/core";
 import type React from "react";
 import { useState } from "react";
-import type { Habit, QuestionType, TimeOfDay } from "./types";
+import type { Tracker, TrackerType } from "../database/models";
 
-function AddHabitForm({
+function AddTrackerForm({
   onSubmit,
 }: {
-  onSubmit: (habit: Omit<Habit, "id">) => void;
+  onSubmit: (tracker: Tracker) => void;
 }) {
   const [question, setQuestion] = useState("");
-  const [type, setType] = useState<QuestionType>("number");
-  const [defaultTime, setDefaultTime] = useState<TimeOfDay>("anytime");
+  const [trackerType, setTrackerType] = useState<TrackerType>("number");
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     onSubmit({
+      type: "tracker",
       question,
-      type,
-      defaultTime,
+      trackerType,
       options: [],
     });
   };
@@ -36,35 +35,20 @@ function AddHabitForm({
         <Select
           label="Type"
           required
-          value={type}
-          onChange={(value) => setType(value as QuestionType)}
+          value={trackerType}
+          onChange={(value) => setTrackerType(value as TrackerType)}
           data={[
             { value: "number", label: "Number" },
             { value: "scale", label: "Scale (0-10)" },
             { value: "boolean", label: "Yes/No" },
-            { value: "mood", label: "Mood Tracking" },
-            { value: "food", label: "Food Tracking" },
             { value: "text_list", label: "Multiple Text Selection" },
           ]}
         />
 
-        <Select
-          label="Default Time"
-          required
-          value={defaultTime}
-          onChange={(value) => setDefaultTime(value as TimeOfDay)}
-          data={[
-            { value: "anytime", label: "Anytime" },
-            { value: "morning", label: "Morning" },
-            { value: "afternoon", label: "Afternoon" },
-            { value: "night", label: "Night" },
-          ]}
-        />
-
-        <Button type="submit">Add Habit</Button>
+        <Button type="submit">Add Tracker</Button>
       </Stack>
     </form>
   );
 }
 
-export default AddHabitForm;
+export default AddTrackerForm;

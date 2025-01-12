@@ -2,14 +2,14 @@ import { useState } from "react";
 import { AppShell, Text, Button, Stack, ColorSchemeScript, Group, ScrollArea, Burger, rem } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import { IconPlus, IconList, IconSettings, IconChartBar, IconHistory } from "@tabler/icons-react";
-import LogsView from "./LogsView";
-import Track from "./Track";
-import Habits from "./Habits";
 import { Settings } from "./Settings";
+import EntryList from "./entry/EntryList";
+import TrackerManagement from "./tracker/TrackerManagement";
+import QuickAccess from "./quickAccess/QuickAccess";
 
 function Home() {
   const [sideBarOpened, { toggle: toggleSidebar }] = useDisclosure();
-  const [activeTab, setActiveTab] = useState<string>("track");
+  const [activeTab, setActiveTab] = useState<string>("quickAccess");
 
   const changeTab = (tab: string) => {
     setActiveTab(tab);
@@ -40,8 +40,8 @@ function Home() {
             <Button
               leftSection={<IconPlus size={20} />}
               fullWidth
-              variant={activeTab === "track" ? "filled" : "subtle"}
-              onClick={() => changeTab("track")}
+              variant={activeTab === "quickAccess" ? "filled" : "subtle"}
+              onClick={() => changeTab("quickAccess")}
               justify="start"
             >
               Track
@@ -50,21 +50,21 @@ function Home() {
             <Button
               leftSection={<IconList size={20} />}
               fullWidth
-              variant={activeTab === "habits" ? "filled" : "subtle"}
-              onClick={() => changeTab("habits")}
+              variant={activeTab === "trackerManagement" ? "filled" : "subtle"}
+              onClick={() => changeTab("trackerManagement")}
               justify="start"
             >
-              Habits
+              Trackers
             </Button>
 
             <Button
               leftSection={<IconHistory size={20} />}
               fullWidth
-              variant={activeTab === "logs" ? "filled" : "subtle"}
-              onClick={() => changeTab("logs")}
+              variant={activeTab === "entries" ? "filled" : "subtle"}
+              onClick={() => changeTab("entries")}
               justify="start"
             >
-              Logs
+              Entries
             </Button>
 
             <Button
@@ -91,9 +91,9 @@ function Home() {
 
         <AppShell.Main>
           <ScrollArea h={`calc(100vh - ${rem(60)})`} pb={"md"}>
-            {activeTab === "track" && <Track />}
-            {activeTab === "logs" && <LogsView />}
-            {activeTab === "habits" && <Habits />}
+            {activeTab === "quickAccess" && <QuickAccess />}
+            {activeTab === "entries" && <EntryList />}
+            {activeTab === "trackerManagement" && <TrackerManagement />}
             {activeTab === "settings" && <Settings />}
           </ScrollArea>
         </AppShell.Main>
