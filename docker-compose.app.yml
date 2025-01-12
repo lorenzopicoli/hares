@@ -1,0 +1,6 @@
+name: hares
+services:
+  hares-app:
+    ports:
+      - 9000:80
+    build: .

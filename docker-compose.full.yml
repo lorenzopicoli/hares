@@ -1,0 +1,13 @@
+name: hares
+services:
+  hares-app:
+    ports:
+      - 9000:80
+    build: .
+  couchdb:
+    ports:
+      - 5984:5984
+    environment:
+      - COUCHDB_USER=admin
+      - COUCHDB_PASSWORD=password
+    image: couchdb
