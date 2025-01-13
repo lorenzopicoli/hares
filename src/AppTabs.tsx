@@ -7,7 +7,7 @@ import EntryList from "./entry/EntryList";
 import TrackerManagement from "./tracker/TrackerManagement";
 import QuickAccess from "./quickAccess/QuickAccess";
 
-function Home() {
+function AppTabs() {
   const [sideBarOpened, { toggle: toggleSidebar }] = useDisclosure();
   const [activeTab, setActiveTab] = useState<string>("quickAccess");
 
@@ -91,6 +91,7 @@ function Home() {
 
         <AppShell.Main>
           <ScrollArea h={`calc(100vh - ${rem(60)})`} pb={"md"}>
+            {/* {activeTab === 'quickAccess' && <UnifiedManagement />} */}
             {activeTab === "quickAccess" && <QuickAccess />}
             {activeTab === "entries" && <EntryList />}
             {activeTab === "trackerManagement" && <TrackerManagement />}
@@ -102,4 +103,4 @@ function Home() {
   );
 }
 
-export default Home;
+export default AppTabs;
