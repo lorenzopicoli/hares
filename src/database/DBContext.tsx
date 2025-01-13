@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, useEffect, useRef, type ReactNode } from "react";
 import PouchDB from "pouchdb-browser";
-import { useLocalStorage } from "@mantine/hooks";
+import { useDebouncedValue, useLocalStorage } from "@mantine/hooks";
 import { v4 as uuidv4 } from "uuid";
 import PouchdbFind from "pouchdb-find";
 
@@ -45,6 +45,10 @@ export function DBProvider({ children }: { children: ReactNode }) {
     defaultValue: "",
   });
 
+  const [debouncedRemoteUrl] = useDebouncedValue(serverHost ? `${serverHost}/${DB_NAME}` : undefined, 500);
+  const [debouncedPassword] = useDebouncedValue(password, 500);
+  const [debouncedUsername] = useDebouncedValue(username, 500);
+
   useEffect(() => {
     db.createIndex({
       index: { fields: ["type", "createdAt"] },
@@ -52,7 +56,7 @@ export function DBProvider({ children }: { children: ReactNode }) {
   }, [db]);
 
   useEffect(() => {
-    if (!serverHost || !username || !password) {
+    if (!debouncedRemoteUrl || !debouncedUsername || !debouncedPassword) {
       setIsConnected(false);
       return;
     }
@@ -85,8 +89,8 @@ export function DBProvider({ children }: { children: ReactNode }) {
       try {
         // Always create a new remote DB instance
         await cleanupSync();
-        remoteDBRef.current = new PouchDB(`${serverHost}/${DB_NAME}`, {
-          auth: { username, password },
+        remoteDBRef.current = new PouchDB(debouncedRemoteUrl, {
+          auth: { username: debouncedUsername, password: debouncedPassword },
         });
 
         await remoteDBRef.current.info();
@@ -133,7 +137,7 @@ export function DBProvider({ children }: { children: ReactNode }) {
         remoteDBRef.current = null;
       }
     };
-  }, [serverHost, username, password, db]);
+  }, [debouncedRemoteUrl, debouncedUsername, debouncedPassword, db]);
 
   const value = {
     db,

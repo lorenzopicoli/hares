@@ -4,6 +4,10 @@ volumes:
   hares_data:
 
 services:
+  hares-app:
+    image: ghcr.io/lorenzopicoli/hares:main
+    ports:
+      - 127.0.0.1:9000:80
   couchdb:
     image: couchdb
     ports:
