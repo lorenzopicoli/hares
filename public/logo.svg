@@ -1,36 +1,69 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-  <rect width="1000" height="1000" fill="rgb(20, 20, 20)"/>
+
+  <!-- Shadow -->
+  <ellipse cx="256" cy="470" rx="130" ry="20" fill="#E0E0E0" opacity="0.3"/>
+  
+  <!-- Head shape with gradient -->
+  <defs>
+    <linearGradient id="headGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#FFFFFF"/>
+      <stop offset="100%" style="stop-color:#F0F0F0"/>
+    </linearGradient>
+  </defs>
   
   <path d="M256 460c-77.32 0-140-62.68-140-140 0-66.45 46.37-122.06 108.5-136.52V160c0-38.66 31.34-70 70-70h2c38.66 0 70 31.34 70 70v23.48C428.63 197.94 475 253.55 475 320c0 77.32-62.68 140-140 140z" 
-        fill="#9354e0"/>
+        fill="url(#headGradient)"
+        stroke="#E6E6E6"
+        stroke-width="2"/>
+  
+  <!-- Inner ear shadows with gradient -->
+  <defs>
+    <linearGradient id="earGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#FFF5F5"/>
+      <stop offset="100%" style="stop-color:#FFE6E6"/>
+    </linearGradient>
+  </defs>
   
   <path d="M296.5 160v-70c0-38.66-31.34-70-70-70h-2c-38.66 0-70 31.34-70 70v70" 
-        fill="#7b2eda" 
-        stroke="#6921c2" 
-        stroke-width="20"/>
+        fill="url(#earGradient)" 
+        stroke="#E6E6E6" 
+        stroke-width="2"/>
   
+  <!-- Ears -->
   <path d="M154.5 160c0-38.66 31.34-70 70-70h2c38.66 0 70 31.34 70 70" 
         fill="none" 
-        stroke="#833cdb" 
+        stroke="#E6E6E6" 
         stroke-width="40" 
         stroke-linecap="round"/>
   
-  <circle cx="206" cy="300" r="20" fill="#333333"/>
-  <circle cx="306" cy="300" r="20" fill="#333333"/>
+  <!-- Eyes with gradient -->
+  <defs>
+    <radialGradient id="eyeGradient" cx="50%" cy="50%" r="50%" fx="30%" fy="30%">
+      <stop offset="0%" style="stop-color:#666666"/>
+      <stop offset="100%" style="stop-color:#333333"/>
+    </radialGradient>
+  </defs>
   
+  <circle cx="206" cy="300" r="20" fill="url(#eyeGradient)"/>
+  <circle cx="306" cy="300" r="20" fill="url(#eyeGradient)"/>
+  
+  <!-- Shine in eyes -->
   <circle cx="214" cy="292" r="6" fill="#FFFFFF"/>
   <circle cx="314" cy="292" r="6" fill="#FFFFFF"/>
   
-  <path d="M256 330 L246 350 Q256 360 266 350 Z" fill="#ffab18"/>
+  <!-- Nose -->
+  <path d="M256 330 L246 350 Q256 360 266 350 Z" fill="#FF9999"/>
   
-  <circle cx="206" cy="340" r="15" fill="#ffa503" opacity="0.6"/>
-  <circle cx="306" cy="340" r="15" fill="#ffa503" opacity="0.6"/>
+  <!-- Cheeks -->
+  <circle cx="206" cy="340" r="15" fill="#FFD6D6" opacity="0.4"/>
+  <circle cx="306" cy="340" r="15" fill="#FFD6D6" opacity="0.4"/>
   
-  <line x1="186" y1="330" x2="146" y2="320" stroke="#6921c2" stroke-width="2"/>
-  <line x1="186" y1="340" x2="146" y2="340" stroke="#6921c2" stroke-width="2"/>
-  <line x1="186" y1="350" x2="146" y2="360" stroke="#6921c2" stroke-width="2"/>
+  <!-- Whiskers with better contrast -->
+  <line x1="186" y1="330" x2="146" y2="320" stroke="#AAAAAA" stroke-width="2"/>
+  <line x1="186" y1="340" x2="146" y2="340" stroke="#AAAAAA" stroke-width="2"/>
+  <line x1="186" y1="350" x2="146" y2="360" stroke="#AAAAAA" stroke-width="2"/>
   
-  <line x1="326" y1="330" x2="366" y2="320" stroke="#6921c2" stroke-width="2"/>
-  <line x1="326" y1="340" x2="366" y2="340" stroke="#6921c2" stroke-width="2"/>
-  <line x1="326" y1="350" x2="366" y2="360" stroke="#6921c2" stroke-width="2"/>
+  <line x1="326" y1="330" x2="366" y2="320" stroke="#AAAAAA" stroke-width="2"/>
+  <line x1="326" y1="340" x2="366" y2="340" stroke="#AAAAAA" stroke-width="2"/>
+  <line x1="326" y1="350" x2="366" y2="360" stroke="#AAAAAA" stroke-width="2"/>
 </svg>
