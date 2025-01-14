@@ -16,7 +16,7 @@ export default defineConfig({
         name: "🐰 Hares",
         short_name: "Hares",
         description: "A habit tracker",
-        theme_color: "#f6ecff",
+        theme_color: "#141414",
         background_color: "#141414",
         icons: [
           {
