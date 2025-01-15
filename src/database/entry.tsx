@@ -22,8 +22,9 @@ export function useEntries({ pageSize = 10, currentPage = 0, keepOldPages = true
       selector: {
         type: "trackerEntry",
         date: { $gt: null },
+        createdAt: { $gt: null },
       },
-      sort: [{ date: "desc" }],
+      sort: [{ date: "desc" }, { createdAt: "desc" }],
       limit: pageSize + 1,
       skip: currentPage * pageSize,
     });
