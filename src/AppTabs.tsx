@@ -1,11 +1,12 @@
 import { useState } from "react";
-import { AppShell, Text, Button, Stack, ColorSchemeScript, Group, ScrollArea, Burger, rem } from "@mantine/core";
+import { AppShell, Text, Button, Stack, ColorSchemeScript, Group, ScrollArea, Burger } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import { IconPlus, IconList, IconSettings, IconChartBar, IconHistory } from "@tabler/icons-react";
 import { Settings } from "./Settings";
 import EntryList from "./entry/EntryList";
 import TrackerManagement from "./tracker/TrackerManagement";
 import QuickAccess from "./quickAccess/QuickAccess";
+import { HEADER_HEIGHT, HEADER_TOP_HEIGHT } from "./constants";
 
 function AppTabs() {
   const [sideBarOpened, { toggle: toggleSidebar }] = useDisclosure();
@@ -20,7 +21,7 @@ function AppTabs() {
     <>
       <ColorSchemeScript />
       <AppShell
-        header={{ height: 60 }}
+        header={{ height: HEADER_HEIGHT }}
         navbar={{
           width: 300,
           breakpoint: "sm",
@@ -90,7 +91,7 @@ function AppTabs() {
         </AppShell.Navbar>
 
         <AppShell.Main>
-          <ScrollArea h={`calc(100vh - ${rem(60)})`} pb={"md"}>
+          <ScrollArea type="never" pb={"md"} h={`calc(100vh - ${HEADER_TOP_HEIGHT})`}>
             {/* {activeTab === 'quickAccess' && <UnifiedManagement />} */}
             {activeTab === "quickAccess" && <QuickAccess />}
             {activeTab === "entries" && <EntryList />}

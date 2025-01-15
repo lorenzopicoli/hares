@@ -53,8 +53,11 @@ export function DBProvider({ children }: { children: ReactNode }) {
     db.createIndex({
       index: { fields: ["type", "createdAt"] },
     });
-  }, [db]);
 
+    db.createIndex({
+      index: { fields: ["date", "type"] },
+    });
+  }, [db]);
   useEffect(() => {
     if (!debouncedRemoteUrl || !debouncedUsername || !debouncedPassword) {
       setIsConnected(false);

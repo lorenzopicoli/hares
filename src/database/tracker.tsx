@@ -14,7 +14,6 @@ export function useTrackers() {
   }, [allTrackers]);
 
   const refetch = useCallback(() => {
-    console.log("Refecth");
     db.find({
       selector: {
         type: "tracker",

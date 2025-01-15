@@ -120,11 +120,25 @@ export function Settings() {
         try {
           const content = await file.text();
           const data = JSON.parse(content);
-          await db.destroy();
-          const newDb = new PouchDB("hares_db");
-          for (const doc of data) {
-            await newDb.put(doc);
+
+          if (!Array.isArray(data)) {
+            throw new Error("Invalid backup file format");
           }
+
+          const cleanedDocs = data.map((doc) => {
+            const { _rev, ...cleanDoc } = doc;
+
+            return cleanDoc;
+          });
+
+          await db.destroy();
+
+          const newDb = new PouchDB("hares_db");
+
+          await newDb.bulkDocs(cleanedDocs, {
+            new_edits: true,
+          });
+
           window.location.reload();
         } catch (error) {
           console.error("Error importing data:", error);

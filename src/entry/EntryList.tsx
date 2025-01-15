@@ -1,13 +1,21 @@
-import { Stack, Text, Paper, Group, ActionIcon, ScrollArea } from "@mantine/core";
+import { Stack, Text, Paper, Group, ActionIcon, ScrollArea, Button } from "@mantine/core";
 import { IconTrash } from "@tabler/icons-react";
 import type { EntryDoc } from "../database/models";
 import { useTrackers } from "../database/tracker";
 import { useEntries, useRemoveEntry } from "../database/entry";
+import { useState } from "react";
+import { HEADER_TOP_HEIGHT } from "../constants";
 
 const EntryList = () => {
   const { allTrackers } = useTrackers();
-  const { allEntries } = useEntries();
   const { removeEntry } = useRemoveEntry();
+
+  const [currentPage, setCurrentPage] = useState<number>(0);
+
+  const { allEntries, hasMore } = useEntries({
+    currentPage,
+  });
+
   const formatDate = (timestamp: number) => {
     const date = new Date(timestamp);
     return date.toLocaleString();
@@ -19,6 +27,9 @@ const EntryList = () => {
   };
 
   const formatValue = (entry: EntryDoc) => {
+    if (entry.value === undefined || entry.value === null) {
+      return "No value";
+    }
     switch (entry.trackerType) {
       case "boolean":
         return (entry.value as boolean) ? "Yes" : "No";
@@ -33,8 +44,7 @@ const EntryList = () => {
 
   return (
     <Stack>
-      <Text size="xl">Tracker Entries</Text>
-      <ScrollArea h="calc(100vh - 180px)">
+      <ScrollArea type="never" pb={"md"} h={`calc(100vh - ${HEADER_TOP_HEIGHT})`}>
         <Stack gap="md">
           {allEntries.map((entry) => (
             <Paper key={entry._id} p="md" withBorder>
@@ -89,6 +99,11 @@ const EntryList = () => {
               </Group>
             </Paper>
           ))}
+          {hasMore && (
+            <Button variant="light" onClick={() => setCurrentPage(currentPage + 1)} fullWidth>
+              Load More
+            </Button>
+          )}
         </Stack>
       </ScrollArea>
     </Stack>
