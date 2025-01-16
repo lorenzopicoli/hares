@@ -19,6 +19,7 @@ export function useTrackers() {
         type: "tracker",
         createdAt: { $gt: null },
       },
+      limit: 200,
     }).then((result) => {
       console.log("Refetch result");
       setAllTrackers(result.docs as TrackerDoc[]);

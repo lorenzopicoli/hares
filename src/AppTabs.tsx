@@ -1,12 +1,12 @@
 import { useState } from "react";
-import { AppShell, Text, Button, Stack, ColorSchemeScript, Group, ScrollArea, Burger } from "@mantine/core";
+import { AppShell, Text, Button, Stack, ColorSchemeScript, Group, ScrollArea, Burger, Container } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import { IconPlus, IconList, IconSettings, IconChartBar, IconHistory } from "@tabler/icons-react";
 import { Settings } from "./Settings";
 import EntryList from "./entry/EntryList";
 import TrackerManagement from "./tracker/TrackerManagement";
-import QuickAccess from "./quickAccess/QuickAccess";
 import { HEADER_HEIGHT, HEADER_TOP_HEIGHT } from "./constants";
+import { CollectionsView } from "./CollectionsView";
 
 function AppTabs() {
   const [sideBarOpened, { toggle: toggleSidebar }] = useDisclosure();
@@ -91,12 +91,14 @@ function AppTabs() {
         </AppShell.Navbar>
 
         <AppShell.Main>
-          <ScrollArea type="never" pb={"md"} h={`calc(100vh - ${HEADER_TOP_HEIGHT})`}>
-            {/* {activeTab === 'quickAccess' && <UnifiedManagement />} */}
-            {activeTab === "quickAccess" && <QuickAccess />}
-            {activeTab === "entries" && <EntryList />}
-            {activeTab === "trackerManagement" && <TrackerManagement />}
-            {activeTab === "settings" && <Settings />}
+          <ScrollArea type="never" h={`calc(100vh - ${HEADER_TOP_HEIGHT})`}>
+            <Container p={0} pb={"md"}>
+              {/* {activeTab === 'quickAccess' && <UnifiedManagement />} */}
+              {activeTab === "quickAccess" && <CollectionsView />}
+              {activeTab === "entries" && <EntryList />}
+              {activeTab === "trackerManagement" && <TrackerManagement />}
+              {activeTab === "settings" && <Settings />}
+            </Container>
           </ScrollArea>
         </AppShell.Main>
       </AppShell>

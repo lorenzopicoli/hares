@@ -1,4 +1,4 @@
-import { Stack, Paper, Group, ActionIcon, Text } from "@mantine/core";
+import { Stack, Paper, Group, ActionIcon, Text, Grid, Container, Card, Center } from "@mantine/core";
 import { IconNotes, IconPinned, IconPin, IconTrash } from "@tabler/icons-react";
 import type { TrackerDoc } from "../database/models";
 import { useRemoveTracker, useTrackers, useUpdateTracker } from "../database/tracker";
@@ -54,3 +54,49 @@ function TrackersList(props: { searchQuery?: string; onNewEntry: (tracker: Track
 }
 
 export default TrackersList;
+
+const TrackerCard = ({ tracker, onClick }: { tracker: TrackerDoc; onClick: () => void }) => {
+  return (
+    <Card
+      p="md"
+      radius="md"
+      h="100%"
+      onClick={onClick}
+      bg={"var(--mantine-color-dark-8)"}
+      style={(theme) => ({
+        cursor: "pointer",
+        transform: "none",
+        borderWidth: "1px",
+        borderColor: theme.colors.dark[7],
+      })}
+      withBorder
+    >
+      <Center h="100%" mih={60}>
+        <Text
+          size="sm"
+          ta="center"
+          fw={500}
+          style={(theme) => ({
+            color: theme.colors.gray[1],
+          })}
+        >
+          {tracker.question}
+        </Text>
+      </Center>
+    </Card>
+  );
+};
+
+export function TrackersListV2(props: { trackers: TrackerDoc[]; onClick: (tracker: TrackerDoc) => void }) {
+  return (
+    <Container fluid m={0} mt={"md"} p={0}>
+      <Grid gutter={"sm"} overflow="hidden">
+        {props.trackers.map((tracker) => (
+          <Grid.Col key={tracker._id} span={4}>
+            <TrackerCard tracker={tracker} onClick={() => props.onClick(tracker)} />
+          </Grid.Col>
+        ))}
+      </Grid>
+    </Container>
+  );
+}

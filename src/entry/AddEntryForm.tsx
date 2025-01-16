@@ -29,7 +29,6 @@ function AddEntryForm({
   const [selectedTime, setSelectedTime] = useState<string>("");
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [generalTime, setGeneralTime] = useState<TimeOfDay>("all_day");
-  //   const [mealType, setMealType] = useState<MealType | "">("");
 
   // For creatable multi-select
   const [search, setSearch] = useState("");
@@ -272,7 +271,7 @@ function AddEntryForm({
   };
 
   const isSubmitDisabled = () => {
-    if (!value) return true;
+    if (value === null || value === undefined) return true;
     return false;
   };
 

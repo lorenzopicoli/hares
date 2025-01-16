@@ -19,6 +19,7 @@ export function useCollections() {
         type: "collection",
         createdAt: { $gt: null },
       },
+      limit: 200,
     }).then((result) => setAllCollections(result.docs as CollectionDoc[]));
   }, [db]);
 
@@ -31,20 +32,20 @@ export function useCollections() {
   };
 }
 
-export function useCollectionTrackers(collection: CollectionDoc) {
+export function useCollectionTrackers(collection?: CollectionDoc) {
   const { db } = useDB();
   const [collectionTrackers, setCollectionTrackers] = useState<TrackerDoc[]>([]);
   const refetch = useCallback(() => {
     db.find({
       selector: {
         type: "tracker",
-        _id: { $in: collection.trackers },
+        _id: { $in: collection?.trackers ?? [] },
       },
     }).then((result) => setCollectionTrackers(result.docs as TrackerDoc[]));
   }, [db, collection]);
 
   //   useWatchChanges(refetch);
-  useEffect(refetch, []);
+  useEffect(() => refetch(), [refetch]);
 
   return {
     collectionTrackers,
