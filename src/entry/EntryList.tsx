@@ -1,27 +1,23 @@
-import { Stack, Text, Paper, Group, ActionIcon, ScrollArea, Button, Box } from "@mantine/core";
-import { IconTrash } from "@tabler/icons-react";
+import { useState, useMemo, useCallback } from "react";
+import { Stack, Text, Group, ActionIcon, ScrollArea, Button, Box, Card, Container } from "@mantine/core";
+import { IconTrash, IconChevronLeft, IconChevronRight, IconCalendar, IconArrowsShuffle } from "@tabler/icons-react";
+import { DatePickerInput } from "@mantine/dates";
 import type { EntryDoc } from "../database/models";
 import { useTrackers } from "../database/tracker";
 import { useEntries, useRemoveEntry } from "../database/entry";
-import { useState, useMemo, useCallback } from "react";
 import { HEADER_TOP_HEIGHT } from "../constants";
-
-interface GroupedEntries {
-  [key: string]: EntryDoc[];
-}
 
 const EntryList = () => {
   const { allTrackers } = useTrackers();
   const { removeEntry } = useRemoveEntry();
-  const [currentPage, setCurrentPage] = useState<number>(0);
-  const { allEntries, hasMore } = useEntries({
-    currentPage,
-  });
+  const [currentDay, setCurrentDay] = useState(new Date());
+  const [datePickerOpened, setDatePickerOpened] = useState(false);
 
-  const formatDate = (timestamp: number) => {
-    const date = new Date(timestamp);
-    return date.toLocaleString();
-  };
+  // Get entries for the current day
+  const { allEntries } = useEntries({
+    pageSize: 100,
+    keepOldPages: false,
+  });
 
   const getTrackerQuestion = (trackerId: string) => {
     const tracker = allTrackers.find((h) => h._id === trackerId);
@@ -34,9 +30,9 @@ const EntryList = () => {
     }
     switch (entry.trackerType) {
       case "boolean":
-        return (entry.value as boolean) ? "Yes" : "No";
+        return entry.value ? "Yes" : "No";
       case "text_list":
-        return (entry.value as string[]).join(", ");
+        return Array.isArray(entry.value) ? entry.value.join(", ") : entry.value;
       case "scale":
         return `${entry.value}/10`;
       default:
@@ -44,126 +40,193 @@ const EntryList = () => {
     }
   };
 
-  const getDateKey = useCallback((date: Date): string => {
+  const navigateDay = (direction: "prev" | "next") => {
+    const newDate = new Date(currentDay);
+    if (direction === "prev") {
+      newDate.setDate(newDate.getDate() - 1);
+    } else {
+      newDate.setDate(newDate.getDate() + 1);
+    }
+    setCurrentDay(newDate);
+  };
+
+  const jumpToRandomDay = () => {
+    const oldestEntry = allEntries[allEntries.length - 1];
+    const newestEntry = allEntries[0];
+
+    if (!oldestEntry || !newestEntry) return;
+
+    const oldestDate = new Date(oldestEntry.date);
+    const newestDate = new Date(newestEntry.date);
+    const timeDiff = newestDate.getTime() - oldestDate.getTime();
+    const randomTime = oldestDate.getTime() + Math.random() * timeDiff;
+    setCurrentDay(new Date(randomTime));
+  };
+
+  const dayEntries = useMemo(() => {
+    return allEntries.filter((entry) => {
+      const entryDate = new Date(entry.date);
+      return entryDate.toDateString() === currentDay.toDateString();
+    });
+  }, [allEntries, currentDay]);
+
+  // Group entries by time of day
+  const groupedEntries = useMemo(() => {
+    const groups: Record<string, EntryDoc[]> = {
+      morning: [],
+      afternoon: [],
+      night: [],
+      all_day: [],
+    };
+
+    for (const entry of dayEntries) {
+      const timeGroup = entry.timeOfDay || "all_day";
+      groups[timeGroup].push(entry);
+    }
+
+    return groups;
+  }, [dayEntries]);
+
+  const formatDate = useCallback((date: Date) => {
     const today = new Date();
-    today.setHours(0, 0, 0, 0);
+    const yesterday = new Date(today);
+    yesterday.setDate(yesterday.getDate() - 1);
 
-    const entryDate = new Date(date);
-    entryDate.setHours(0, 0, 0, 0);
-
-    const diffTime = today.getTime() - entryDate.getTime();
-    const diffDays = diffTime / (1000 * 60 * 60 * 24);
-
-    if (diffDays === 0) return "Today";
-    if (diffDays === 1) return "Yesterday";
-
-    return new Date(date).toLocaleDateString("en-US", {
+    if (date.toDateString() === today.toDateString()) {
+      return "Today";
+    }
+    if (date.toDateString() === yesterday.toDateString()) {
+      return "Yesterday";
+    }
+    return date.toLocaleDateString("en-US", {
       weekday: "long",
       month: "long",
       day: "numeric",
-      year: today.getFullYear() !== entryDate.getFullYear() ? "numeric" : undefined,
+      year: today.getFullYear() !== date.getFullYear() ? "numeric" : undefined,
     });
   }, []);
 
-  // This cannot be efficient... need to improve it
-  const groupedEntries = useMemo(() => {
-    const groups: GroupedEntries = {};
-    for (const entry of allEntries) {
-      const dateKey = getDateKey(new Date(entry.date));
-      if (!groups[dateKey]) {
-        groups[dateKey] = [];
-      }
-      groups[dateKey].push(entry);
-    }
-    return groups;
-  }, [allEntries, getDateKey]);
+  const renderEntry = (entry: EntryDoc) => (
+    <Card key={entry._id} p="md" radius="md" className="transition-all duration-200 hover:shadow-md" withBorder>
+      <Group justify="space-between" align="flex-start">
+        <Stack gap="xs" style={{ flex: 1 }}>
+          <Text fw={500} size="lg">
+            {getTrackerQuestion(entry.trackerId)}
+          </Text>
 
-  return (
-    <Stack>
-      <ScrollArea type="never" pb="md" h={`calc(100vh - ${HEADER_TOP_HEIGHT})`}>
-        <Stack gap="xl">
-          {Object.entries(groupedEntries).map(([dateKey, entries]) => (
-            <Stack key={dateKey} gap="md">
-              <Box pt="md">
-                <Text size="lg" fw={700} c="dimmed">
-                  {dateKey}
-                </Text>
-              </Box>
+          <Group gap="lg">
+            <Text fw={500}>{formatValue(entry)}</Text>
+            {entry.exactTime && (
+              <Text size="sm" c="dimmed">
+                at {entry.exactTime}
+              </Text>
+            )}
+          </Group>
 
-              <Stack gap="xs">
-                {entries.map((entry) => (
-                  <Paper key={entry._id} p="md" withBorder className="transition-all duration-200 hover:shadow-md">
-                    <Group justify="space-between" align="flex-start">
-                      <Stack gap="xs" style={{ flex: 1 }}>
-                        <Group justify="space-between" align="center">
-                          <Text fw={500}>{getTrackerQuestion(entry.trackerId)}</Text>
-                        </Group>
-
-                        <Group gap="lg">
-                          <Text size="sm" fw={500}>
-                            Value:{" "}
-                            <Text span c="dimmed">
-                              {formatValue(entry)}
-                            </Text>
-                          </Text>
-
-                          {entry.timeOfDay && (
-                            <Text size="sm" fw={500}>
-                              Time of day:{" "}
-                              <Text span c="dimmed">
-                                {entry.timeOfDay}
-                              </Text>
-                            </Text>
-                          )}
-                        </Group>
-
-                        <Group gap="lg">
-                          <Text size="sm" fw={500}>
-                            Time:{" "}
-                            <Text span c="dimmed">
-                              {entry.exactTime || entry.timeOfDay}
-                            </Text>
-                          </Text>
-                          <Text size="sm" c="dimmed">
-                            Logged: {formatDate(entry.createdAt)}
-                          </Text>
-                        </Group>
-
-                        {entry.collectionId && (
-                          <Text size="sm" c="blue">
-                            Part of survey
-                          </Text>
-                        )}
-                      </Stack>
-
-                      <ActionIcon
-                        variant="light"
-                        color="red"
-                        onClick={() => removeEntry(entry._id)}
-                        className="transition-colors hover:bg-red-900"
-                      >
-                        <IconTrash size={16} />
-                      </ActionIcon>
-                    </Group>
-                  </Paper>
-                ))}
-              </Stack>
-            </Stack>
-          ))}
-
-          {hasMore && (
-            <Button
-              variant="light"
-              onClick={() => setCurrentPage(currentPage + 1)}
-              fullWidth
-              className="transition-colors hover:bg-gray-800"
-            >
-              Load More
-            </Button>
+          {entry.collectionId && (
+            <Text size="sm" c="blue">
+              Part of collection
+            </Text>
           )}
         </Stack>
-      </ScrollArea>
-    </Stack>
+
+        <ActionIcon
+          variant="light"
+          color="red"
+          onClick={() => removeEntry(entry._id)}
+          className="transition-colors hover:bg-red-900"
+        >
+          <IconTrash size={16} />
+        </ActionIcon>
+      </Group>
+    </Card>
+  );
+
+  const renderTimeSection = (title: string, entries: EntryDoc[]) => {
+    if (entries.length === 0) return null;
+
+    return (
+      <Stack gap="md">
+        <Text fw={700} c="dimmed" tt="uppercase" size="sm">
+          {title}
+        </Text>
+        <Stack gap="md">{entries.map(renderEntry)}</Stack>
+      </Stack>
+    );
+  };
+
+  return (
+    <Container size="md" px="md">
+      <Stack>
+        {/* Date Navigation */}
+        <Card withBorder>
+          <Group justify="space-between">
+            <Group>
+              <ActionIcon variant="light" onClick={() => navigateDay("prev")} size="lg">
+                <IconChevronLeft size={20} />
+              </ActionIcon>
+
+              <Button
+                variant="subtle"
+                leftSection={<IconCalendar size={20} />}
+                onClick={() => setDatePickerOpened(true)}
+              >
+                {formatDate(currentDay)}
+              </Button>
+
+              <ActionIcon variant="light" onClick={() => navigateDay("next")} size="lg">
+                <IconChevronRight size={20} />
+              </ActionIcon>
+            </Group>
+
+            <Button variant="light" leftSection={<IconArrowsShuffle size={20} />} onClick={jumpToRandomDay}>
+              Random Day
+            </Button>
+          </Group>
+
+          {/* Hidden date picker that shows on button click */}
+          {datePickerOpened && (
+            <Box mt="md">
+              <DatePickerInput
+                value={currentDay}
+                onChange={(date) => {
+                  if (date) {
+                    setCurrentDay(date);
+                    setDatePickerOpened(false);
+                  }
+                }}
+                onClose={() => setDatePickerOpened(false)}
+                popoverProps={{ opened: datePickerOpened }}
+                maxDate={new Date()}
+              />
+            </Box>
+          )}
+        </Card>
+
+        {/* Entries List */}
+        <ScrollArea h={`calc(100vh - ${HEADER_TOP_HEIGHT})`} type="never">
+          <Stack gap="xl">
+            {renderTimeSection("Morning", groupedEntries.morning)}
+            {renderTimeSection("Afternoon", groupedEntries.afternoon)}
+            {renderTimeSection("Night", groupedEntries.night)}
+            {renderTimeSection("All Day", groupedEntries.all_day)}
+
+            {dayEntries.length === 0 && (
+              <Card withBorder p="xl">
+                <Stack align="center" gap="md">
+                  <Text size="lg" fw={500} c="dimmed" ta="center">
+                    No entries for this day
+                  </Text>
+                  <Button variant="light" onClick={jumpToRandomDay}>
+                    Try another day
+                  </Button>
+                </Stack>
+              </Card>
+            )}
+          </Stack>
+        </ScrollArea>
+      </Stack>
+    </Container>
   );
 };
 
