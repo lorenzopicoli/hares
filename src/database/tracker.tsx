@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useDB } from "./DBContext";
 import type { Tracker, TrackerDoc } from "./models";
 import { v4 } from "uuid";
@@ -9,19 +9,16 @@ export function useTrackers() {
   const { db } = useDB();
   const [allTrackers, setAllTrackers] = useState<TrackerDoc[]>([]);
 
-  const pinnedTrackers = useMemo(() => {
-    return allTrackers.filter((tracker) => !!tracker.isPinned);
-  }, [allTrackers]);
-
   const refetch = useCallback(() => {
     db.find({
       selector: {
         type: "tracker",
         createdAt: { $gt: null },
+        order: { $gt: null },
       },
+      sort: ["order"],
       limit: 200,
     }).then((result) => {
-      console.log("Refetch result");
       setAllTrackers(result.docs as TrackerDoc[]);
     });
   }, [db]);
@@ -32,7 +29,6 @@ export function useTrackers() {
 
   return {
     allTrackers,
-    pinnedTrackers,
   };
 }
 
@@ -73,21 +69,20 @@ export function useRemoveTracker() {
   return { removeTracker };
 }
 
-export function useUpdateTracker() {
+export function useUpdateTrackers() {
   const { db } = useDB();
 
-  const updateTracker = useCallback(
-    async (trackerId: string, data: Partial<Tracker>) => {
-      const tracker = (await db.get(trackerId)) as TrackerDoc;
-
-      await db.put({
-        ...tracker,
-        ...data,
-        updatedAt: new Date(),
-      });
+  const updateTrackers = useCallback(
+    async (trackers: TrackerDoc[]) => {
+      await db.bulkDocs(
+        trackers.map((t) => ({
+          ...t,
+          updatedAt: new Date(),
+        })),
+      );
     },
     [db],
   );
 
-  return { updateTracker };
+  return { updateTrackers };
 }

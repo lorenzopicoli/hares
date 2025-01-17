@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useDB } from "./DBContext";
 import type { Collection, CollectionDoc, TrackerDoc } from "./models";
 import { v4 } from "uuid";
@@ -8,10 +8,6 @@ import { useWatchChanges } from "./WatchChangesContext";
 export function useCollections() {
   const { db } = useDB();
   const [allCollections, setAllCollections] = useState<CollectionDoc[]>([]);
-
-  const pinnedCollections = useMemo(() => {
-    return allCollections.filter((collection) => !!collection.isPinned);
-  }, [allCollections]);
 
   const refetch = useCallback(() => {
     db.find({
@@ -28,7 +24,6 @@ export function useCollections() {
 
   return {
     allCollections,
-    pinnedCollections,
   };
 }
 
@@ -41,7 +36,21 @@ export function useCollectionTrackers(collection?: CollectionDoc) {
         type: "tracker",
         _id: { $in: collection?.trackers ?? [] },
       },
-    }).then((result) => setCollectionTrackers(result.docs as TrackerDoc[]));
+    }).then((result) => {
+      if (result.docs.length === 0 || !collection) {
+        setCollectionTrackers([]);
+        return;
+      }
+      const trackersById = result.docs.reduce(
+        (prev, curr) => {
+          prev[curr._id] = curr as TrackerDoc;
+          return prev;
+        },
+        {} as Record<string, TrackerDoc>,
+      );
+      // TODO: how can we sort results in the query?
+      setCollectionTrackers(collection?.trackers.map((id) => trackersById[id]));
+    });
   }, [db, collection]);
 
   //   useWatchChanges(refetch);

@@ -6,7 +6,7 @@ import { Settings } from "./Settings";
 import EntryList from "./entry/EntryList";
 import TrackerManagement from "./tracker/TrackerManagement";
 import { HEADER_HEIGHT, HEADER_TOP_HEIGHT } from "./constants";
-import { CollectionsView } from "./CollectionsView";
+import { CollectionsView } from "./home/CollectionsView";
 
 function AppTabs() {
   const [sideBarOpened, { toggle: toggleSidebar }] = useDisclosure();

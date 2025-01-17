@@ -15,7 +15,6 @@ function CollectionFlow({ collection, onComplete, onClose }: CollectionFlowProps
   const [responses, setResponses] = useState<Entry[]>([]);
   const { collectionTrackers } = useCollectionTrackers(collection);
 
-  console.log("coo", collectionTrackers, collection);
   const currentTracker = collectionTrackers[currentQuestionIndex];
   const progress = (currentQuestionIndex / collectionTrackers.length) * 100;
 

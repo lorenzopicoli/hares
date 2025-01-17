@@ -15,7 +15,6 @@ export interface Tracker {
   question: string;
   trackerType: TrackerType;
   options?: string[];
-  isPinned?: boolean;
   order?: number;
 }
 
@@ -25,7 +24,6 @@ export interface Collection {
   type: "collection";
   name: string;
   trackers: string[];
-  isPinned?: boolean;
 }
 
 export type CollectionDoc = Collection & DocBase;

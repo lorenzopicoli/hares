@@ -55,6 +55,9 @@ export function DBProvider({ children }: { children: ReactNode }) {
     });
 
     db.createIndex({
+      index: { fields: ["order", "type", "createdAt"] },
+    });
+    db.createIndex({
       index: { fields: ["date", "createdAt", "type"] },
     });
   }, [db]);

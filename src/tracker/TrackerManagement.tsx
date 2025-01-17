@@ -2,7 +2,6 @@ import { Stack, Group, Button, Text, Modal, TextInput, Tabs } from "@mantine/cor
 import { useState } from "react";
 import { useDisclosure } from "@mantine/hooks";
 import CollectionList from "../collection/CollectionList";
-import TrackersList from "./TrackersList";
 import AddTrackerForm from "./AddTrackerForm";
 import AddCollectionForm from "../collection/AddCollectionForm";
 import AddEntryForm from "../entry/AddEntryForm";
@@ -44,10 +43,6 @@ function TrackerManagement() {
           <Tabs.Tab value="trackers">Trackers</Tabs.Tab>
           <Tabs.Tab value="collections">Collections</Tabs.Tab>
         </Tabs.List>
-
-        <Tabs.Panel value="trackers">
-          <TrackersList searchQuery={searchQuery} onNewEntry={setSelectedTracker} />
-        </Tabs.Panel>
 
         <Tabs.Panel value="collections">
           <CollectionList onStartCollection={() => {}} />
