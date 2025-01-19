@@ -1,6 +1,5 @@
-import * as S from "@effect/schema/Schema";
-import { NonEmptyString1000, type NotNull, cast, createEvolu, jsonArrayFrom } from "@evolu/react-native";
-import { Database, indexes, NonEmptyString50 } from "./schema";
+import { type NotNull, cast, createEvolu, jsonArrayFrom } from "@evolu/react-native";
+import { Database, indexes } from "./schema";
 
 export * from "./schema";
 
@@ -9,57 +8,49 @@ export const createDatabase = () =>
   createEvolu(Database, {
     indexes,
     ...(process.env.NODE_ENV === "development" && {
-      syncUrl: "http://localhost:4000",
-      enableWebsocketConnection: true,
+      syncUrl: "",
+      //   enableWebsocketConnection: true,
     }),
-    initialData: (evolu) => {
-      const { id: categoryId } = evolu.create("todoCategory", {
-        name: S.decodeSync(NonEmptyString50)("Not Urgent"),
-      });
-      evolu.create("todo", {
-        title: S.decodeSync(NonEmptyString1000)("Try React Suspense"),
-        categoryId,
-      });
-    },
+    initialData: (evolu) => {},
+
     // minimumLogLevel: "trace",
   });
 
 export const evolu = createDatabase();
 
-export const todoCategories = evolu.createQuery((db) =>
+export const trackers = evolu.createQuery((db) =>
   db
-    .selectFrom("todoCategory")
-    .select(["id", "name", "json"])
+    .selectFrom("trackers")
+    .select(["id", "name", "question"])
     .where("isDeleted", "is not", cast(true))
-    // Filter null value and ensure non-null type.
     .where("name", "is not", null)
     .$narrowType<{ name: NotNull }>()
     .orderBy("createdAt"),
 );
 
 // Evolu queries should be collocated. If necessary, they can be preloaded.
-export const todosWithCategories = evolu.createQuery(
+export const collectionsWithTrackers = evolu.createQuery(
   (db) =>
     db
-      .selectFrom("todo")
-      .select(["id", "title", "isCompleted", "categoryId"])
+      .selectFrom("collections")
+      .select(["id", "name"])
       .where("isDeleted", "is not", cast(true))
       // Filter null value and ensure non-null type.
-      .where("title", "is not", null)
-      .$narrowType<{ title: NotNull }>()
+      .where("name", "is not", null)
+      .$narrowType<{ name: NotNull }>()
       .orderBy("createdAt")
       // https://kysely.dev/docs/recipes/relations
       .select((eb) => [
         jsonArrayFrom(
           eb
-            .selectFrom("todoCategory")
-            .select(["todoCategory.id", "todoCategory.name"])
+            .selectFrom("trackers")
+            .select(["collections.id", "trackers.collectionId"])
             .where("isDeleted", "is not", cast(true))
             .orderBy("createdAt"),
-        ).as("categories"),
+        ).as("trackers"),
       ]),
   {
-    // logQueryExecutionTime: true,
+    logQueryExecutionTime: true,
     // logExplainQueryPlan: true,
   },
 );

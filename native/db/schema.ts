@@ -1,6 +1,6 @@
 import * as S from "@effect/schema/Schema";
 // biome-ignore lint/suspicious/noShadowRestrictedNames: <explanation>
-import { NonEmptyString1000, String, database, id, table } from "@evolu/react-native";
+import { NonEmptyString1000, String, createIndexes, database, id, table } from "@evolu/react-native";
 
 // Let's start with the database schema.
 
@@ -22,6 +22,7 @@ export const TrackerTable = table({
   id: TrackerId,
   name: NonEmptyString1000,
   question: NonEmptyString1000,
+  collectionId: CollectionId,
 });
 export type TrackerTable = typeof TrackerTable.Type;
 
@@ -33,8 +34,8 @@ export type CollectionTable = typeof CollectionTable.Type;
 
 // Now, we can define the database schema.
 export const Database = database({
-  tracker: TrackerTable,
-  collection: CollectionTable,
+  trackers: TrackerTable,
+  collections: CollectionTable,
 });
 export type Database = typeof Database.Type;
 
@@ -45,7 +46,7 @@ export type Database = typeof Database.Type;
  *
  * See https://www.evolu.dev/docs/indexes
  */
-// export const indexes = createIndexes((create) => [
-//   create("indexTodoCreatedAt").on("todo").column("createdAt"),
-//   create("indexTodoCategoryCreatedAt").on("todoCategory").column("createdAt"),
-// ]);
+export const indexes = createIndexes((create) => [
+  //   create("indexTodoCreatedAt").on("todo").column("createdAt"),
+  //   create("indexTodoCategoryCreatedAt").on("todoCategory").column("createdAt"),
+]);
