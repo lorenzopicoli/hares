@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { View, Text, TouchableOpacity, TextInput, Modal, ScrollView } from "react-native";
+import { View, Text, TouchableOpacity, TextInput, Modal, ScrollView, Dimensions } from "react-native";
 import {
   DndProvider,
   Draggable,
@@ -9,7 +9,7 @@ import {
   type DraggableGridProps,
 } from "@mgcrea/react-native-dnd";
 import { Ionicons } from "@expo/vector-icons";
-import { TabBar, type Route, type NavigationState, type SceneRendererProps } from "react-native-tab-view";
+import { TabBar, type Route, type NavigationState, type SceneRendererProps, TabView } from "react-native-tab-view";
 import { GestureHandlerRootView, State } from "react-native-gesture-handler";
 
 import { StyleSheet } from "react-native";
@@ -32,6 +32,18 @@ const mockTrackers: Tracker[] = [
   { _id: "2", question: "How was your mood today?", type: "scale" },
   { _id: "3", question: "Did you exercise?", type: "boolean" },
   { _id: "4", question: "What did you eat?", type: "text_list" },
+  { _id: "5", question: "How many glasses of water?", type: "number" },
+  { _id: "6", question: "How was your mood today?", type: "scale" },
+  { _id: "7", question: "Did you exercise?", type: "boolean" },
+  { _id: "8", question: "What did you eat?", type: "text_list" },
+  { _id: "9", question: "How many glasses of water?", type: "number" },
+  { _id: "10", question: "How was your mood today?", type: "scale" },
+  { _id: "11", question: "Did you exercise?", type: "boolean" },
+  { _id: "12", question: "What did you eat?", type: "text_list" },
+  { _id: "13", question: "How many glasses of water?", type: "number" },
+  { _id: "14", question: "How was your mood today?", type: "scale" },
+  { _id: "15", question: "Did you exercise?", type: "boolean" },
+  { _id: "16", question: "What did you eat?", type: "text_list" },
 ];
 
 const mockCollections: Collection[] = [
@@ -132,25 +144,16 @@ export const CollectionsView = () => {
 
     return (
       <ScrollView style={styles.sceneContainer}>
-        <DndProvider
-          onDragEnd={({ active, over }) => {
-            if (active && over) {
-              const activeIndex = filteredTrackers.findIndex((t) => t._id === active.id);
-              const overIndex = filteredTrackers.findIndex((t) => t._id === over.id);
-              if (activeIndex !== -1 && overIndex !== -1) {
-                const newTrackers = [...filteredTrackers];
-                const [removed] = newTrackers.splice(activeIndex, 1);
-                newTrackers.splice(overIndex, 0, removed);
-                handleReorder(collection._id, newTrackers);
-              }
-            }
-          }}
-        >
-          <TrackerGrid
-            trackers={filteredTrackers}
-            onSelectTracker={setSelectedTracker}
-            onReorder={(newTrackers) => handleReorder(collection._id, newTrackers)}
-          />
+        <DndProvider onBegin={handleBegin} onFinalize={handleFinalize} onDragEnd={handleDragEnd} activationDelay={200}>
+          <DraggableGrid direction="row" size={2} style={styles.gridContainer} onOrderChange={onGridOrderChange}>
+            {mockTrackers.map((item) => (
+              <Draggable key={item._id} id={item._id} style={styles.gridItem}>
+                <TouchableOpacity style={styles.card} onPress={() => console.log("selected")} activeOpacity={0.7}>
+                  <Text style={styles.cardText}>{item.question}</Text>
+                </TouchableOpacity>
+              </Draggable>
+            ))}
+          </DraggableGrid>
         </DndProvider>
       </ScrollView>
     );
@@ -208,24 +211,13 @@ export const CollectionsView = () => {
           </TouchableOpacity>
         </View>
 
-        {/* <TabView
+        <TabView
           navigationState={{ index, routes }}
           renderScene={renderScene}
           onIndexChange={setIndex}
           renderTabBar={renderTabBar}
           initialLayout={{ width: Dimensions.get("window").width }}
-        /> */}
-        <DndProvider onBegin={handleBegin} onFinalize={handleFinalize} onDragEnd={handleDragEnd} activationDelay={200}>
-          <DraggableGrid direction="row" size={2} style={styles.gridContainer} onOrderChange={onGridOrderChange}>
-            {mockTrackers.map((item) => (
-              <Draggable key={item._id} id={item._id} style={styles.gridItem}>
-                <TouchableOpacity style={styles.card} onPress={() => console.log("selected")} activeOpacity={0.7}>
-                  <Text style={styles.cardText}>{item.question}</Text>
-                </TouchableOpacity>
-              </Draggable>
-            ))}
-          </DraggableGrid>
-        </DndProvider>
+        />
 
         <TouchableOpacity style={styles.fab} onPress={() => setAddNewModalVisible(true)}>
           <Ionicons name="add" size={24} color="#fff" />
