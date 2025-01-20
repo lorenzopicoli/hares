@@ -11,6 +11,7 @@ import "react-native-reanimated";
 import { useColorScheme } from "@/hooks/useColorScheme";
 import { EvoluProvider } from "@evolu/react-native";
 import { useThemeColor } from "@/hooks/useThemeColor";
+import { Platform } from "react-native";
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
@@ -29,7 +30,9 @@ export default function RootLayout() {
   }, [loaded]);
 
   useEffect(() => {
-    NavigationBar.setBackgroundColorAsync(backgroundColor);
+    if (Platform.OS === "android") {
+      NavigationBar.setBackgroundColorAsync(backgroundColor);
+    }
   }, [backgroundColor]);
 
   if (!loaded) {
