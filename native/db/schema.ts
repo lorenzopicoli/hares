@@ -12,6 +12,9 @@ export type TrackerId = typeof TrackerId.Type;
 export const CollectionId = id("CollectionId");
 export type CollectionId = typeof CollectionId.Type;
 
+export const CollectionTrackerId = id("CollectionTrackerId");
+export type CollectionTrackerId = typeof CollectionTrackerId.Type;
+
 // This branded type ensures a string must be validated before being put
 // into the database.
 export const NonEmptyString50 = String.pipe(S.minLength(1), S.maxLength(50), S.brand("NonEmptyString50"));
@@ -22,7 +25,6 @@ export const TrackerTable = table({
   id: TrackerId,
   name: NonEmptyString1000,
   question: NonEmptyString1000,
-  collectionId: CollectionId,
 });
 export type TrackerTable = typeof TrackerTable.Type;
 
@@ -32,10 +34,18 @@ export const CollectionTable = table({
 });
 export type CollectionTable = typeof CollectionTable.Type;
 
+export const CollectionTrackerTable = table({
+  id: CollectionTrackerId,
+  collectionId: CollectionId,
+  trackerId: TrackerId,
+});
+export type CollectionTrackerTable = typeof CollectionTable.Type;
+
 // Now, we can define the database schema.
 export const Database = database({
   trackers: TrackerTable,
   collections: CollectionTable,
+  collectionsTrackers: CollectionTrackerTable,
 });
 export type Database = typeof Database.Type;
 

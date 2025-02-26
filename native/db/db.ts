@@ -1,4 +1,4 @@
-import { type NotNull, cast, createEvolu, jsonArrayFrom } from "@evolu/react-native";
+import { type NotNull, cast, createEvolu, jsonArrayFrom, jsonObjectFrom } from "@evolu/react-native";
 import { Database, indexes } from "./schema";
 
 export * from "./schema";
@@ -35,18 +35,26 @@ export const collectionsWithTrackers = evolu.createQuery(
       .selectFrom("collections")
       .select(["id", "name"])
       .where("isDeleted", "is not", cast(true))
-      // Filter null value and ensure non-null type.
       .where("name", "is not", null)
       .$narrowType<{ name: NotNull }>()
       .orderBy("createdAt")
-      // https://kysely.dev/docs/recipes/relations
       .select((eb) => [
         jsonArrayFrom(
           eb
-            .selectFrom("trackers")
-            .select(["collections.id", "trackers.collectionId"])
-            .where("isDeleted", "is not", cast(true))
-            .orderBy("createdAt"),
+            .selectFrom("collectionsTrackers")
+            .select(["collectionsTrackers.id"])
+            .select((eb2) => [
+              jsonObjectFrom(
+                eb2
+                  .selectFrom("trackers")
+                  .select(["trackers.id", "trackers.name"]) // select whatever fields you need
+                  .whereRef("trackers.id", "=", "collectionsTrackers.trackerId")
+                  .where("trackers.isDeleted", "is not", cast(true)),
+              ).as("tracker"),
+            ])
+            .whereRef("collectionsTrackers.collectionId", "=", "collections.id")
+            .where("collectionsTrackers.isDeleted", "is not", cast(true))
+            .orderBy("collectionsTrackers.createdAt"),
         ).as("trackers"),
       ]),
   {

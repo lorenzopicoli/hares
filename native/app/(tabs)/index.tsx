@@ -4,15 +4,17 @@ import {
   DndProvider,
   Draggable,
   DraggableGrid,
-  Droppable,
   type DndProviderProps,
   type DraggableGridProps,
 } from "@mgcrea/react-native-dnd";
 import { Ionicons } from "@expo/vector-icons";
 import { TabBar, type Route, type NavigationState, type SceneRendererProps, TabView } from "react-native-tab-view";
 import { GestureHandlerRootView, State } from "react-native-gesture-handler";
-
+import * as S from "@effect/schema/Schema";
 import { StyleSheet } from "react-native";
+import { collectionsWithTrackers, evolu, NonEmptyString50, trackers } from "@/db/db";
+import { NonEmptyString1000 } from "@evolu/common";
+import { useQuery } from "@evolu/react-native";
 
 interface Tracker {
   _id: string;
@@ -60,53 +62,6 @@ const mockCollections: Collection[] = [
   },
 ];
 
-interface TrackerCardProps {
-  tracker: Tracker;
-  onPress: () => void;
-}
-
-const TrackerCard = ({ tracker, onPress }: TrackerCardProps) => {
-  return (
-    <Draggable id={tracker._id}>
-      <TouchableOpacity style={styles.card} onPress={onPress} activeOpacity={0.7}>
-        <Text style={styles.cardText}>{tracker.question}</Text>
-      </TouchableOpacity>
-    </Draggable>
-  );
-};
-
-interface TrackerGridProps {
-  trackers: Tracker[];
-  onSelectTracker: (tracker: Tracker) => void;
-  onReorder: (newOrder: Tracker[]) => void;
-}
-
-const TrackerGrid = ({ trackers, onSelectTracker, onReorder }: TrackerGridProps) => {
-  //   const handleDragEnd = ({ active, over }) => {
-  //     "worklet";
-  //     if (over) {
-  //       const activeIndex = trackers.findIndex((t) => t._id === active.id);
-  //       const overIndex = trackers.findIndex((t) => t._id === over.id);
-  //       if (activeIndex !== -1 && overIndex !== -1) {
-  //         const newTrackers = [...trackers];
-  //         const [removed] = newTrackers.splice(activeIndex, 1);
-  //         newTrackers.splice(overIndex, 0, removed);
-  //         onReorder(newTrackers);
-  //       }
-  //     }
-  //   };
-
-  return (
-    <View style={styles.gridContainer}>
-      {trackers.map((tracker, index) => (
-        <Droppable key={tracker._id} id={tracker._id} style={styles.gridItem}>
-          <TrackerCard tracker={tracker} onPress={() => onSelectTracker(tracker)} />
-        </Droppable>
-      ))}
-    </View>
-  );
-};
-
 type TabRoute = Route & {
   key: string;
   title: string;
@@ -118,6 +73,11 @@ export const CollectionsView = () => {
   const [selectedTracker, setSelectedTracker] = useState<Tracker | null>(null);
   const [addNewModalVisible, setAddNewModalVisible] = useState(false);
   const [collections, setCollections] = useState(mockCollections);
+  const bla = useQuery(trackers);
+  const collectionWithTrackers = useQuery(collectionsWithTrackers);
+
+  console.log("bla", bla.rows);
+  console.log("collectionWithTrackers ", JSON.stringify(collectionWithTrackers.rows, null, 2));
 
   const [routes] = useState<TabRoute[]>(
     collections.map((collection) => ({
@@ -126,21 +86,9 @@ export const CollectionsView = () => {
     })),
   );
 
-  const handleReorder = (collectionId: string, newTrackers: Tracker[]) => {
-    setCollections((prev) =>
-      prev.map((collection) =>
-        collection._id === collectionId ? { ...collection, trackers: newTrackers } : collection,
-      ),
-    );
-  };
-
   const renderScene = ({ route }: SceneRendererProps & { route: TabRoute }) => {
     const collection = collections.find((c) => c._id === route.key);
     if (!collection) return null;
-
-    const filteredTrackers = collection.trackers.filter((tracker) =>
-      tracker.question.toLowerCase().includes(searchQuery.toLowerCase()),
-    );
 
     return (
       <ScrollView style={styles.sceneContainer}>
@@ -160,13 +108,7 @@ export const CollectionsView = () => {
   };
 
   const renderTabBar = (props: SceneRendererProps & { navigationState: NavigationState<TabRoute> }) => (
-    <TabBar
-      {...props}
-      style={styles.tabBar}
-      indicatorStyle={styles.indicator}
-      //   labelStyle={styles.tabLabel}
-      scrollEnabled
-    />
+    <TabBar {...props} style={styles.tabBar} indicatorStyle={styles.indicator} scrollEnabled />
   );
   const handleDragEnd: DndProviderProps["onDragEnd"] = ({ active, over }) => {
     "worklet";
@@ -187,8 +129,20 @@ export const CollectionsView = () => {
       console.log("onFinalize");
     }
   };
-  const onGridOrderChange: DraggableGridProps["onOrderChange"] = (value) => {
+  const onGridOrderChange: DraggableGridProps["onOrderChange"] = async (value) => {
     console.log("onGridOrderChange", value);
+    const tracker = await evolu.create("trackers", {
+      name: S.decodeSync(NonEmptyString1000)("my tracker"),
+      question: S.decodeSync(NonEmptyString1000)("whats up"),
+    });
+    const collection = await evolu.create("collections", {
+      name: S.decodeSync(NonEmptyString50)("Tracker collection"),
+    });
+
+    evolu.create("collectionsTrackers", {
+      collectionId: collection.id,
+      trackerId: tracker.id,
+    });
   };
 
   return (
