@@ -20,7 +20,8 @@
     "formatter": {
       "quoteStyle": "double",
       "lineWidth": 120
-    }
+    },
+    "jsxRuntime": "reactClassic"
   },
   "json": {
     "formatter": {

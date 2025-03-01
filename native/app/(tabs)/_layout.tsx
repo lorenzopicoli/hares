@@ -1,15 +1,33 @@
-import { Tabs } from "expo-router";
-import { Platform } from "react-native";
+import { Tabs, useNavigation } from "expo-router";
+import { Platform, TouchableOpacity, View, StyleSheet } from "react-native";
 
 import { HapticTab } from "@/components/HapticTab";
 import { IconSymbol } from "@/components/ui/IconSymbol";
 import { Colors } from "@/constants/Colors";
 import { useColorScheme } from "@/hooks/useColorScheme";
 import { useThemeColor } from "@/hooks/useThemeColor";
+import { useEffect } from "react";
+import { Ionicons } from "@expo/vector-icons";
 
 export default function TabLayout() {
   const colorScheme = useColorScheme();
   const backgroundColor = useThemeColor({}, "background");
+  const navigation = useNavigation();
+
+  useEffect(() => {
+    navigation.setOptions({
+      headerRight: () => (
+        <View style={styles.navbarButtons}>
+          <TouchableOpacity onPress={() => console.log("Add")}>
+            <Ionicons name="add" size={28} color="#fff" />
+          </TouchableOpacity>
+          {/* <TouchableOpacity onPress={() => console.log("Search")}>
+            <Ionicons name="search" size={24} color="#fff" />
+          </TouchableOpacity> */}
+        </View>
+      ),
+    });
+  }, [navigation]);
 
   return (
     <Tabs
@@ -58,3 +76,10 @@ export default function TabLayout() {
     </Tabs>
   );
 }
+
+const styles = StyleSheet.create({
+  navbarButtons: {
+    display: "flex",
+    flexDirection: "row",
+  },
+});
