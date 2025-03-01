@@ -1,5 +1,5 @@
-import { Tabs, useNavigation } from "expo-router";
-import { Platform, TouchableOpacity, View, StyleSheet } from "react-native";
+import { Link, Tabs, useNavigation } from "expo-router";
+import { Platform, View, StyleSheet, Pressable } from "react-native";
 
 import { HapticTab } from "@/components/HapticTab";
 import { IconSymbol } from "@/components/ui/IconSymbol";
@@ -18,9 +18,11 @@ export default function TabLayout() {
     navigation.setOptions({
       headerRight: () => (
         <View style={styles.navbarButtons}>
-          <TouchableOpacity onPress={() => console.log("Add")}>
-            <Ionicons name="add" size={28} color="#fff" />
-          </TouchableOpacity>
+          <Link href="./addTracker" asChild>
+            <Pressable>
+              <Ionicons name="add" size={28} color="#fff" />
+            </Pressable>
+          </Link>
           {/* <TouchableOpacity onPress={() => console.log("Search")}>
             <Ionicons name="search" size={24} color="#fff" />
           </TouchableOpacity> */}

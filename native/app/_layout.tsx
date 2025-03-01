@@ -41,6 +41,7 @@ export default function RootLayout() {
     <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
       <Stack>
         <Stack.Screen name="(tabs)" options={{ headerShown: true, headerTitle: "🐰 Hares" }} />
+        <Stack.Screen name="addTracker" options={{ headerShown: true, headerTitle: "🐰 Hares" }} />
         <Stack.Screen name="+not-found" />
       </Stack>
       <StatusBar style="auto" />
