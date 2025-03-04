@@ -1,5 +1,5 @@
-import { Link, Tabs, useNavigation } from "expo-router";
-import { Platform, View, StyleSheet, Pressable } from "react-native";
+import { Tabs, useNavigation } from "expo-router";
+import { Platform, View, StyleSheet } from "react-native";
 
 import { HapticTab } from "@/components/HapticTab";
 import { IconSymbol } from "@/components/ui/IconSymbol";
@@ -8,6 +8,7 @@ import { useColorScheme } from "@/hooks/useColorScheme";
 import { useThemeColor } from "@/hooks/useThemeColor";
 import { useEffect } from "react";
 import { Ionicons } from "@expo/vector-icons";
+import ThemedLink from "@/components/ThemedLink";
 
 export default function TabLayout() {
   const colorScheme = useColorScheme();
@@ -18,14 +19,9 @@ export default function TabLayout() {
     navigation.setOptions({
       headerRight: () => (
         <View style={styles.navbarButtons}>
-          <Link href="./addTracker" asChild>
-            <Pressable>
-              <Ionicons name="add" size={28} color="#fff" />
-            </Pressable>
-          </Link>
-          {/* <TouchableOpacity onPress={() => console.log("Search")}>
+          <ThemedLink path={"/addtracker"}>
             <Ionicons name="search" size={24} color="#fff" />
-          </TouchableOpacity> */}
+          </ThemedLink>
         </View>
       ),
     });

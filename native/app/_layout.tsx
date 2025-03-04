@@ -5,6 +5,7 @@ import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
 import { useEffect } from "react";
 import * as NavigationBar from "expo-navigation-bar";
+import * as SystemUI from "expo-system-ui";
 import "react-native-reanimated";
 
 import { useColorScheme } from "@/hooks/useColorScheme";
@@ -31,6 +32,7 @@ export default function RootLayout() {
     if (Platform.OS === "android") {
       NavigationBar.setBackgroundColorAsync(backgroundColor);
     }
+    SystemUI.setBackgroundColorAsync(backgroundColor);
   }, [backgroundColor]);
 
   if (!loaded) {
@@ -40,8 +42,8 @@ export default function RootLayout() {
   return (
     <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
       <Stack>
+        <Stack.Screen name="addtracker" options={{ headerShown: true, headerTitle: "🐰 Hares" }} />
         <Stack.Screen name="(tabs)" options={{ headerShown: true, headerTitle: "🐰 Hares" }} />
-        <Stack.Screen name="addTracker" options={{ headerShown: true, headerTitle: "🐰 Hares" }} />
         <Stack.Screen name="+not-found" />
       </Stack>
       <StatusBar style="auto" />
