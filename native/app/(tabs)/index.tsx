@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Dimensions, StyleSheet, TextInput, TouchableOpacity, View } from "react-native";
+import { StyleSheet, TextInput, TouchableOpacity, View } from "react-native";
 import { type NavigationState, type Route, type SceneRendererProps, TabBar, TabView } from "react-native-tab-view";
 import { Ionicons } from "@expo/vector-icons";
 import type { Tracker, Collection } from "@/models/tracker";
@@ -60,7 +60,7 @@ export default function HomeScreen() {
     const collection = collections.find((c) => c.id === route.key);
     if (!collection) return null;
 
-    return <TrackerGridView trackers={mockTrackers} />;
+    return <TrackerGridView isReordering={false} trackers={mockTrackers} />;
   };
 
   const renderTabBar = (props: SceneRendererProps & { navigationState: NavigationState<TabRoute> }) => (
@@ -92,7 +92,6 @@ export default function HomeScreen() {
           renderScene={renderScene}
           onIndexChange={setIndex}
           renderTabBar={renderTabBar}
-          initialLayout={{ width: Dimensions.get("window").width }}
         />
       </View>
     </GestureHandlerRootView>

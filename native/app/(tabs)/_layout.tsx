@@ -5,27 +5,30 @@ import { HapticTab } from "@/components/HapticTab";
 import { IconSymbol } from "@/components/ui/IconSymbol";
 import { Colors } from "@/constants/Colors";
 import { useColorScheme } from "@/hooks/useColorScheme";
-import { useThemeColor } from "@/hooks/useThemeColor";
 import { useEffect } from "react";
 import { Ionicons } from "@expo/vector-icons";
 import ThemedLink from "@/components/ThemedLink";
+import { useColors } from "@/components/ThemeProvider";
+import { enableScreens } from "react-native-screens";
 
 export default function TabLayout() {
   const colorScheme = useColorScheme();
-  const backgroundColor = useThemeColor({}, "background");
   const navigation = useNavigation();
+  const { colors } = useColors();
 
   useEffect(() => {
     navigation.setOptions({
       headerRight: () => (
         <View style={styles.navbarButtons}>
           <ThemedLink path={"/addtracker"}>
-            <Ionicons name="search" size={24} color="#fff" />
+            <Ionicons name="add" size={30} color="#fff" />
           </ThemedLink>
         </View>
       ),
     });
   }, [navigation]);
+
+  enableScreens(true)
 
   return (
     <Tabs
@@ -33,11 +36,11 @@ export default function TabLayout() {
         tabBarActiveTintColor: Colors[colorScheme ?? "light"].tint,
         headerShown: false,
         tabBarButton: HapticTab,
-        tabBarInactiveBackgroundColor: backgroundColor,
-        tabBarActiveBackgroundColor: backgroundColor,
+        tabBarInactiveBackgroundColor: colors.background,
+        tabBarActiveBackgroundColor: colors.background,
         tabBarStyle: Platform.select({
           ios: {
-            backgroundColor,
+            backgroundColor: colors.background,
           },
           default: {},
         }),

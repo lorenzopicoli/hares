@@ -1,15 +1,15 @@
 import type { Tracker } from "@/models/tracker";
 import {
   DndProvider,
-  DraggableGrid,
   Draggable,
+  DraggableGrid,
   type DndProviderProps,
   type DraggableGridProps,
 } from "@mgcrea/react-native-dnd";
-import { StyleSheet, ScrollView, TouchableOpacity, Text } from "react-native";
+import { StyleSheet, ScrollView, TouchableOpacity, Text, View } from "react-native";
 import { State } from "react-native-gesture-handler";
 
-export default function TrackerGridView({ trackers }: { trackers: Tracker[] }) {
+export default function TrackerGridView({ trackers, isReordering }: { trackers: Tracker[]; isReordering: boolean }) {
   const handleDragEnd: DndProviderProps["onDragEnd"] = ({ active, over }) => {
     "worklet";
     if (over) {
@@ -33,17 +33,31 @@ export default function TrackerGridView({ trackers }: { trackers: Tracker[] }) {
     console.log("On Grid Order change");
   };
 
+  const renderGridElement = (tracker: Tracker) => {
+    return (
+      <TouchableOpacity style={styles.card} onPress={() => console.log("selected")} activeOpacity={0.7}>
+        <Text style={styles.cardText}>{tracker.name}</Text>
+      </TouchableOpacity>
+    );
+  };
+
   return (
     <ScrollView style={styles.container}>
       <DndProvider onBegin={handleBegin} onFinalize={handleFinalize} onDragEnd={handleDragEnd} activationDelay={200}>
         <DraggableGrid direction="row" size={2} style={styles.gridContainer} onOrderChange={onGridOrderChange}>
-          {trackers.map((item) => (
-            <Draggable key={item.id} id={item.id} style={styles.gridItem}>
-              <TouchableOpacity style={styles.card} onPress={() => console.log("selected")} activeOpacity={0.7}>
-                <Text style={styles.cardText}>{item.name}</Text>
-              </TouchableOpacity>
-            </Draggable>
-          ))}
+          {trackers.map((item) =>
+            isReordering ? (
+              // Changing screens with draggable elements seems to cause touches to not be registered in the destination screen
+              // I don't know why it happens and it's intermittent
+              <Draggable key={item.id} id={item.id} style={styles.gridItem}>
+                {renderGridElement(item)}
+              </Draggable>
+            ) : (
+              <View key={item.id} id={item.id} style={styles.gridItem}>
+                {renderGridElement(item)}
+              </View>
+            ),
+          )}
         </DraggableGrid>
       </DndProvider>
     </ScrollView>

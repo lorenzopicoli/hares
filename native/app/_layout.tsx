@@ -6,18 +6,18 @@ import { StatusBar } from "expo-status-bar";
 import { useEffect } from "react";
 import * as NavigationBar from "expo-navigation-bar";
 import * as SystemUI from "expo-system-ui";
+import { ThemeProvider as MyThemeProvider } from "@/components/ThemeProvider";
 import "react-native-reanimated";
 
 import { useColorScheme } from "@/hooks/useColorScheme";
-import { useThemeColor } from "@/hooks/useThemeColor";
 import { Platform } from "react-native";
+import { Colors } from "@/constants/Colors";
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
-  const backgroundColor = useThemeColor({}, "background");
   const [loaded] = useFonts({
     SpaceMono: require("../assets/fonts/SpaceMono-Regular.ttf"),
   });
@@ -30,23 +30,25 @@ export default function RootLayout() {
 
   useEffect(() => {
     if (Platform.OS === "android") {
-      NavigationBar.setBackgroundColorAsync(backgroundColor);
+      NavigationBar.setBackgroundColorAsync(Colors[colorScheme ?? "dark"].background);
     }
-    SystemUI.setBackgroundColorAsync(backgroundColor);
-  }, [backgroundColor]);
+    SystemUI.setBackgroundColorAsync(Colors[colorScheme ?? 'dark'].background);
+  }, [colorScheme]);
 
   if (!loaded) {
     return null;
   }
 
   return (
-    <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
-      <Stack>
-        <Stack.Screen name="addtracker" options={{ headerShown: true, headerTitle: "🐰 Hares" }} />
-        <Stack.Screen name="(tabs)" options={{ headerShown: true, headerTitle: "🐰 Hares" }} />
-        <Stack.Screen name="+not-found" />
-      </Stack>
-      <StatusBar style="auto" />
-    </ThemeProvider>
+    <MyThemeProvider>
+      <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
+        <Stack>
+          <Stack.Screen name="addtracker" options={{ headerShown: true, headerTitle: "🐰 Add tracker" }} />
+          <Stack.Screen name="(tabs)" options={{ headerShown: true, headerTitle: "🐰 Hares" }} />
+          <Stack.Screen name="+not-found" />
+        </Stack>
+        <StatusBar style="auto" />
+      </ThemeProvider>
+    </MyThemeProvider>
   );
 }
