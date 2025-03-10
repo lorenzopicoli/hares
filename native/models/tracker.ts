@@ -1,7 +1,18 @@
+export enum TrackerType {
+  Number = "number",
+  Scale = "scale",
+  Boolean = "boolean",
+  TextList = "textList",
+}
+
 export interface Tracker {
   id: string;
   name: string;
-  type: "number" | "scale" | "boolean" | "text_list";
+  description: string;
+  type: TrackerType;
+  scaleMin?: number;
+  scaleMax?: number;
+  textGroup?: string;
 }
 
 export interface Collection {
