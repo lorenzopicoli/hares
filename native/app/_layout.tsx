@@ -12,12 +12,16 @@ import "react-native-reanimated";
 import { useColorScheme } from "@/hooks/useColorScheme";
 import { Platform } from "react-native";
 import { Colors } from "@/constants/Colors";
+import { db } from "@/db";
+import migrations from "@/drizzle/migrations";
+import { useMigrations } from "drizzle-orm/expo-sqlite/migrator";
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
+  const { success, error } = useMigrations(db, migrations);
   const [loaded] = useFonts({
     SpaceMono: require("../assets/fonts/SpaceMono-Regular.ttf"),
   });
@@ -29,10 +33,20 @@ export default function RootLayout() {
   }, [loaded]);
 
   useEffect(() => {
+    if (success) {
+      console.log("Successfully ran migrations");
+    }
+
+    if (error) {
+      console.log("Failed to run migrations");
+    }
+  }, [success, error]);
+
+  useEffect(() => {
     if (Platform.OS === "android") {
       NavigationBar.setBackgroundColorAsync(Colors[colorScheme ?? "dark"].background);
     }
-    SystemUI.setBackgroundColorAsync(Colors[colorScheme ?? 'dark'].background);
+    SystemUI.setBackgroundColorAsync(Colors[colorScheme ?? "dark"].background);
   }, [colorScheme]);
 
   if (!loaded) {

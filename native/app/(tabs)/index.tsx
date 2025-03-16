@@ -2,65 +2,35 @@ import { useState } from "react";
 import { StyleSheet, TextInput, TouchableOpacity, View } from "react-native";
 import { type NavigationState, type Route, type SceneRendererProps, TabBar, TabView } from "react-native-tab-view";
 import { Ionicons } from "@expo/vector-icons";
-import type { Tracker, Collection } from "@/models/tracker";
 import TrackerGridView from "@/components/TrackerGridView";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
+import { useLiveQuery } from "drizzle-orm/expo-sqlite";
+import { db } from "@/db";
+import { collectionsTable, trackersTable } from "@/db/schema";
 
 type TabRoute = Route & {
   key: string;
   title: string;
 };
 
-const mockTrackers: Tracker[] = [
-  { id: "1", name: "How many glasses of water?", type: "number" },
-  { id: "2", name: "How was your mood today?", type: "scale" },
-  { id: "3", name: "Did you exercise?", type: "boolean" },
-  { id: "4", name: "What did you eat?", type: "text_list" },
-  { id: "5", name: "How many glasses of water?", type: "number" },
-  { id: "6", name: "How was your mood today?", type: "scale" },
-  { id: "7", name: "Did you exercise?", type: "boolean" },
-  { id: "8", name: "What did you eat?", type: "text_list" },
-  { id: "9", name: "How many glasses of water?", type: "number" },
-  { id: "10", name: "How was your mood today?", type: "scale" },
-  { id: "11", name: "Did you exercise?", type: "boolean" },
-  { id: "12", name: "What did you eat?", type: "text_list" },
-  { id: "13", name: "How many glasses of water?", type: "number" },
-  { id: "14", name: "How was your mood today?", type: "scale" },
-  { id: "15", name: "Did you exercise?", type: "boolean" },
-  { id: "16", name: "What did you eat?", type: "text_list" },
-];
-
-const mockCollections: Collection[] = [
-  { id: "all", name: "All", trackers: mockTrackers },
-  {
-    id: "health",
-    name: "Daily Health",
-    trackers: mockTrackers.slice(0, 2),
-  },
-  {
-    id: "fitness",
-    name: "Fitness",
-    trackers: mockTrackers.slice(2),
-  },
-];
-
 export default function HomeScreen() {
   const [index, setIndex] = useState(0);
   const [searchQuery, setSearchQuery] = useState("");
-  const [collections, setCollections] = useState(mockCollections);
+  const { data: collections } = useLiveQuery(db.select().from(collectionsTable));
+  const { data: trackers } = useLiveQuery(db.select().from(trackersTable));
 
   const [routes] = useState<TabRoute[]>(
     collections.map((collection) => ({
-      key: collection.id,
+      key: String(collection.id),
       title: collection.name,
     })),
   );
 
   const renderScene = ({ route }: SceneRendererProps & { route: TabRoute }) => {
-    const collection = collections.find((c) => c.id === route.key);
+    const collection = collections.find((c) => c.id === +route.key);
     if (!collection) return null;
 
-    return <TrackerGridView isReordering={false} trackers={mockTrackers} />;
+    return <TrackerGridView isReordering={false} trackers={trackers} />;
   };
 
   const renderTabBar = (props: SceneRendererProps & { navigationState: NavigationState<TabRoute> }) => (

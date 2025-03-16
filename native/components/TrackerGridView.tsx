@@ -1,4 +1,4 @@
-import type { Tracker } from "@/models/tracker";
+import type { Tracker } from "@/db/schema";
 import {
   DndProvider,
   Draggable,
