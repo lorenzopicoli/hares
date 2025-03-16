@@ -49,11 +49,11 @@ export default function TrackerGridView({ trackers, isReordering }: { trackers: 
             isReordering ? (
               // Changing screens with draggable elements seems to cause touches to not be registered in the destination screen
               // I don't know why it happens and it's intermittent
-              <Draggable key={item.id} id={item.id} style={styles.gridItem}>
+              <Draggable key={item.id} id={String(item.id)} style={styles.gridItem}>
                 {renderGridElement(item)}
               </Draggable>
             ) : (
-              <View key={item.id} id={item.id} style={styles.gridItem}>
+              <View key={item.id} id={String(item.id)} style={styles.gridItem}>
                 {renderGridElement(item)}
               </View>
             ),

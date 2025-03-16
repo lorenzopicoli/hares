@@ -33,7 +33,7 @@ export const collectionsTable = sqliteTable("collections", {
 export type Collection = typeof collectionsTable.$inferSelect;
 export type NewCollection = typeof collectionsTable.$inferInsert;
 
-export const collectionsTrackersTable = sqliteTable("collections", {
+export const collectionsTrackersTable = sqliteTable("collections_trackers", {
   id: int().primaryKey({ autoIncrement: true }),
   trackerId: int("tracker_id")
     .notNull()

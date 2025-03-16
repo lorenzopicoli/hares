@@ -1,14 +1,10 @@
-/**
- * Below are the colors that are used in the app. The colors are defined in the light and dark mode.
- * There are many other ways to style your app. For example, [Nativewind](https://www.nativewind.dev/), [Tamagui](https://tamagui.dev/), [unistyles](https://reactnativeunistyles.vercel.app), etc.
- */
-
 const tintColorLight = "#8A2BE2"; // Bright purple for light mode
 const tintColorDark = "#BF5FFF"; // Lighter neon purple for dark mode
 export const Colors = {
   light: {
     text: "#11181C",
     background: "#fff",
+    secondaryBackground: "#111",
     tint: tintColorLight,
     icon: "#687076",
     tabIconDefault: "#687076",
@@ -35,6 +31,7 @@ export const Colors = {
   dark: {
     text: "#ECEDEE",
     background: "#151718",
+    secondaryBackground: "#151718",
     tint: "#BF5FFF",
     icon: "#9BA1A6",
     tabIconDefault: "#9BA1A6",
@@ -59,3 +56,30 @@ export const Colors = {
     },
   },
 };
+
+// export const NavigationThemes: { dark: Theme; light: Theme } = {
+//   dark: {
+//     dark: true,
+//     fonts: DarkTheme.fonts,
+//     colors: {
+//       primary: "rgb(10, 132, 255)",
+//       background: "blue",
+//       card: "rgb(18, 18, 18)",
+//       text: Colors.dark.text,
+//       border: "rgb(39, 39, 41)",
+//       notification: "rgb(255, 69, 58)",
+//     },
+//   },
+//   light: {
+//     dark: false,
+//     fonts: DefaultTheme.fonts,
+//     colors: {
+//       primary: "rgb(10, 132, 255)",
+//       background: Colors.light.background,
+//       card: "rgb(18, 18, 18)",
+//       text: Colors.light.text,
+//       border: "rgb(39, 39, 41)",
+//       notification: "rgb(255, 69, 58)",
+//     },
+//   },
+// };

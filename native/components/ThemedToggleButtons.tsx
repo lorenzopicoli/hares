@@ -10,13 +10,15 @@ type ThemedToggleButtonsProps = {
   options: string[];
   columns: number;
   label?: string;
+  onChangeSelection?: (option: string) => void;
 };
 
-const ThemedToggleButtons: React.FC<ThemedToggleButtonsProps> = ({ options, columns, label }) => {
+const ThemedToggleButtons: React.FC<ThemedToggleButtonsProps> = ({ options, columns, label, onChangeSelection }) => {
   const { styles } = useStyles(createStyles);
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
   const handleSelectOption = (option: string) => () => {
     setSelectedOption(option);
+    onChangeSelection?.(option);
   };
   const Row = ({ children }: PropsWithChildren) => <View style={styles.row}>{children}</View>;
 

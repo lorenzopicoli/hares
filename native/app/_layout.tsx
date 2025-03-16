@@ -15,6 +15,7 @@ import { Colors } from "@/constants/Colors";
 import { db } from "@/db";
 import migrations from "@/drizzle/migrations";
 import { useMigrations } from "drizzle-orm/expo-sqlite/migrator";
+import { ActionSheetProvider } from "@expo/react-native-action-sheet";
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
@@ -55,14 +56,18 @@ export default function RootLayout() {
 
   return (
     <MyThemeProvider>
-      <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
-        <Stack>
-          <Stack.Screen name="addtracker" options={{ headerShown: true, headerTitle: "🐰 Add tracker" }} />
-          <Stack.Screen name="(tabs)" options={{ headerShown: true, headerTitle: "🐰 Hares" }} />
-          <Stack.Screen name="+not-found" />
-        </Stack>
-        <StatusBar style="auto" />
-      </ThemeProvider>
+      <ActionSheetProvider>
+        <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
+          <Stack>
+            <Stack.Screen name="(tabs)" options={{ headerShown: true, headerTitle: "🐰 Hares" }} />
+            <Stack.Screen name="addTracker" options={{ headerShown: true, headerTitle: "🐰 Add tracker" }} />
+            <Stack.Screen name="addCollection" options={{ headerShown: true, headerTitle: "🐰 Add collection" }} />
+            <Stack.Screen name="editCollection" options={{ headerShown: true, headerTitle: "🐰 Edit collection" }} />
+            <Stack.Screen name="+not-found" />
+          </Stack>
+          <StatusBar style="auto" />
+        </ThemeProvider>
+      </ActionSheetProvider>
     </MyThemeProvider>
   );
 }

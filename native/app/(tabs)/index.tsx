@@ -1,12 +1,14 @@
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { StyleSheet, TextInput, TouchableOpacity, View } from "react-native";
 import { type NavigationState, type Route, type SceneRendererProps, TabBar, TabView } from "react-native-tab-view";
 import { Ionicons } from "@expo/vector-icons";
-import TrackerGridView from "@/components/TrackerGridView";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { useLiveQuery } from "drizzle-orm/expo-sqlite";
 import { db } from "@/db";
 import { collectionsTable, trackersTable } from "@/db/schema";
+import TrackerGridView from "@/components/TrackerGridView";
+import type { ThemedColors } from "@/components/ThemeProvider";
+import useStyles from "@/hooks/useStyles";
 
 type TabRoute = Route & {
   key: string;
@@ -14,17 +16,28 @@ type TabRoute = Route & {
 };
 
 export default function HomeScreen() {
+  const { styles } = useStyles(createStyles);
   const [index, setIndex] = useState(0);
   const [searchQuery, setSearchQuery] = useState("");
-  const { data: collections } = useLiveQuery(db.select().from(collectionsTable));
+  const { data: collectionsDb } = useLiveQuery(db.select().from(collectionsTable));
   const { data: trackers } = useLiveQuery(db.select().from(trackersTable));
+  const collections = useMemo(() => [{ id: -1, name: "All" }, ...collectionsDb], [collectionsDb]);
 
-  const [routes] = useState<TabRoute[]>(
+  const [routes, setRoutes] = useState<TabRoute[]>(
     collections.map((collection) => ({
       key: String(collection.id),
       title: collection.name,
     })),
   );
+
+  useEffect(() => {
+    setRoutes(
+      collections.map((collection) => ({
+        key: String(collection.id),
+        title: collection.name,
+      })),
+    );
+  }, [collections]);
 
   const renderScene = ({ route }: SceneRendererProps & { route: TabRoute }) => {
     const collection = collections.find((c) => c.id === +route.key);
@@ -68,33 +81,34 @@ export default function HomeScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#1A1B1E",
-  },
-  searchContainer: {
-    padding: 16,
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  searchInput: {
-    flex: 1,
-    height: 40,
-    backgroundColor: "#25262B",
-    borderRadius: 8,
-    paddingHorizontal: 16,
-    color: "#fff",
-  },
-  searchClear: {
-    position: "absolute",
-    right: 24,
-    top: 24,
-  },
-  tabBar: {
-    backgroundColor: "#1A1B1E",
-  },
-  indicator: {
-    backgroundColor: "#7B2EDA",
-  },
-});
+const createStyles = (theme: ThemedColors) =>
+  StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: theme.background,
+    },
+    searchContainer: {
+      padding: 16,
+      flexDirection: "row",
+      alignItems: "center",
+    },
+    searchInput: {
+      flex: 1,
+      height: 40,
+      backgroundColor: "#25262B",
+      borderRadius: 8,
+      paddingHorizontal: 16,
+      color: "#fff",
+    },
+    searchClear: {
+      position: "absolute",
+      right: 24,
+      top: 24,
+    },
+    tabBar: {
+      backgroundColor: theme.background,
+    },
+    indicator: {
+      backgroundColor: theme.tint,
+    },
+  });

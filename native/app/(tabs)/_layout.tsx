@@ -1,39 +1,69 @@
-import { Tabs, useNavigation } from "expo-router";
-import { Platform, View, StyleSheet } from "react-native";
+import { router, Tabs, useNavigation } from "expo-router";
+import { Platform, View, StyleSheet, Pressable } from "react-native";
 
 import { HapticTab } from "@/components/HapticTab";
 import { IconSymbol } from "@/components/ui/IconSymbol";
-import { Colors } from "@/constants/Colors";
 import { useColorScheme } from "@/hooks/useColorScheme";
 import { useEffect } from "react";
 import { Ionicons } from "@expo/vector-icons";
-import ThemedLink from "@/components/ThemedLink";
 import { useColors } from "@/components/ThemeProvider";
 import { enableScreens } from "react-native-screens";
+import { useActionSheet } from "@expo/react-native-action-sheet";
 
 export default function TabLayout() {
   const colorScheme = useColorScheme();
   const navigation = useNavigation();
   const { colors } = useColors();
+  const { showActionSheetWithOptions } = useActionSheet();
+  enableScreens(true);
 
   useEffect(() => {
     navigation.setOptions({
       headerRight: () => (
         <View style={styles.navbarButtons}>
-          <ThemedLink path={"/addtracker"}>
+          <Pressable onPress={handleManage}>
             <Ionicons name="add" size={30} color="#fff" />
-          </ThemedLink>
+          </Pressable>
         </View>
       ),
     });
   }, [navigation]);
 
-  enableScreens(true)
+  const handleManage = () => {
+    const options = ["Add tracker", "Add collection", "Edit current collection", "Cancel"];
+    const cancelButtonIndex = options.length - 1;
+
+    showActionSheetWithOptions(
+      {
+        options,
+        cancelButtonIndex,
+        containerStyle: { backgroundColor: colors.background },
+        textStyle: { color: colors.text },
+      },
+      (selectedIndex?: number) => {
+        switch (selectedIndex) {
+          case 0:
+            router.push("/addTracker");
+            break;
+
+          case 1:
+            router.push("/addCollection");
+            break;
+
+          case 2:
+            router.push("/editCollection");
+            break;
+
+          default:
+        }
+      },
+    );
+  };
 
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme ?? "light"].tint,
+        tabBarActiveTintColor: colors.tint,
         headerShown: false,
         tabBarButton: HapticTab,
         tabBarInactiveBackgroundColor: colors.background,
