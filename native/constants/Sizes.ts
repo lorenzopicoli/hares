@@ -9,4 +9,7 @@ export const Sizes = {
     medium: spaceUnit * 2,
     large: spaceUnit * 3,
   },
+  scrollView: {
+    padding: 24,
+  },
 };

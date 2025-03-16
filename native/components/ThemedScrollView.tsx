@@ -4,6 +4,7 @@ import Animated, { useAnimatedRef } from "react-native-reanimated";
 
 import { ThemedView } from "@/components/ThemedView";
 import { useBottomTabOverflow } from "@/hooks/useBottomTabOverflow";
+import { Sizes } from "@/constants/Sizes";
 
 type Props = PropsWithChildren;
 
@@ -30,7 +31,7 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
-    padding: 32,
+    padding: Sizes.scrollView.padding,
     gap: 16,
     overflow: "hidden",
   },
