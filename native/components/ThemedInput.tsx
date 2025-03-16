@@ -3,6 +3,7 @@ import { View, TextInput, Text, StyleSheet, TouchableOpacity } from "react-nativ
 import { Ionicons } from "@expo/vector-icons";
 import type { ThemedColors } from "./ThemeProvider";
 import useStyles from "@/hooks/useStyles";
+import ThemedInputLabel from "./ThemedInputLabel";
 
 interface ThemedInputProps {
   label?: string;
@@ -42,7 +43,7 @@ const ThemedInput: React.FC<ThemedInputProps> = ({
   const { styles } = useStyles(createStyles);
   return (
     <View style={styles.container}>
-      {label && <Text style={styles.label}>{label}</Text>}
+      {label && <ThemedInputLabel label={label} />}
 
       <View
         style={[
@@ -90,17 +91,9 @@ const createStyles = (theme: ThemedColors) =>
       marginBottom: 16,
       width: "100%",
     },
-    label: {
-      color: theme.secondaryText,
-      fontSize: 14,
-      marginBottom: 8,
-      fontWeight: "500",
-    },
     inputContainer: {
       flexDirection: "row",
       alignItems: "center",
-      //   backgroundColor: theme.input.background,
-      //   backgroundColor: "red",
       borderRadius: 8,
       borderWidth: 1,
       borderColor: theme.input.border,
@@ -123,7 +116,6 @@ const createStyles = (theme: ThemedColors) =>
       color: theme.input.text,
       fontSize: 16,
       height: "100%",
-      //   backgroundColor: "red",
     },
     iconContainer: {
       padding: 4,

@@ -23,23 +23,39 @@ export const Colors = {
       text: "#11181C",
       textError: "#E53E3E",
     },
+    toggleButton: {
+      background: "#F8F9FA", // Light background matching input background
+      border: "#E6E8EB", // Light border matching input border
+      selected: {
+        background: "#F2E8FA", // Light purple background
+        border: "#8A2BE2", // Matching tint color
+      },
+    },
   },
   dark: {
     text: "#ECEDEE",
     background: "#151718",
-    tint: tintColorDark,
+    tint: "#BF5FFF",
     icon: "#9BA1A6",
     tabIconDefault: "#9BA1A6",
-    tabIconSelected: tintColorDark,
-    secondaryText: "#9BA1A6", // Added secondary text color
+    tabIconSelected: "#BF5FFF",
+    secondaryText: "#9BA1A6",
     input: {
       background: "#1E2021",
       border: "#2A2D2E",
-      focusedBorder: "#BF5FFF", // Matching tint color
+      focusedBorder: "#BF5FFF",
       borderError: "#E53E3E",
       backgroundDisabled: "#1A1B1C",
       text: "#ECEDEE",
       textError: "#FF6B6B",
+    },
+    toggleButton: {
+      background: "#1E2021",
+      border: "#2A2D2E",
+      selected: {
+        background: "#2D1E33",
+        border: "#BF5FFF",
+      },
     },
   },
 };

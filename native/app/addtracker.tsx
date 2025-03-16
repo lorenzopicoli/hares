@@ -1,9 +1,9 @@
-import { StyleSheet } from "react-native";
 import ThemedScrollView from "@/components/ThemedScrollView";
 import ThemedInput from "@/components/ThemedInput";
 import { useState } from "react";
 import type { TrackerType } from "@/models/tracker";
-import { Picker } from "@react-native-picker/picker";
+import ThemedToggleButtons from "@/components/ThemedToggleButtons";
+import { StyleSheet } from "react-native";
 
 export default function AddTrackerScreen() {
   const [name, setName] = useState("");
@@ -15,26 +15,9 @@ export default function AddTrackerScreen() {
 
   return (
     <ThemedScrollView>
-      <ThemedInput
-        label="Tracker name"
-        value={name}
-        onChangeText={(text) => {
-          console.log(text);
-        }}
-      />
-      <ThemedInput
-        label="Description"
-        value={description}
-        onChangeText={(text) => {
-          console.log(text);
-        }}
-      />
-      <Picker selectedValue={type} onValueChange={(itemValue, itemIndex) => setType(itemValue)}>
-        <Picker.Item label="Number" value="number" />
-        <Picker.Item label="Scale" value="scale" />
-        <Picker.Item label="Yes or no" value="boolean" />
-        <Picker.Item label="List" value="textList" />
-      </Picker>
+      <ThemedInput label="Tracker name" value={name} onChangeText={setName} />
+      <ThemedInput label="Description/Question (optional)" value={description} onChangeText={setDescription} />
+      <ThemedToggleButtons label="Value type" columns={2} options={["Number", "Text", "Yes/No", "Range"]} />
     </ThemedScrollView>
   );
 }
