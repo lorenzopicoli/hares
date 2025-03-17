@@ -19,8 +19,8 @@ export default function HomeScreen() {
   const { styles } = useStyles(createStyles);
   const [index, setIndex] = useState(0);
   const [searchQuery, setSearchQuery] = useState("");
-  const { data: collectionsDb } = useLiveQuery(db.select().from(collectionsTable));
-  const { data: trackers } = useLiveQuery(db.select().from(trackersTable));
+  const { data: collectionsDb } = useLiveQuery(db.select().from(collectionsTable).orderBy(collectionsTable.index));
+  const { data: trackers } = useLiveQuery(db.select().from(trackersTable).orderBy(trackersTable.index));
   const collections = useMemo(() => [{ id: -1, name: "All" }, ...collectionsDb], [collectionsDb]);
 
   const [routes, setRoutes] = useState<TabRoute[]>(

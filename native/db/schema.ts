@@ -22,6 +22,7 @@ export const trackersTable = sqliteTable("trackers", {
   rangeMin: int(),
   rangeMax: int(),
   textGroupId: text(),
+  index: int().notNull(),
 });
 export type Tracker = typeof trackersTable.$inferSelect;
 export type NewTracker = typeof trackersTable.$inferInsert;
@@ -29,6 +30,7 @@ export type NewTracker = typeof trackersTable.$inferInsert;
 export const collectionsTable = sqliteTable("collections", {
   id: int().primaryKey({ autoIncrement: true }),
   name: text().notNull(),
+  index: int().notNull(),
 });
 export type Collection = typeof collectionsTable.$inferSelect;
 export type NewCollection = typeof collectionsTable.$inferInsert;
@@ -41,6 +43,7 @@ export const collectionsTrackersTable = sqliteTable("collections_trackers", {
   collectionId: int("collection_id")
     .notNull()
     .references(() => collectionsTable.id),
+  index: int().notNull(),
 });
 export type CollectionTracker = typeof collectionsTrackersTable.$inferSelect;
 export type NewCollectionTracker = typeof collectionsTrackersTable.$inferInsert;

@@ -39,7 +39,7 @@ export default function RootLayout() {
     }
 
     if (error) {
-      console.log("Failed to run migrations");
+      console.log("Failed to run migrations", error);
     }
   }, [success, error]);
 
@@ -62,7 +62,6 @@ export default function RootLayout() {
             <Stack.Screen name="(tabs)" options={{ headerShown: true, headerTitle: "🐰 Hares" }} />
             <Stack.Screen name="addTracker" options={{ headerShown: true, headerTitle: "🐰 Add tracker" }} />
             <Stack.Screen name="addCollection" options={{ headerShown: true, headerTitle: "🐰 Add collection" }} />
-            <Stack.Screen name="editCollection" options={{ headerShown: true, headerTitle: "🐰 Edit collection" }} />
             <Stack.Screen name="+not-found" />
           </Stack>
           <StatusBar style="auto" />

@@ -22,10 +22,19 @@ export default function AddTrackerScreen() {
     if (!type || !name) {
       throw new Error("Missing data");
     }
+    const nextIndex = await db
+      .select({
+        index: trackersTable.index,
+      })
+      .from(trackersTable)
+      .orderBy(trackersTable.index)
+      .limit(1);
+
     const tracker: NewTracker = {
       name,
       type,
       description,
+      index: (nextIndex?.[0]?.index ?? 0) + 1,
     };
     await db.insert(trackersTable).values(tracker);
     router.back();

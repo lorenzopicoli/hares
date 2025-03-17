@@ -33,6 +33,7 @@ export default function TabLayout() {
     const options = ["Add tracker", "Add collection", "Edit current collection", "Cancel"];
     const cancelButtonIndex = options.length - 1;
 
+    console.log("co", colors);
     showActionSheetWithOptions(
       {
         options,
@@ -51,7 +52,7 @@ export default function TabLayout() {
             break;
 
           case 2:
-            router.push("/editCollection");
+            router.push("/addCollection");
             break;
 
           default:

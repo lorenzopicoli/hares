@@ -18,9 +18,19 @@ export default function AddCollectionScreen() {
       console.log("NAme", name);
       throw new Error("Missing data");
     }
+    const nextIndex = await db
+      .select({
+        index: collectionsTable.index,
+      })
+      .from(collectionsTable)
+      .orderBy(collectionsTable.index)
+      .limit(1);
+
     const newCollection: NewCollection = {
       name,
+      index: (nextIndex?.[0]?.index ?? 0) + 1,
     };
+
     await db
       .insert(collectionsTable)
       .values(newCollection)
