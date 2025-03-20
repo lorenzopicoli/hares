@@ -1,5 +1,5 @@
 import React from "react";
-import { Pressable, StyleSheet, Text } from "react-native";
+import { Pressable, StyleSheet, Text, type StyleProp, type ViewStyle } from "react-native";
 import type { ThemedColors } from "./ThemeProvider";
 import useStyles from "@/hooks/useStyles";
 import { Sizes } from "@/constants/Sizes";
@@ -9,14 +9,15 @@ interface ThemedButtonProps {
   onPress?: () => void;
   fullWidth?: boolean;
   disabled?: boolean;
+  style?: StyleProp<ViewStyle>;
 }
 
-const ThemedButton: React.FC<ThemedButtonProps> = ({ title, onPress, fullWidth = false, disabled = false }) => {
+const ThemedButton: React.FC<ThemedButtonProps> = ({ title, onPress, fullWidth = false, disabled = false, style }) => {
   const { styles } = useStyles(createStyles);
 
   return (
     <Pressable
-      style={[styles.button, fullWidth && styles.fullWidth, disabled && styles.disabled]}
+      style={[styles.button, fullWidth && styles.fullWidth, disabled && styles.disabled, style]}
       onPress={onPress}
       disabled={disabled}
     >

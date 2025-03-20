@@ -2,7 +2,6 @@ import { useEffect, useMemo, useState } from "react";
 import { StyleSheet, TextInput, TouchableOpacity, View } from "react-native";
 import { type NavigationState, type Route, type SceneRendererProps, TabBar, TabView } from "react-native-tab-view";
 import { Ionicons } from "@expo/vector-icons";
-import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { useLiveQuery } from "drizzle-orm/expo-sqlite";
 import { db } from "@/db";
 import { collectionsTable, trackersTable } from "@/db/schema";
@@ -51,33 +50,31 @@ export default function HomeScreen() {
   );
 
   return (
-    <GestureHandlerRootView style={{ flex: 1 }}>
-      <View style={styles.container}>
-        <View style={styles.searchContainer}>
-          <TextInput
-            style={styles.searchInput}
-            placeholder="Search..."
-            placeholderTextColor="#666"
-            value={searchQuery}
-            onChangeText={setSearchQuery}
-          />
-          <TouchableOpacity style={styles.searchClear} onPress={() => setSearchQuery("")}>
-            {searchQuery ? (
-              <Ionicons name="close-circle" size={20} color="#666" />
-            ) : (
-              <Ionicons name="search" size={20} color="#666" />
-            )}
-          </TouchableOpacity>
-        </View>
-
-        <TabView
-          navigationState={{ index, routes }}
-          renderScene={renderScene}
-          onIndexChange={setIndex}
-          renderTabBar={renderTabBar}
+    <View style={styles.container}>
+      <View style={styles.searchContainer}>
+        <TextInput
+          style={styles.searchInput}
+          placeholder="Search..."
+          placeholderTextColor="#666"
+          value={searchQuery}
+          onChangeText={setSearchQuery}
         />
+        <TouchableOpacity style={styles.searchClear} onPress={() => setSearchQuery("")}>
+          {searchQuery ? (
+            <Ionicons name="close-circle" size={20} color="#666" />
+          ) : (
+            <Ionicons name="search" size={20} color="#666" />
+          )}
+        </TouchableOpacity>
       </View>
-    </GestureHandlerRootView>
+
+      <TabView
+        navigationState={{ index, routes }}
+        renderScene={renderScene}
+        onIndexChange={setIndex}
+        renderTabBar={renderTabBar}
+      />
+    </View>
   );
 }
 

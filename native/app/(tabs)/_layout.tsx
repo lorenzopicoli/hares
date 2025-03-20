@@ -9,12 +9,15 @@ import { Ionicons } from "@expo/vector-icons";
 import { useColors } from "@/components/ThemeProvider";
 import { enableScreens } from "react-native-screens";
 import { useActionSheet } from "@expo/react-native-action-sheet";
+import { Colors } from "@/constants/Colors";
 
 export default function TabLayout() {
   const colorScheme = useColorScheme();
   const navigation = useNavigation();
   const { colors } = useColors();
   const { showActionSheetWithOptions } = useActionSheet();
+  // Not really sure, but the hook doesn't work here
+  const themedColors = Colors[colorScheme ?? "dark"];
   enableScreens(true);
 
   useEffect(() => {
@@ -33,13 +36,12 @@ export default function TabLayout() {
     const options = ["Add tracker", "Add collection", "Edit current collection", "Cancel"];
     const cancelButtonIndex = options.length - 1;
 
-    console.log("co", colors);
     showActionSheetWithOptions(
       {
         options,
         cancelButtonIndex,
-        containerStyle: { backgroundColor: colors.background },
-        textStyle: { color: colors.text },
+        containerStyle: { backgroundColor: themedColors.background },
+        textStyle: { color: themedColors.text },
       },
       (selectedIndex?: number) => {
         switch (selectedIndex) {
@@ -64,14 +66,14 @@ export default function TabLayout() {
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: colors.tint,
+        tabBarActiveTintColor: themedColors.tint,
         headerShown: false,
         tabBarButton: HapticTab,
-        tabBarInactiveBackgroundColor: colors.background,
-        tabBarActiveBackgroundColor: colors.background,
+        tabBarInactiveBackgroundColor: themedColors.background,
+        tabBarActiveBackgroundColor: themedColors.background,
         tabBarStyle: Platform.select({
           ios: {
-            backgroundColor: colors.background,
+            backgroundColor: themedColors.background,
           },
           default: {},
         }),

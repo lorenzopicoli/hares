@@ -1,16 +1,31 @@
-import ThemedScrollView from "@/components/ThemedScrollView";
-import ThemedInput from "@/components/ThemedInput";
-import { useState } from "react";
-import { StyleSheet, View } from "react-native";
+import React, { memo, useState } from "react";
+import { StyleSheet, View, type ListRenderItemInfo } from "react-native";
 import ThemedButton from "@/components/ThemedButton";
 import { ThemedView } from "@/components/ThemedView";
 import { Sizes } from "@/constants/Sizes";
-import { collectionsTable, type NewCollection } from "@/db/schema";
+import { collectionsTable, trackersTable, type NewCollection, type Tracker } from "@/db/schema";
 import { db } from "@/db";
 import { router } from "expo-router";
+import { ThemedText } from "@/components/ThemedText";
+import useDbQuery from "@/hooks/useDbQuery";
+import { NestedReorderableList, ScrollViewContainer, useReorderableDrag } from "react-native-reorderable-list";
+import { Pressable } from "react-native-gesture-handler";
+
+const TrackerItem: React.FC<{ tracker: Tracker }> = memo((tracker) => {
+  const drag = useReorderableDrag();
+
+  return (
+    <Pressable onLongPress={drag}>
+      <ThemedText>{tracker.tracker.name}</ThemedText>
+    </Pressable>
+  );
+});
 
 export default function AddCollectionScreen() {
   const [name, setName] = useState("");
+  const { data: trackers } = useDbQuery<typeof trackersTable>(
+    db.select().from(trackersTable).orderBy(trackersTable.index).$dynamic(),
+  );
 
   const handleSubmit = async () => {
     console.log("On submit", name);
@@ -38,11 +53,30 @@ export default function AddCollectionScreen() {
     router.back();
   };
 
+  const renderTracker = ({ item }: ListRenderItemInfo<Tracker>) => {
+    return <TrackerItem tracker={item} />;
+  };
+  const trackerKeyExtractor = (tracker: Tracker, _index: number) => String(tracker.id);
+
   return (
     <ThemedView>
-      <ThemedScrollView>
+      <ScrollViewContainer>
+        <ThemedText>In the collection</ThemedText>
+        <NestedReorderableList
+          data={trackers ?? []}
+          renderItem={renderTracker}
+          keyExtractor={trackerKeyExtractor}
+          onReorder={(trackers) => console.log(trackers)}
+        />
+        <ThemedText>Not in the collection</ThemedText>
+        {/* <FlatList data={trackers} renderItem={renderTracker} keyExtractor={trackerKeyExtractor} /> */}
+      </ScrollViewContainer>
+      {/* <ThemedScrollView>
         <ThemedInput label="Collection name" value={name} onChangeText={setName} />
-      </ThemedScrollView>
+        <View>
+          <TrackerGridView horizontalPadding={false} isReordering={true} trackers={trackers} />
+        </View>
+      </ThemedScrollView> */}
       <View style={styles.submitButtonContainer}>
         <ThemedButton fullWidth title="Create collection" onPress={handleSubmit} />
       </View>

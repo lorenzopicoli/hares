@@ -6,10 +6,15 @@ import {
   type DndProviderProps,
   type DraggableGridProps,
 } from "@mgcrea/react-native-dnd";
-import { StyleSheet, ScrollView, TouchableOpacity, Text, View } from "react-native";
+import { StyleSheet, TouchableOpacity, Text, View } from "react-native";
 import { State } from "react-native-gesture-handler";
+import Animated from "react-native-reanimated";
 
-export default function TrackerGridView({ trackers, isReordering }: { trackers: Tracker[]; isReordering: boolean }) {
+export default function TrackerGridView({
+  trackers,
+  isReordering,
+  horizontalPadding = true,
+}: { trackers: Tracker[]; isReordering: boolean; horizontalPadding?: boolean }) {
   const handleDragEnd: DndProviderProps["onDragEnd"] = ({ active, over }) => {
     "worklet";
     if (over) {
@@ -42,9 +47,14 @@ export default function TrackerGridView({ trackers, isReordering }: { trackers: 
   };
 
   return (
-    <ScrollView style={styles.container}>
-      <DndProvider onBegin={handleBegin} onFinalize={handleFinalize} onDragEnd={handleDragEnd} activationDelay={200}>
-        <DraggableGrid direction="row" size={2} style={styles.gridContainer} onOrderChange={onGridOrderChange}>
+    <DndProvider onBegin={handleBegin} onFinalize={handleFinalize} onDragEnd={handleDragEnd} activationDelay={200}>
+      <Animated.ScrollView>
+        <DraggableGrid
+          direction="row"
+          size={2}
+          style={{ ...styles.gridContainer, ...(horizontalPadding ? {} : styles.noHorizontalPadding) }}
+          onOrderChange={onGridOrderChange}
+        >
           {trackers.map((item) =>
             isReordering ? (
               // Changing screens with draggable elements seems to cause touches to not be registered in the destination screen
@@ -59,8 +69,8 @@ export default function TrackerGridView({ trackers, isReordering }: { trackers: 
             ),
           )}
         </DraggableGrid>
-      </DndProvider>
-    </ScrollView>
+      </Animated.ScrollView>
+    </DndProvider>
   );
 }
 
@@ -71,7 +81,9 @@ const styles = StyleSheet.create({
   gridContainer: {
     flexDirection: "row",
     flexWrap: "wrap",
-    padding: 8,
+  },
+  noHorizontalPadding: {
+    marginHorizontal: -8,
   },
   gridItem: {
     width: "50%",
