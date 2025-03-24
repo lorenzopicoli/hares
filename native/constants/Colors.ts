@@ -10,6 +10,7 @@ export const Colors = {
     tabIconDefault: "#687076",
     tabIconSelected: tintColorLight,
     secondaryText: "#687076", // Added secondary text color
+    border: "#2A2D2E",
     input: {
       background: "#F8F9FA",
       border: "#E6E8EB",
@@ -37,6 +38,7 @@ export const Colors = {
     tabIconDefault: "#9BA1A6",
     tabIconSelected: "#BF5FFF",
     secondaryText: "#9BA1A6",
+    border: "#2A2D2E",
     input: {
       background: "#1E2021",
       border: "#2A2D2E",

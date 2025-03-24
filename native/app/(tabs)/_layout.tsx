@@ -1,12 +1,11 @@
 import { router, Tabs, useNavigation } from "expo-router";
-import { Platform, View, StyleSheet, Pressable } from "react-native";
+import { Platform, View, StyleSheet, TouchableOpacity } from "react-native";
 
 import { HapticTab } from "@/components/HapticTab";
 import { IconSymbol } from "@/components/ui/IconSymbol";
 import { useColorScheme } from "@/hooks/useColorScheme";
 import { useEffect } from "react";
 import { Ionicons } from "@expo/vector-icons";
-import { useColors } from "@/components/ThemeProvider";
 import { enableScreens } from "react-native-screens";
 import { useActionSheet } from "@expo/react-native-action-sheet";
 import { Colors } from "@/constants/Colors";
@@ -14,7 +13,6 @@ import { Colors } from "@/constants/Colors";
 export default function TabLayout() {
   const colorScheme = useColorScheme();
   const navigation = useNavigation();
-  const { colors } = useColors();
   const { showActionSheetWithOptions } = useActionSheet();
   // Not really sure, but the hook doesn't work here
   const themedColors = Colors[colorScheme ?? "dark"];
@@ -24,9 +22,10 @@ export default function TabLayout() {
     navigation.setOptions({
       headerRight: () => (
         <View style={styles.navbarButtons}>
-          <Pressable onPress={handleManage}>
+          {/* On press in because of: https://github.com/expo/expo/issues/29489 */}
+          <TouchableOpacity onPressIn={handleManage}>
             <Ionicons name="add" size={30} color="#fff" />
-          </Pressable>
+          </TouchableOpacity>
         </View>
       ),
     });
@@ -36,6 +35,7 @@ export default function TabLayout() {
     const options = ["Add tracker", "Add collection", "Edit current collection", "Cancel"];
     const cancelButtonIndex = options.length - 1;
 
+    console.log("here");
     showActionSheetWithOptions(
       {
         options,

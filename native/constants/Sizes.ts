@@ -4,6 +4,9 @@ export const Sizes = {
   small: spaceUnit,
   medium: spaceUnit * 2,
   large: spaceUnit * 3,
+  list: {
+    large: 80,
+  },
   radius: {
     small: spaceUnit,
     medium: spaceUnit * 2,
