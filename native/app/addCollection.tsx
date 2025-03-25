@@ -1,21 +1,34 @@
-import React, { memo, useState } from "react";
+import React, { memo, useEffect, useState } from "react";
 import { FlatList, LogBox, StyleSheet, View, type ListRenderItemInfo } from "react-native";
 import ThemedButton from "@/components/ThemedButton";
 import { ThemedView } from "@/components/ThemedView";
 import { Sizes } from "@/constants/Sizes";
-import { collectionsTable, trackersTable, type NewCollection, type Tracker } from "@/db/schema";
+import {
+  collectionsTable,
+  collectionsTrackersTable,
+  trackersTable,
+  type NewCollection,
+  type Tracker,
+} from "@/db/schema";
 import { db } from "@/db";
-import { router } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import { ThemedText } from "@/components/ThemedText";
-import useDbQuery from "@/hooks/useDbQuery";
-import { NestedReorderableList, ScrollViewContainer, useReorderableDrag } from "react-native-reorderable-list";
+import {
+  NestedReorderableList,
+  ScrollViewContainer,
+  useReorderableDrag,
+  type ReorderableListReorderEvent,
+} from "react-native-reorderable-list";
 import { Pressable, TouchableOpacity } from "react-native-gesture-handler";
 import type { ThemedColors } from "@/components/ThemeProvider";
 import useStyles from "@/hooks/useStyles";
 import { Separator } from "@/components/Separator";
 import { Spacing } from "@/components/Spacing";
 import ThemedInput from "@/components/ThemedInput";
-import { MaterialIcons } from "@expo/vector-icons";
+import { Feather, MaterialIcons } from "@expo/vector-icons";
+import { eq, notExists } from "drizzle-orm";
+import { moveElement } from "@/utils/moveElements";
+import { useLiveQuery } from "drizzle-orm/expo-sqlite";
 
 LogBox.ignoreLogs(["VirtualizedLists should never be nested inside plain ScrollViews"]);
 
@@ -39,6 +52,11 @@ const createStyles = (theme: ThemedColors) =>
       justifyContent: "space-between",
       overflow: "visible",
     },
+    itemActions: {
+      display: "flex",
+      gap: Sizes.small,
+      flexDirection: "row",
+    },
     reorderableList: {
       overflow: "visible",
     },
@@ -48,7 +66,7 @@ const createStyles = (theme: ThemedColors) =>
     },
   });
 
-const DraggableTrackerItem: React.FC<{ tracker: Tracker }> = memo((props) => {
+const DraggableTrackerItem: React.FC<{ tracker: Tracker; onRemove: (tracker: Tracker) => void }> = memo((props) => {
   const drag = useReorderableDrag();
   const { styles } = useStyles(createStyles);
 
@@ -56,17 +74,22 @@ const DraggableTrackerItem: React.FC<{ tracker: Tracker }> = memo((props) => {
     <Pressable onLongPress={drag}>
       <View style={styles.itemContainer}>
         <ThemedText>{props.tracker.name}</ThemedText>
-        <MaterialIcons name="drag-indicator" size={20} color="#fff" />
+        <View style={styles.itemActions}>
+          <Pressable onPress={() => props.onRemove(props.tracker)}>
+            <Feather name="x" size={25} color="#fff" />
+          </Pressable>
+          <MaterialIcons name="drag-indicator" size={25} color="#fff" />
+        </View>
       </View>
     </Pressable>
   );
 });
 
-const NonDraggableTrackerItem: React.FC<{ tracker: Tracker; onPress: () => void }> = memo((props) => {
+const NonDraggableTrackerItem: React.FC<{ tracker: Tracker; onPress: (tracker: Tracker) => void }> = memo((props) => {
   const { styles } = useStyles(createStyles);
 
   return (
-    <TouchableOpacity onPress={props.onPress}>
+    <TouchableOpacity onPress={() => props.onPress(props.tracker)}>
       <View style={styles.itemContainer}>
         <ThemedText>{props.tracker.name}</ThemedText>
       </View>
@@ -74,12 +97,25 @@ const NonDraggableTrackerItem: React.FC<{ tracker: Tracker; onPress: () => void 
   );
 });
 
-export default function AddCollectionScreen() {
+function AddCollectionScreenInternal(props: {
+  collectionTrackers: Tracker[];
+  nonCollectionTrackers: Tracker[];
+  collectionId?: number;
+}) {
+  const {
+    nonCollectionTrackers: preExistingNonCollectionTrackers,
+    collectionTrackers: preExistingCollectionTrackers,
+    collectionId,
+  } = props;
+  const [collectionTrackers, setCollectionTrackers] = useState<Tracker[]>([]);
+  const [nonCollectionTrackers, setNonCollectionTrackers] = useState<Tracker[]>([]);
   const [name, setName] = useState("");
-  const { data: trackers } = useDbQuery<typeof trackersTable>(
-    db.select().from(trackersTable).orderBy(trackersTable.index).$dynamic(),
-  );
   const { styles } = useStyles(createStyles);
+
+  useEffect(() => {
+    setCollectionTrackers(preExistingCollectionTrackers);
+    setNonCollectionTrackers(preExistingNonCollectionTrackers);
+  }, [preExistingCollectionTrackers, preExistingNonCollectionTrackers]);
 
   const handleSubmit = async () => {
     console.log("On submit", name);
@@ -107,12 +143,22 @@ export default function AddCollectionScreen() {
     router.back();
   };
 
-  const addTrackerToCollection = () => {
-    console.log("clicked");
+  const addTrackerToCollection = (tracker: Tracker) => {
+    setCollectionTrackers([...collectionTrackers, { ...tracker }]);
+    setNonCollectionTrackers([...nonCollectionTrackers.filter((t) => t.id !== tracker.id)]);
+  };
+
+  const handleTrackerReorder = (event: ReorderableListReorderEvent) => {
+    setCollectionTrackers(moveElement(collectionTrackers, event));
+  };
+
+  const handleRemoveTracker = (tracker: Tracker) => {
+    setNonCollectionTrackers([...nonCollectionTrackers, { ...tracker }]);
+    setCollectionTrackers([...collectionTrackers.filter((t) => t.id !== tracker.id)]);
   };
 
   const renderDraggableTracker = ({ item }: ListRenderItemInfo<Tracker>) => {
-    return <DraggableTrackerItem tracker={item} />;
+    return <DraggableTrackerItem onRemove={handleRemoveTracker} tracker={item} />;
   };
   const renderNonDraggableTracker = ({ item }: ListRenderItemInfo<Tracker>) => {
     return <NonDraggableTrackerItem onPress={addTrackerToCollection} tracker={item} />;
@@ -125,32 +171,75 @@ export default function AddCollectionScreen() {
         <ThemedView style={styles.form}>
           <ThemedInput label="Collection name" value={name} onChangeText={setName} />
         </ThemedView>
-        <ThemedText style={styles.title} type="title">
-          Trackers in this collection
-        </ThemedText>
-        <NestedReorderableList
-          style={styles.reorderableList}
-          data={trackers ?? []}
-          renderItem={renderDraggableTracker}
-          keyExtractor={trackerKeyExtractor}
-          onReorder={(trackers) => console.log(trackers)}
-          ItemSeparatorComponent={Separator}
-        />
-        <Spacing size="large" />
-        <ThemedText style={styles.title} type="title">
-          Not in this collection
-        </ThemedText>
-        <FlatList
-          style={styles.reorderableList}
-          data={trackers ?? []}
-          renderItem={renderNonDraggableTracker}
-          keyExtractor={trackerKeyExtractor}
-          ItemSeparatorComponent={Separator}
-        />
+        {collectionTrackers && (
+          <>
+            <ThemedText style={styles.title} type="title">
+              Trackers in this collection
+            </ThemedText>
+            <NestedReorderableList
+              style={styles.reorderableList}
+              data={collectionTrackers ?? []}
+              renderItem={renderDraggableTracker}
+              keyExtractor={trackerKeyExtractor}
+              onReorder={handleTrackerReorder}
+              ItemSeparatorComponent={Separator}
+            />
+          </>
+        )}
+        <Spacing size="medium" />
+        {nonCollectionTrackers && (
+          <>
+            <ThemedText style={styles.title} type="title">
+              Not in this collection
+            </ThemedText>
+            <FlatList
+              style={styles.reorderableList}
+              data={nonCollectionTrackers ?? []}
+              renderItem={renderNonDraggableTracker}
+              keyExtractor={trackerKeyExtractor}
+              ItemSeparatorComponent={Separator}
+            />
+          </>
+        )}
       </ScrollViewContainer>
       <View style={styles.submitButtonContainer}>
         <ThemedButton fullWidth title="Create collection" onPress={handleSubmit} />
       </View>
     </ThemedView>
+  );
+}
+
+export default function AddCollectionScreen() {
+  const { id: collectionId } = useLocalSearchParams<{ id: string }>();
+  const { data: collectionTrackers } = useLiveQuery(
+    db
+      .select()
+      .from(trackersTable)
+      .innerJoin(collectionsTrackersTable, eq(collectionsTrackersTable.trackerId, trackersTable.id))
+      .where(eq(collectionsTrackersTable.collectionId, Number(collectionId) || -1))
+      .orderBy(collectionsTrackersTable.index),
+  );
+  const { data: nonCollectionTrackers } = useLiveQuery(
+    db
+      .select()
+      .from(trackersTable)
+      .where(
+        notExists(
+          db
+            .select()
+            .from(collectionsTrackersTable)
+            .where(eq(collectionsTrackersTable.collectionId, Number(collectionId) || -1)),
+        ),
+      )
+      .orderBy(trackersTable.index)
+      .$dynamic(),
+  );
+
+  return (
+    <AddCollectionScreenInternal
+      collectionTrackers={collectionTrackers.map((ct) => ct.trackers)}
+      nonCollectionTrackers={nonCollectionTrackers}
+      collectionId={Number(collectionId) || undefined}
+    />
   );
 }
