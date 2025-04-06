@@ -4,7 +4,7 @@ import { type NavigationState, type Route, type SceneRendererProps, TabBar, TabV
 import { Ionicons } from "@expo/vector-icons";
 import { useLiveQuery } from "drizzle-orm/expo-sqlite";
 import { db } from "@/db";
-import { collectionsTable, trackersTable } from "@/db/schema";
+import { collectionsTable } from "@/db/schema";
 import TrackerGridView from "@/components/TrackerGridView";
 import type { ThemedColors } from "@/components/ThemeProvider";
 import useStyles from "@/hooks/useStyles";
@@ -19,7 +19,7 @@ export default function HomeScreen() {
   const [index, setIndex] = useState(0);
   const [searchQuery, setSearchQuery] = useState("");
   const { data: collectionsDb } = useLiveQuery(db.select().from(collectionsTable).orderBy(collectionsTable.index));
-  const { data: trackers } = useLiveQuery(db.select().from(trackersTable).orderBy(trackersTable.index));
+  //   const { data: trackers } = useLiveQuery(db.select().from(trackersTable).orderBy(trackersTable.index));
   const collections = useMemo(() => [{ id: -1, name: "All" }, ...collectionsDb], [collectionsDb]);
 
   const [routes, setRoutes] = useState<TabRoute[]>(
@@ -39,10 +39,7 @@ export default function HomeScreen() {
   }, [collections]);
 
   const renderScene = ({ route }: SceneRendererProps & { route: TabRoute }) => {
-    const collection = collections.find((c) => c.id === +route.key);
-    if (!collection) return null;
-
-    return <TrackerGridView isReordering={false} trackers={trackers} />;
+    return <TrackerGridView isReordering={false} collectionId={+route.key === -1 ? undefined : +route.key} />;
   };
 
   const renderTabBar = (props: SceneRendererProps & { navigationState: NavigationState<TabRoute> }) => (

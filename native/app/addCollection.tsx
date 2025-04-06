@@ -8,6 +8,7 @@ import {
   collectionsTrackersTable,
   trackersTable,
   type NewCollection,
+  type NewCollectionTracker,
   type Tracker,
 } from "@/db/schema";
 import { db } from "@/db";
@@ -118,9 +119,7 @@ function AddCollectionScreenInternal(props: {
   }, [preExistingCollectionTrackers, preExistingNonCollectionTrackers]);
 
   const handleSubmit = async () => {
-    console.log("On submit", name);
     if (!name) {
-      console.log("aAme", name);
       throw new Error("Missing data");
     }
     const nextIndex = await db
@@ -136,10 +135,35 @@ function AddCollectionScreenInternal(props: {
       index: (nextIndex?.[0]?.index ?? 0) + 1,
     };
 
-    await db
-      .insert(collectionsTable)
-      .values(newCollection)
-      .catch((bla) => console.log(bla));
+    const { savedCollectionId } = collectionId
+      ? await db
+          .update(collectionsTable)
+          .set(newCollection)
+          .where(eq(collectionsTable.id, collectionId))
+          .then(() => ({
+            savedCollectionId: collectionId,
+          }))
+          .catch((err) => {
+            console.log("Failed to update collection", err);
+            throw err;
+          })
+      : await db
+          .insert(collectionsTable)
+          .values(newCollection)
+          .returning({ savedCollectionId: collectionsTable.id })
+          .then((values) => values[0])
+          .catch((err) => {
+            console.log("Failed to save collection", err);
+            throw err;
+          });
+
+    const relationship: NewCollectionTracker[] = collectionTrackers.map((t, i) => ({
+      index: i,
+      trackerId: t.id,
+      collectionId: savedCollectionId,
+    }));
+    await db.insert(collectionsTrackersTable).values(relationship);
+
     router.back();
   };
 

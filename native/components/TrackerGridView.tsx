@@ -1,4 +1,5 @@
-import type { Tracker } from "@/db/schema";
+import { db } from "@/db";
+import { collectionsTrackersTable, trackersTable, type Tracker } from "@/db/schema";
 import {
   DndProvider,
   Draggable,
@@ -6,15 +7,31 @@ import {
   type DndProviderProps,
   type DraggableGridProps,
 } from "@mgcrea/react-native-dnd";
+import { eq } from "drizzle-orm";
+import { useLiveQuery } from "drizzle-orm/expo-sqlite";
+import { useMemo } from "react";
 import { StyleSheet, TouchableOpacity, Text, View } from "react-native";
 import { State } from "react-native-gesture-handler";
 import Animated from "react-native-reanimated";
 
 export default function TrackerGridView({
-  trackers,
+  collectionId,
   isReordering,
   horizontalPadding = true,
-}: { trackers: Tracker[]; isReordering: boolean; horizontalPadding?: boolean }) {
+}: { collectionId?: number; isReordering: boolean; horizontalPadding?: boolean }) {
+  const { data: allTrackers } = useLiveQuery(db.select().from(trackersTable).orderBy(trackersTable.index));
+  const { data: collectionTrackers } = useLiveQuery(
+    db
+      .select()
+      .from(trackersTable)
+      .innerJoin(collectionsTrackersTable, eq(collectionsTrackersTable.trackerId, trackersTable.id))
+      .orderBy(collectionsTrackersTable.index),
+  );
+
+  const trackers = useMemo(
+    () => (collectionId ? collectionTrackers.map((ct) => ct.trackers) : allTrackers),
+    [collectionId, collectionTrackers, allTrackers],
+  );
   const handleDragEnd: DndProviderProps["onDragEnd"] = ({ active, over }) => {
     "worklet";
     if (over) {
