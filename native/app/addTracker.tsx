@@ -6,7 +6,7 @@ import { StyleSheet, View } from "react-native";
 import ThemedButton from "@/components/ThemedButton";
 import { ThemedView } from "@/components/ThemedView";
 import { Sizes } from "@/constants/Sizes";
-import { trackerNames, trackersTable, type NewTracker, type TrackerType } from "@/db/schema";
+import { trackerNames, trackerNamesToType, trackersTable, type NewTracker, type TrackerType } from "@/db/schema";
 import { db } from "@/db";
 import { router } from "expo-router";
 
@@ -49,7 +49,7 @@ export default function AddTrackerScreen() {
           label="Value type"
           columns={2}
           options={Object.values(trackerNames)}
-          onChangeSelection={(option) => setType(option as TrackerType)}
+          onChangeSelection={(option) => setType(trackerNamesToType[option])}
         />
       </ThemedScrollView>
       <View style={styles.submitButtonContainer}>

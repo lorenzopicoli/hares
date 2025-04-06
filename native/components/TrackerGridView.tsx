@@ -14,11 +14,15 @@ import { StyleSheet, TouchableOpacity, Text, View } from "react-native";
 import { State } from "react-native-gesture-handler";
 import Animated from "react-native-reanimated";
 
-export default function TrackerGridView({
-  collectionId,
-  isReordering,
-  horizontalPadding = true,
-}: { collectionId?: number; isReordering: boolean; horizontalPadding?: boolean }) {
+interface Props {
+  collectionId?: number;
+  isReordering: boolean;
+  horizontalPadding?: boolean;
+  onSelectTracker?: (tracker: Tracker) => void;
+}
+
+export default function TrackerGridView(props: Props) {
+  const { collectionId, isReordering, horizontalPadding = true, onSelectTracker } = props;
   const { data: allTrackers } = useLiveQuery(db.select().from(trackersTable).orderBy(trackersTable.index));
   const { data: collectionTrackers } = useLiveQuery(
     db
@@ -46,7 +50,6 @@ export default function TrackerGridView({
 
   const handleFinalize: DndProviderProps["onFinalize"] = ({ state }) => {
     "worklet";
-    console.log("onFinalize");
     if (state !== State.FAILED) {
       console.log("onFinalize");
     }
@@ -57,7 +60,7 @@ export default function TrackerGridView({
 
   const renderGridElement = (tracker: Tracker) => {
     return (
-      <TouchableOpacity style={styles.card} onPress={() => console.log("selected")} activeOpacity={0.7}>
+      <TouchableOpacity style={styles.card} onPress={() => onSelectTracker?.(tracker)} activeOpacity={0.7}>
         <Text style={styles.cardText}>{tracker.name}</Text>
       </TouchableOpacity>
     );

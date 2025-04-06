@@ -14,6 +14,14 @@ export const trackerNames: { [key in TrackerType]: string } = {
   [TrackerType.TextList]: "Text",
 };
 
+export const trackerNamesToType = Object.keys(trackerNames).reduce(
+  (acc, curr) => {
+    acc[trackerNames[curr as TrackerType]] = curr as TrackerType;
+    return acc;
+  },
+  {} as { [key: string]: TrackerType },
+);
+
 export const trackersTable = sqliteTable("trackers", {
   id: int().primaryKey({ autoIncrement: true }),
   name: text().notNull(),

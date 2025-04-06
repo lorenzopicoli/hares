@@ -35,7 +35,6 @@ const useColors = (): ColorType => {
   }
 
   useEffect(() => {
-    console.log("scheme", colorScheme);
     store.applyColors(colorScheme === "dark" ? Colors.dark : Colors.light);
   }, [store.applyColors, colorScheme]);
 
