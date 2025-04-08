@@ -7,6 +7,12 @@ export enum TrackerType {
   TextList = "textList",
 }
 
+export enum PeriodOfDay {
+  Morning = "morning",
+  Afternoon = "afternoon",
+  Evening = "evening",
+}
+
 export const trackerNames: { [key in TrackerType]: string } = {
   [TrackerType.Number]: "Number",
   [TrackerType.Scale]: "Range",

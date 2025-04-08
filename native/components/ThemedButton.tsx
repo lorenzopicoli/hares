@@ -1,5 +1,5 @@
 import React from "react";
-import { Pressable, StyleSheet, Text, type StyleProp, type ViewStyle } from "react-native";
+import { StyleSheet, Text, TouchableOpacity, type StyleProp, type ViewStyle } from "react-native";
 import type { ThemedColors } from "./ThemeProvider";
 import useStyles from "@/hooks/useStyles";
 import { Sizes } from "@/constants/Sizes";
@@ -10,26 +10,48 @@ interface ThemedButtonProps {
   fullWidth?: boolean;
   disabled?: boolean;
   style?: StyleProp<ViewStyle>;
+  mode?: "accent" | "ghost";
 }
 
-const ThemedButton: React.FC<ThemedButtonProps> = ({ title, onPress, fullWidth = false, disabled = false, style }) => {
+const ThemedButton: React.FC<ThemedButtonProps> = ({
+  title,
+  onPress,
+  fullWidth = false,
+  disabled = false,
+  style,
+  mode = "accent",
+}) => {
   const { styles } = useStyles(createStyles);
 
   return (
-    <Pressable
-      style={[styles.button, fullWidth && styles.fullWidth, disabled && styles.disabled, style]}
+    <TouchableOpacity
+      style={[
+        styles.button,
+        fullWidth && styles.fullWidth,
+        disabled && styles.disabled,
+        mode === "accent" && styles.accentButton,
+        mode === "ghost" && styles.ghostButton,
+        style,
+      ]}
       onPress={onPress}
       disabled={disabled}
     >
       <Text style={[styles.text, disabled && styles.disabledText]}>{title}</Text>
-    </Pressable>
+    </TouchableOpacity>
   );
 };
 
 const createStyles = (theme: ThemedColors) =>
   StyleSheet.create({
-    button: {
+    accentButton: {
       backgroundColor: theme.tint,
+    },
+    ghostButton: {
+      backgroundColor: theme.toggleButton.background,
+      borderColor: theme.toggleButton.border,
+      borderWidth: 1,
+    },
+    button: {
       height: Sizes.buttonHeight,
       paddingHorizontal: Sizes.small,
       borderRadius: Sizes.radius.small,

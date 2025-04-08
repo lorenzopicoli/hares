@@ -4,24 +4,33 @@ import { StyleSheet, TextInput, View } from "react-native";
 import ThemedButton from "@/components/ThemedButton";
 import { ThemedView } from "@/components/ThemedView";
 import { Sizes } from "@/constants/Sizes";
-import { trackersTable, TrackerType } from "@/db/schema";
+import { PeriodOfDay, trackersTable, TrackerType } from "@/db/schema";
 import { db } from "@/db";
 import { router, useLocalSearchParams } from "expo-router";
 import { useLiveQuery } from "drizzle-orm/expo-sqlite";
 import { eq } from "drizzle-orm";
 import { ThemedText } from "@/components/ThemedText";
-import { useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import type { ThemedColors } from "@/components/ThemeProvider";
 import useStyles from "@/hooks/useStyles";
 import ThemedToggleButtons from "@/components/ThemedToggleButtons";
+import DateTimePicker, { useDefaultStyles, type DateType } from "react-native-ui-datepicker";
+import type { SingleChange } from "react-native-ui-datepicker/lib/typescript/types";
+import ThemedModal from "@/components/ThemedModal";
+import { format } from "date-fns";
+import { Spacing } from "@/components/Spacing";
 
 export default function AddEntryScreen() {
   const { trackerId } = useLocalSearchParams<{ trackerId: string }>();
   const { styles } = useStyles(createStyles);
   const { data: tracker } = useLiveQuery(db.select().from(trackersTable).where(eq(trackersTable.id, +trackerId)));
   const refNumberInput = useRef<TextInput>(null);
+  const [dateSelected, setSelectedDate] = useState<DateType | null>(new Date());
+  const [periodOfDay, setSelectedPeriodOfDay] = useState<PeriodOfDay | null>(null);
+  const [showDatePicker, setShowDatePicker] = useState(false);
+  const datePickerDefaultStyles = useDefaultStyles();
 
-  const [numberValue, setNumberValue] = useState<string>("");
+  const [numberValue, setNumberValue] = useState<number | null>(0);
   const [scaleValue, setScaleValue] = useState<number | string | null>(null);
   const [yesOrNoValue, setYesOrNoValue] = useState<boolean | null>(null);
 
@@ -37,19 +46,27 @@ export default function AddEntryScreen() {
     switch (trackerType) {
       case TrackerType.Number:
         return (
-          <TextInput
-            ref={refNumberInput}
-            style={styles.numberInput}
-            onKeyPress={({ nativeEvent }) => console.log("Key pressed:", nativeEvent.key)}
-            value={numberValue}
-            onChangeText={(text) => setNumberValue(text)}
-            keyboardType="numeric"
-            autoFocus
-            caretHidden
-            onBlur={() => {
-              refNumberInput?.current?.focus();
-            }}
-          />
+          <>
+            <TextInput
+              ref={refNumberInput}
+              style={styles.numberInput}
+              value={numberValue !== null ? String(numberValue) : "_"}
+              onChangeText={(text) => {
+                if (!text) {
+                  setNumberValue(null);
+                  return;
+                }
+                setNumberValue(Number.parseFloat(text.replace("_", "")));
+              }}
+              keyboardType="numeric"
+              autoFocus
+              caretHidden
+            />
+            <View style={{ flex: 1, flexDirection: "row", justifyContent: "center", gap: Sizes.large }}>
+              <ThemedButton style={{ width: 40 }} title="-" onPress={() => setNumberValue((numberValue ?? 0) - 1)} />
+              <ThemedButton style={{ width: 40 }} title="+" onPress={() => setNumberValue((numberValue ?? 0) + 1)} />
+            </View>
+          </>
         );
 
       case TrackerType.Scale:
@@ -86,12 +103,93 @@ export default function AddEntryScreen() {
     }
   };
 
+  const handlePressNow = () => {
+    setSelectedDate(new Date());
+    setSelectedPeriodOfDay(null);
+  };
+  const handlePressPeriodOfDay = (p: PeriodOfDay) => {
+    setSelectedPeriodOfDay(p);
+    setSelectedDate(null);
+  };
+  const handleDatePickerChange: SingleChange = ({ date }) => {
+    setSelectedDate(date);
+    setSelectedPeriodOfDay(null);
+  };
+
+  const toggleDatePicker = () => {
+    if (!showDatePicker) {
+      setSelectedDate(new Date());
+    }
+    setShowDatePicker(!showDatePicker);
+  };
+
+  const currentDateFormatted = useMemo(() => {
+    if (dateSelected) {
+      return format(new Date(dateSelected.valueOf()), "MMMM do, yyyy H:mma");
+    }
+
+    return periodOfDay;
+  }, [periodOfDay, dateSelected]);
+
   return (
     <ThemedView>
-      <ThemedScrollView>{renderEntryInput()}</ThemedScrollView>
+      <ThemedScrollView>
+        <ThemedText>{currentDateFormatted}</ThemedText>
+        {renderEntryInput()}
+
+        <Spacing size="small" />
+        <ThemedText type="title">Date options</ThemedText>
+        <View style={styles.dateSelectionButtonsContainer}>
+          <ThemedButton title="Now" mode="ghost" style={styles.dateSelectionButton} onPress={handlePressNow} />
+          <ThemedButton
+            title="Morning"
+            mode="ghost"
+            style={styles.dateSelectionButton}
+            onPress={() => handlePressPeriodOfDay(PeriodOfDay.Morning)}
+          />
+          <ThemedButton
+            title="Afternoon"
+            mode="ghost"
+            style={styles.dateSelectionButton}
+            onPress={() => handlePressPeriodOfDay(PeriodOfDay.Afternoon)}
+          />
+          <ThemedButton
+            title="Evening"
+            mode="ghost"
+            style={styles.dateSelectionButton}
+            onPress={() => handlePressPeriodOfDay(PeriodOfDay.Evening)}
+          />
+        </View>
+        <ThemedButton title="Custom" mode="ghost" onPress={toggleDatePicker} style={styles.dateSelectionButton} />
+        <Spacing size="small" />
+        <ThemedText type="title">Previous entries</ThemedText>
+      </ThemedScrollView>
       <View style={styles.submitButtonContainer}>
         <ThemedButton fullWidth title="Log entry" onPress={handleSubmit} />
       </View>
+      <ThemedModal
+        visible={showDatePicker}
+        hideDismiss
+        fullWidthButton
+        onDismiss={toggleDatePicker}
+        onConfirm={toggleDatePicker}
+      >
+        <View style={styles.datePickerContainer}>
+          <ThemedText>{dateSelected?.toLocaleString()}</ThemedText>
+          <DateTimePicker
+            mode="single"
+            initialView="time"
+            navigationPosition="right"
+            timePicker
+            date={dateSelected ?? new Date()}
+            onChange={handleDatePickerChange}
+            styles={{
+              ...datePickerDefaultStyles,
+              ...styles.datePicker,
+            }}
+          />
+        </View>
+      </ThemedModal>
     </ThemedView>
   );
 }
@@ -105,8 +203,22 @@ const createStyles = (theme: ThemedColors) =>
     numberInput: {
       flex: 1,
       color: theme.input.text,
-      fontSize: 80,
+      fontSize: 60,
       height: "100%",
       textAlign: "center",
+    },
+    datePicker: {
+      backgroundColor: "blue",
+    },
+    dateSelectionButtonsContainer: {
+      flexDirection: "row",
+      gap: Sizes.small,
+    },
+    dateSelectionButton: {
+      flex: 1,
+    },
+    datePickerContainer: {
+      flex: 1,
+      width: "100%",
     },
   });
