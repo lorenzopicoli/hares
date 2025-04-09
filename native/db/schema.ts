@@ -1,4 +1,4 @@
-import { int, sqliteTable, text } from "drizzle-orm/sqlite-core";
+import { int, integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
 
 export enum TrackerType {
   Number = "number",
@@ -12,6 +12,8 @@ export enum PeriodOfDay {
   Afternoon = "afternoon",
   Evening = "evening",
 }
+
+export type EntryDateInformation = { periodOfDay: PeriodOfDay } | { date: Date };
 
 export const trackerNames: { [key in TrackerType]: string } = {
   [TrackerType.Number]: "Number",
@@ -61,3 +63,15 @@ export const collectionsTrackersTable = sqliteTable("collections_trackers", {
 });
 export type CollectionTracker = typeof collectionsTrackersTable.$inferSelect;
 export type NewCollectionTracker = typeof collectionsTrackersTable.$inferInsert;
+
+export const entriesTable = sqliteTable("entries", {
+  id: int().primaryKey({ autoIncrement: true }),
+  trackerId: int("tracker_id")
+    .notNull()
+    .references(() => trackersTable.id),
+  date: integer({ mode: "timestamp" }),
+  periodOfDay: text(),
+  timezone: text(),
+});
+export type TrackerEntry = typeof entriesTable.$inferSelect;
+export type NewTrackerEntry = typeof entriesTable.$inferInsert;
