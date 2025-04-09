@@ -1,5 +1,4 @@
 import ThemedScrollView from "@/components/ThemedScrollView";
-import ThemedInput from "@/components/ThemedInput";
 import { StyleSheet, type TextInput, View } from "react-native";
 import ThemedButton from "@/components/ThemedButton";
 import { ThemedView } from "@/components/ThemedView";
@@ -19,6 +18,7 @@ import { formatEntryDate } from "@/utils/entryDate";
 import EntryDateSelection from "@/components/EntryDateSelection";
 import EntriesListRow from "@/components/EntriesList/EntriesListRow";
 import EntryNumberInput from "@/components/EntryInputs/EntryNumberInput";
+import EntrySliderInput from "@/components/EntryInputs/EntrySliderInput";
 
 export default function AddEntryScreen() {
   const { trackerId } = useLocalSearchParams<{ trackerId: string }>();
@@ -65,16 +65,7 @@ export default function AddEntryScreen() {
         return <EntryNumberInput onChange={handleNumberInputChange} />;
 
       case TrackerType.Scale:
-        return (
-          <View>
-            <ThemedInput
-              label="Or enter value manually"
-              value={scaleValue?.toString() ?? ""}
-              onChangeText={(text) => setScaleValue(text || null)}
-              keyboardType="numeric"
-            />
-          </View>
-        );
+        return <EntrySliderInput min={0} max={100} />;
 
       case TrackerType.Boolean:
         return (
@@ -104,7 +95,7 @@ export default function AddEntryScreen() {
     <ThemedView>
       <ThemedScrollView>
         <ThemedText>{currentDateFormatted}</ThemedText>
-        {renderEntryInput()}
+        <ThemedView>{renderEntryInput()}</ThemedView>
 
         <Spacing size="small" />
         <ThemedText type="title">Date options</ThemedText>

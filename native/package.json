@@ -48,7 +48,8 @@
     "react-native-tab-view": "^4.0.5",
     "react-native-ui-datepicker": "^3.1.2",
     "react-native-web": "~0.19.13",
-    "react-native-webview": "13.12.5"
+    "react-native-webview": "13.12.5",
+    "@react-native-community/slider": "4.5.5"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",
