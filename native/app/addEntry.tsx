@@ -65,7 +65,7 @@ export default function AddEntryScreen() {
         return <EntryNumberInput onChange={handleNumberInputChange} />;
 
       case TrackerType.Scale:
-        return <EntrySliderInput min={0} max={100} />;
+        return <EntrySliderInput onChange={handleNumberInputChange} min={0} max={100} />;
 
       case TrackerType.Boolean:
         return (
