@@ -1,6 +1,6 @@
 import ThemedScrollView from "@/components/ThemedScrollView";
 import ThemedInput from "@/components/ThemedInput";
-import { StyleSheet, TextInput, View } from "react-native";
+import { StyleSheet, type TextInput, View } from "react-native";
 import ThemedButton from "@/components/ThemedButton";
 import { ThemedView } from "@/components/ThemedView";
 import { Sizes } from "@/constants/Sizes";
@@ -18,6 +18,7 @@ import { Spacing } from "@/components/Spacing";
 import { formatEntryDate } from "@/utils/entryDate";
 import EntryDateSelection from "@/components/EntryDateSelection";
 import EntriesListRow from "@/components/EntriesList/EntriesListRow";
+import EntryNumberInput from "@/components/EntryInputs/EntryNumberInput";
 
 export default function AddEntryScreen() {
   const { trackerId } = useLocalSearchParams<{ trackerId: string }>();
@@ -40,6 +41,7 @@ export default function AddEntryScreen() {
   const [yesOrNoValue, setYesOrNoValue] = useState<boolean | null>(null);
 
   const handleDateSelectionChange = useCallback((data: EntryDateInformation) => setSelectedDate(data), []);
+  const handleNumberInputChange = useCallback((value: number | null) => setNumberValue(value), []);
   const handleSubmit = async () => {
     const entry: NewTrackerEntry = {
       date: "date" in dateSelected ? dateSelected.date : undefined,
@@ -60,29 +62,7 @@ export default function AddEntryScreen() {
 
     switch (trackerType) {
       case TrackerType.Number:
-        return (
-          <View>
-            <TextInput
-              ref={refNumberInput}
-              style={styles.numberInput}
-              value={numberValue !== null ? String(numberValue) : "_"}
-              onChangeText={(text) => {
-                if (!text) {
-                  setNumberValue(null);
-                  return;
-                }
-                setNumberValue(Number.parseFloat(text.replace("_", "")));
-              }}
-              keyboardType="numeric"
-              autoFocus
-              caretHidden
-            />
-            <View style={styles.numberCounterButtonsContainer}>
-              <ThemedButton style={{ width: 40 }} title="-" onPress={() => setNumberValue((numberValue ?? 0) - 1)} />
-              <ThemedButton style={{ width: 40 }} title="+" onPress={() => setNumberValue((numberValue ?? 0) + 1)} />
-            </View>
-          </View>
-        );
+        return <EntryNumberInput onChange={handleNumberInputChange} />;
 
       case TrackerType.Scale:
         return (
