@@ -14,11 +14,10 @@ import { useCallback, useMemo, useRef, useState } from "react";
 import type { ThemedColors } from "@/components/ThemeProvider";
 import useStyles from "@/hooks/useStyles";
 import ThemedToggleButtons from "@/components/ThemedToggleButtons";
-import { format } from "date-fns";
 import { Spacing } from "@/components/Spacing";
-import { Separator } from "@/components/Separator";
 import { formatEntryDate } from "@/utils/entryDate";
 import EntryDateSelection from "@/components/EntryDateSelection";
+import EntriesListRow from "@/components/EntriesList/EntriesListRow";
 
 export default function AddEntryScreen() {
   const { trackerId } = useLocalSearchParams<{ trackerId: string }>();
@@ -133,13 +132,7 @@ export default function AddEntryScreen() {
         <Spacing size="small" />
         <ThemedText type="title">Previous entries</ThemedText>
         {lastEntries.map((entry) => (
-          <View key={entry.id}>
-            <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
-              <ThemedText>{entry.date ? format(entry.date, "MMMM do, yyyy H:mma") : entry.periodOfDay}</ThemedText>
-              <ThemedText>10</ThemedText>
-            </View>
-            <Separator />
-          </View>
+          <EntriesListRow key={entry.id} entry={entry} />
         ))}
       </ThemedScrollView>
       <View style={styles.submitButtonContainer}>
