@@ -79,7 +79,6 @@ export default function TextListSelectionScreen() {
     }
   };
 
-  // Yikes, need to change this
   const data = useMemo(
     () => [
       ...Array.from(selectedItems, ([value, label]) => ({
