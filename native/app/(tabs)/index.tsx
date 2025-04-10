@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
-import { StyleSheet, TextInput, TouchableOpacity, View } from "react-native";
+import { StyleSheet, View } from "react-native";
 import { type NavigationState, type Route, type SceneRendererProps, TabBar, TabView } from "react-native-tab-view";
-import { Ionicons } from "@expo/vector-icons";
 import { useLiveQuery } from "drizzle-orm/expo-sqlite";
 import { db } from "@/db";
 import { collectionsTable, type Tracker } from "@/db/schema";
@@ -9,6 +8,8 @@ import TrackerGridView from "@/components/TrackerGridView";
 import type { ThemedColors } from "@/components/ThemeProvider";
 import useStyles from "@/hooks/useStyles";
 import { router } from "expo-router";
+import SearchInput from "@/components/SearchInput";
+import { Sizes } from "@/constants/Sizes";
 
 type TabRoute = Route & {
   key: string;
@@ -59,20 +60,7 @@ export default function HomeScreen() {
   return (
     <View style={styles.container}>
       <View style={styles.searchContainer}>
-        <TextInput
-          style={styles.searchInput}
-          placeholder="Search..."
-          placeholderTextColor="#666"
-          value={searchQuery}
-          onChangeText={setSearchQuery}
-        />
-        <TouchableOpacity style={styles.searchClear} onPress={() => setSearchQuery("")}>
-          {searchQuery ? (
-            <Ionicons name="close-circle" size={20} color="#666" />
-          ) : (
-            <Ionicons name="search" size={20} color="#666" />
-          )}
-        </TouchableOpacity>
+        <SearchInput value={searchQuery} placeholder="Search..." onChange={setSearchQuery} />
       </View>
 
       <TabView
@@ -92,22 +80,7 @@ const createStyles = (theme: ThemedColors) =>
       backgroundColor: theme.background,
     },
     searchContainer: {
-      padding: 16,
-      flexDirection: "row",
-      alignItems: "center",
-    },
-    searchInput: {
-      flex: 1,
-      height: 40,
-      backgroundColor: "#25262B",
-      borderRadius: 8,
-      paddingHorizontal: 16,
-      color: "#fff",
-    },
-    searchClear: {
-      position: "absolute",
-      right: 24,
-      top: 24,
+      paddingHorizontal: Sizes.small,
     },
     tabBar: {
       backgroundColor: theme.background,

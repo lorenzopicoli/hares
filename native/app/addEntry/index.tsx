@@ -1,5 +1,5 @@
 import ThemedScrollView from "@/components/ThemedScrollView";
-import { StyleSheet, type TextInput, View } from "react-native";
+import { StyleSheet, View } from "react-native";
 import ThemedButton from "@/components/ThemedButton";
 import { ThemedView } from "@/components/ThemedView";
 import { Sizes } from "@/constants/Sizes";
@@ -9,7 +9,7 @@ import { router, useLocalSearchParams } from "expo-router";
 import { useLiveQuery } from "drizzle-orm/expo-sqlite";
 import { eq, desc } from "drizzle-orm";
 import { ThemedText } from "@/components/ThemedText";
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import type { ThemedColors } from "@/components/ThemeProvider";
 import useStyles from "@/hooks/useStyles";
 import ThemedToggleButtons from "@/components/ThemedToggleButtons";
@@ -32,13 +32,20 @@ export default function AddEntryScreen() {
       .orderBy(desc(entriesTable.date))
       .limit(10),
   );
-  const refNumberInput = useRef<TextInput>(null);
+  const { data: availableEntries } = useLiveQuery(
+    db
+      .select()
+      .from(entriesTable)
+      .where(eq(entriesTable.trackerId, +trackerId))
+      .orderBy(desc(entriesTable.date))
+      .limit(10),
+  );
   const initialDate = useMemo(() => new Date(), []);
   const [dateSelected, setSelectedDate] = useState<EntryDateInformation>({ date: initialDate });
 
   const [numberValue, setNumberValue] = useState<number | null>(0);
-  const [scaleValue, setScaleValue] = useState<number | string | null>(null);
   const [yesOrNoValue, setYesOrNoValue] = useState<boolean | null>(null);
+  const [textListValue, setTextListValue] = useState<string[]>([]);
 
   const handleDateSelectionChange = useCallback((data: EntryDateInformation) => setSelectedDate(data), []);
   const handleNumberInputChange = useCallback((value: number | null) => setNumberValue(value), []);
@@ -59,6 +66,7 @@ export default function AddEntryScreen() {
     if (!tracker || !tracker[0]) return null;
 
     const trackerType = tracker[0].type;
+    console.log("t", trackerType);
 
     switch (trackerType) {
       case TrackerType.Number:
@@ -80,7 +88,13 @@ export default function AddEntryScreen() {
       case TrackerType.TextList:
         return (
           <View>
-            {/* <ThemedInput label="Enter text" value={typeof value === "string" ? value : ""} onChangeText={setValue} /> */}
+            <ThemedButton
+              title="Select items"
+              onPress={() => {
+                router.push({ pathname: "/addEntry/textListSelection", params: { trackerId: trackerId } });
+              }}
+            />
+            {/* <TextListInput data={data} /> */}
           </View>
         );
 
