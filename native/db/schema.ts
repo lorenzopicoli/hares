@@ -1,4 +1,5 @@
-import { int, integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
+import { relations } from "drizzle-orm";
+import { int, integer, real, sqliteTable, text } from "drizzle-orm/sqlite-core";
 
 export enum TrackerType {
   Number = "number",
@@ -34,6 +35,8 @@ export const trackersTable = sqliteTable("trackers", {
   id: int().primaryKey({ autoIncrement: true }),
   name: text().notNull(),
   type: text().$type<TrackerType>().notNull(),
+  prefix: text(),
+  suffix: text(),
   description: text(),
   rangeMin: int(),
   rangeMax: int(),
@@ -69,9 +72,45 @@ export const entriesTable = sqliteTable("entries", {
   trackerId: int("tracker_id")
     .notNull()
     .references(() => trackersTable.id),
+  createdAt: integer({ mode: "timestamp" }).$defaultFn(() => new Date()),
   date: integer({ mode: "timestamp" }),
   periodOfDay: text(),
   timezone: text(),
+  numberValue: real(),
+  booleanValue: integer(),
 });
-export type TrackerEntry = typeof entriesTable.$inferSelect;
+
+export const entriesRelations = relations(entriesTable, ({ many, one }) => ({
+  textListValues: many(textListEntriesTable),
+  tracker: one(trackersTable, {
+    fields: [entriesTable.trackerId],
+    references: [trackersTable.id],
+  }),
+}));
+
+export type TrackerEntry = typeof entriesTable.$inferSelect & {
+  textListValues?: Array<typeof textListEntriesTable.$inferSelect>;
+  tracker?: typeof trackersTable.$inferSelect;
+};
 export type NewTrackerEntry = typeof entriesTable.$inferInsert;
+
+export const textListEntriesTable = sqliteTable("text_list_entries", {
+  id: int().primaryKey({ autoIncrement: true }),
+  trackerId: int("tracker_id")
+    .notNull()
+    .references(() => trackersTable.id),
+  entryId: int("entry_id")
+    .notNull()
+    .references(() => entriesTable.id),
+  name: text().notNull(),
+});
+
+export const textListEntriesRelations = relations(textListEntriesTable, ({ one }) => ({
+  textListValues: one(entriesTable, {
+    fields: [textListEntriesTable.entryId],
+    references: [entriesTable.id],
+  }),
+}));
+
+export type TextListEntry = typeof textListEntriesTable.$inferSelect;
+export type NewTextListEntry = typeof textListEntriesTable.$inferInsert;

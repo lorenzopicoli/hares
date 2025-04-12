@@ -64,10 +64,10 @@ export default function RootLayout() {
               <Stack.Screen name="(tabs)" options={{ headerShown: true, headerTitle: "🐰 Hares" }} />
               <Stack.Screen name="addTracker" options={{ headerShown: true, headerTitle: "🐰 Add tracker" }} />
               <Stack.Screen name="addCollection" options={{ headerShown: true, headerTitle: "🐰 Add collection" }} />
-              <Stack.Screen name="addEntry/index" options={{ headerShown: true, headerTitle: "🐰 Add entry" }} />
+              <Stack.Screen name="addEntry" options={{ headerShown: true, headerTitle: "🐰 Add entry" }} />
               <Stack.Screen
-                name="addEntry/textListSelection"
-                options={{ headerShown: true, headerTitle: "🐰 Select items" }}
+                name="textListSelection"
+                options={{ headerShown: true, headerTitle: "🐰 Select items", presentation: "modal" }}
               />
               <Stack.Screen name="+not-found" />
             </Stack>

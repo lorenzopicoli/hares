@@ -12,7 +12,7 @@ import {
   type Tracker,
 } from "@/db/schema";
 import { db } from "@/db";
-import { router, useLocalSearchParams } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import { ThemedText } from "@/components/ThemedText";
 import {
   NestedReorderableList,
@@ -103,6 +103,7 @@ function AddCollectionScreenInternal(props: {
   nonCollectionTrackers: Tracker[];
   collectionId?: number;
 }) {
+  const router = useRouter();
   const {
     nonCollectionTrackers: preExistingNonCollectionTrackers,
     collectionTrackers: preExistingCollectionTrackers,

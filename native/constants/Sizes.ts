@@ -12,6 +12,7 @@ export const Sizes = {
     small: spaceUnit,
     medium: spaceUnit * 2,
     large: spaceUnit * 3,
+    pill: 10,
   },
   scrollView: {
     padding: 24,

@@ -3,9 +3,17 @@ import { StyleSheet, View } from "react-native";
 import ThemedButton from "@/components/ThemedButton";
 import { ThemedView } from "@/components/ThemedView";
 import { Sizes } from "@/constants/Sizes";
-import { entriesTable, trackersTable, TrackerType, type EntryDateInformation, type NewTrackerEntry } from "@/db/schema";
+import {
+  entriesTable,
+  textListEntriesTable,
+  trackersTable,
+  TrackerType,
+  type EntryDateInformation,
+  type NewTextListEntry,
+  type NewTrackerEntry,
+} from "@/db/schema";
 import { db } from "@/db";
-import { router, useLocalSearchParams } from "expo-router";
+import { useRouter, useLocalSearchParams } from "expo-router";
 import { useLiveQuery } from "drizzle-orm/expo-sqlite";
 import { eq, desc } from "drizzle-orm";
 import { ThemedText } from "@/components/ThemedText";
@@ -14,63 +22,78 @@ import type { ThemedColors } from "@/components/ThemeProvider";
 import useStyles from "@/hooks/useStyles";
 import ThemedToggleButtons from "@/components/ThemedToggleButtons";
 import { Spacing } from "@/components/Spacing";
-import { formatEntryDate } from "@/utils/entryDate";
 import EntryDateSelection from "@/components/EntryDateSelection";
 import EntriesListRow from "@/components/EntriesList/EntriesListRow";
 import EntryNumberInput from "@/components/EntryInputs/EntryNumberInput";
 import EntrySliderInput from "@/components/EntryInputs/EntrySliderInput";
+import { ChipGroup, type ChipData } from "@/components/Chip";
+import { formatEntryDateInformation } from "@/utils/entryDate";
 
 export default function AddEntryScreen() {
-  const { trackerId } = useLocalSearchParams<{ trackerId: string }>();
+  const router = useRouter();
+  const { trackerId, textListSelections } = useLocalSearchParams<{
+    trackerId: string;
+    textListSelections?: string;
+  }>();
   const { styles } = useStyles(createStyles);
   const { data: tracker } = useLiveQuery(db.select().from(trackersTable).where(eq(trackersTable.id, +trackerId)));
   const { data: lastEntries } = useLiveQuery(
-    db
-      .select()
-      .from(entriesTable)
-      .where(eq(entriesTable.trackerId, +trackerId))
-      .orderBy(desc(entriesTable.date))
-      .limit(10),
-  );
-  const { data: availableEntries } = useLiveQuery(
-    db
-      .select()
-      .from(entriesTable)
-      .where(eq(entriesTable.trackerId, +trackerId))
-      .orderBy(desc(entriesTable.date))
-      .limit(10),
+    db.query.entriesTable.findMany({
+      where: eq(entriesTable.trackerId, +trackerId),
+      orderBy: desc(entriesTable.date),
+      limit: 10,
+      with: {
+        textListValues: true,
+      },
+    }),
   );
   const initialDate = useMemo(() => new Date(), []);
   const [dateSelected, setSelectedDate] = useState<EntryDateInformation>({ date: initialDate });
 
-  const [numberValue, setNumberValue] = useState<number | null>(0);
+  const [numberValue, setNumberValue] = useState<number | null>(null);
   const [yesOrNoValue, setYesOrNoValue] = useState<boolean | null>(null);
-  const [textListValue, setTextListValue] = useState<string[]>([]);
+  const [textListValue, setTextListValue] = useState<string[]>(
+    textListSelections ? JSON.parse(textListSelections) : [],
+  );
 
   const handleDateSelectionChange = useCallback((data: EntryDateInformation) => setSelectedDate(data), []);
   const handleNumberInputChange = useCallback((value: number | null) => setNumberValue(value), []);
   const handleSubmit = async () => {
-    const entry: NewTrackerEntry = {
-      date: "date" in dateSelected ? dateSelected.date : undefined,
-      periodOfDay: "periodOfDay" in dateSelected ? dateSelected.periodOfDay : undefined,
-      trackerId: +trackerId,
-    };
-    await db
-      .insert(entriesTable)
-      .values(entry)
-      .catch((t) => console.log(t));
-    router.back();
+    try {
+      const entry: NewTrackerEntry = {
+        date: "date" in dateSelected ? dateSelected.date : undefined,
+        periodOfDay: "periodOfDay" in dateSelected ? dateSelected.periodOfDay : undefined,
+        trackerId: +trackerId,
+        numberValue: numberValue,
+        booleanValue: yesOrNoValue !== null ? (yesOrNoValue ? 1 : 0) : null,
+      };
+      const savedEntry = await db.insert(entriesTable).values(entry).returning({ id: entriesTable.id });
+      if (textListValue.length > 0) {
+        const textListEntries: NewTextListEntry[] = textListValue.map((value) => ({
+          trackerId: +trackerId,
+          entryId: savedEntry[0].id,
+          name: value,
+        }));
+        await db.insert(textListEntriesTable).values(textListEntries);
+      }
+      router.back();
+    } catch (e) {
+      console.log(e);
+    }
+  };
+
+  const handleChipPress = (data: ChipData) => {
+    setTextListValue([...textListValue.filter((t) => t !== data.id)]);
   };
 
   const renderEntryInput = () => {
     if (!tracker || !tracker[0]) return null;
 
-    const trackerType = tracker[0].type;
-    console.log("t", trackerType);
+    const { type: trackerType, prefix, suffix } = tracker[0];
 
     switch (trackerType) {
       case TrackerType.Number:
-        return <EntryNumberInput onChange={handleNumberInputChange} />;
+        return <EntryNumberInput suffix={suffix} prefix={prefix} onChange={handleNumberInputChange} />;
 
       case TrackerType.Scale:
         return <EntrySliderInput onChange={handleNumberInputChange} min={0} max={100} />;
@@ -90,11 +113,16 @@ export default function AddEntryScreen() {
           <View>
             <ThemedButton
               title="Select items"
+              mode="ghost"
               onPress={() => {
-                router.push({ pathname: "/addEntry/textListSelection", params: { trackerId: trackerId } });
+                router.navigate({ pathname: "/textListSelection", params: { trackerId: trackerId } });
               }}
             />
-            {/* <TextListInput data={data} /> */}
+            <ChipGroup
+              onChipPress={handleChipPress}
+              showDelete
+              chips={textListValue.map((t) => ({ label: t, id: t })) ?? []}
+            />
           </View>
         );
 
@@ -103,7 +131,7 @@ export default function AddEntryScreen() {
     }
   };
 
-  const currentDateFormatted = useMemo(() => formatEntryDate(dateSelected), [dateSelected]);
+  const currentDateFormatted = useMemo(() => formatEntryDateInformation(dateSelected), [dateSelected]);
 
   return (
     <ThemedView>

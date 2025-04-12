@@ -24,6 +24,7 @@ interface ThemedInputProps {
   error?: string;
   maxLength?: number;
   disabled?: boolean;
+  style?: any;
 }
 
 const ThemedInput: React.FC<ThemedInputProps> = ({
@@ -37,12 +38,13 @@ const ThemedInput: React.FC<ThemedInputProps> = ({
   error,
   maxLength,
   disabled = false,
+  style,
 }) => {
   const [isFocused, setIsFocused] = useState<boolean>(false);
   const [isPasswordVisible, setIsPasswordVisible] = useState<boolean>(false);
   const { styles } = useStyles(createStyles);
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, !!style && style]}>
       {label && <ThemedInputLabel label={label} />}
 
       <View
@@ -89,7 +91,6 @@ const createStyles = (theme: ThemedColors) =>
   StyleSheet.create({
     container: {
       marginBottom: 16,
-      width: "100%",
     },
     inputContainer: {
       flexDirection: "row",

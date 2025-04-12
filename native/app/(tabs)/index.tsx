@@ -31,7 +31,7 @@ export default function HomeScreen() {
   );
 
   const handleTrackerSelection = (tracker: Tracker) => {
-    router.push({ pathname: "/addEntry", params: { trackerId: tracker.id } });
+    router.navigate({ pathname: "/addEntry", params: { trackerId: tracker.id } });
   };
 
   useEffect(() => {

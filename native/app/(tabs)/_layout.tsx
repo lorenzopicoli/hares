@@ -1,4 +1,4 @@
-import { router, Tabs, useNavigation } from "expo-router";
+import { Tabs, useNavigation, useRouter } from "expo-router";
 import { Platform, View, StyleSheet, TouchableOpacity } from "react-native";
 
 import { HapticTab } from "@/components/HapticTab";
@@ -11,6 +11,7 @@ import { useActionSheet } from "@expo/react-native-action-sheet";
 import { Colors } from "@/constants/Colors";
 
 export default function TabLayout() {
+  const router = useRouter();
   const colorScheme = useColorScheme();
   const navigation = useNavigation();
   const { showActionSheetWithOptions } = useActionSheet();
@@ -35,7 +36,6 @@ export default function TabLayout() {
     const options = ["Add tracker", "Add collection", "Edit current collection", "Cancel"];
     const cancelButtonIndex = options.length - 1;
 
-    console.log("here");
     showActionSheetWithOptions(
       {
         options,
