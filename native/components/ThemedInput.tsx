@@ -34,7 +34,7 @@ const ThemedInput: React.FC<ThemedInputProps> = ({
   onChangeText,
   secureTextEntry = false,
   keyboardType = "default",
-  autoCapitalize = "none",
+  autoCapitalize = "sentences",
   error,
   maxLength,
   disabled = false,
