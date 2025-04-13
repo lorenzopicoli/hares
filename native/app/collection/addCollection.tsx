@@ -7,6 +7,7 @@ import {
   collectionsTable,
   collectionsTrackersTable,
   trackersTable,
+  type Collection,
   type NewCollection,
   type NewCollectionTracker,
   type Tracker,
@@ -27,7 +28,7 @@ import { Separator } from "@/components/Separator";
 import { Spacing } from "@/components/Spacing";
 import ThemedInput from "@/components/ThemedInput";
 import { Feather, MaterialIcons } from "@expo/vector-icons";
-import { eq, notExists } from "drizzle-orm";
+import { eq, notExists, sql } from "drizzle-orm";
 import { moveElement } from "@/utils/moveElements";
 import { useLiveQuery } from "drizzle-orm/expo-sqlite";
 
@@ -101,13 +102,13 @@ const NonDraggableTrackerItem: React.FC<{ tracker: Tracker; onPress: (tracker: T
 function AddCollectionScreenInternal(props: {
   collectionTrackers: Tracker[];
   nonCollectionTrackers: Tracker[];
-  collectionId?: number;
+  collection?: Collection;
 }) {
   const router = useRouter();
   const {
     nonCollectionTrackers: preExistingNonCollectionTrackers,
     collectionTrackers: preExistingCollectionTrackers,
-    collectionId,
+    collection,
   } = props;
   const [collectionTrackers, setCollectionTrackers] = useState<Tracker[]>([]);
   const [nonCollectionTrackers, setNonCollectionTrackers] = useState<Tracker[]>([]);
@@ -117,7 +118,10 @@ function AddCollectionScreenInternal(props: {
   useEffect(() => {
     setCollectionTrackers(preExistingCollectionTrackers);
     setNonCollectionTrackers(preExistingNonCollectionTrackers);
-  }, [preExistingCollectionTrackers, preExistingNonCollectionTrackers]);
+    if (collection) {
+      setName(collection.name);
+    }
+  }, [preExistingCollectionTrackers, preExistingNonCollectionTrackers, collection]);
 
   const handleSubmit = async () => {
     if (!name) {
@@ -136,13 +140,13 @@ function AddCollectionScreenInternal(props: {
       index: (nextIndex?.[0]?.index ?? 0) + 1,
     };
 
-    const { savedCollectionId } = collectionId
+    const { savedCollectionId } = collection
       ? await db
           .update(collectionsTable)
           .set(newCollection)
-          .where(eq(collectionsTable.id, collectionId))
+          .where(eq(collectionsTable.id, collection.id))
           .then(() => ({
-            savedCollectionId: collectionId,
+            savedCollectionId: collection.id,
           }))
           .catch((err) => {
             console.log("Failed to update collection", err);
@@ -163,9 +167,21 @@ function AddCollectionScreenInternal(props: {
       trackerId: t.id,
       collectionId: savedCollectionId,
     }));
-    await db.insert(collectionsTrackersTable).values(relationship);
 
-    router.back();
+    if (collection) {
+      // Easier than finding the diff
+      await db.delete(collectionsTrackersTable).where(eq(collectionsTrackersTable.collectionId, collection.id));
+    }
+    await db
+      .insert(collectionsTrackersTable)
+      .values(relationship)
+      // Shouldn't happen, but it looks nice
+      .onConflictDoUpdate({
+        target: [collectionsTrackersTable.trackerId, collectionsTrackersTable.collectionId],
+        set: { index: sql.raw('"excluded"."index"') },
+      });
+
+    router.dismiss();
   };
 
   const addTrackerToCollection = (tracker: Tracker) => {
@@ -228,14 +244,20 @@ function AddCollectionScreenInternal(props: {
         )}
       </ScrollViewContainer>
       <View style={styles.submitButtonContainer}>
-        <ThemedButton fullWidth title="Create collection" onPress={handleSubmit} />
+        <ThemedButton fullWidth title={collection ? "Edit collection" : "Create collection"} onPress={handleSubmit} />
       </View>
     </ThemedView>
   );
 }
 
 export default function AddCollectionScreen() {
-  const { id: collectionId } = useLocalSearchParams<{ id: string }>();
+  const { collectionId } = useLocalSearchParams<{ collectionId: string }>();
+  const { data: collection } = useLiveQuery(
+    db
+      .select()
+      .from(collectionsTable)
+      .where(eq(collectionsTable.id, collectionId ? +collectionId : -1)),
+  );
   const { data: collectionTrackers } = useLiveQuery(
     db
       .select()
@@ -253,18 +275,26 @@ export default function AddCollectionScreen() {
           db
             .select()
             .from(collectionsTrackersTable)
-            .where(eq(collectionsTrackersTable.collectionId, Number(collectionId) || -1)),
+            .where(sql`${collectionsTrackersTable.collectionId} = ${Number(collectionId) || -1} AND
+            ${collectionsTrackersTable.trackerId} = ${trackersTable.id}`),
         ),
       )
-      .orderBy(trackersTable.index)
-      .$dynamic(),
+      .orderBy(trackersTable.index),
   );
+  const { data: all } = useLiveQuery(
+    db
+      .select()
+      .from(collectionsTrackersTable)
+      .where(eq(collectionsTrackersTable.collectionId, Number(collectionId) || -1)),
+  );
+
+  console.log("non", all);
 
   return (
     <AddCollectionScreenInternal
       collectionTrackers={collectionTrackers.map((ct) => ct.trackers)}
       nonCollectionTrackers={nonCollectionTrackers}
-      collectionId={Number(collectionId) || undefined}
+      collection={collection[0]}
     />
   );
 }

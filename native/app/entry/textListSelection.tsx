@@ -43,7 +43,7 @@ export default function TextListSelectionScreen() {
           <TouchableOpacity
             onPressIn={() => {
               router.navigate({
-                pathname: "/addEntry",
+                pathname: "/entry/addEntry",
                 params: {
                   trackerId: trackerId,
                   textListSelections: JSON.stringify(Array.from(selectedItems, ([value, _label]) => value)),

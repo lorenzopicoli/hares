@@ -61,14 +61,14 @@ export default function RootLayout() {
         <ActionSheetProvider>
           <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
             <Stack>
-              <Stack.Screen name="(tabs)" options={{ headerShown: true, headerTitle: "🐰 Hares" }} />
-              <Stack.Screen name="addTracker" options={{ headerShown: true, headerTitle: "🐰 Add tracker" }} />
-              <Stack.Screen name="addCollection" options={{ headerShown: true, headerTitle: "🐰 Add collection" }} />
-              <Stack.Screen name="addEntry" options={{ headerShown: true, headerTitle: "🐰 Add entry" }} />
+              <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
               <Stack.Screen
-                name="textListSelection"
-                options={{ headerShown: true, headerTitle: "🐰 Select items", presentation: "modal" }}
+                name="collection/addCollection"
+                options={{ headerShown: true, headerTitle: "🐰 Add Collection" }}
               />
+              <Stack.Screen name="entry/addEntry" options={{ headerShown: true, headerTitle: "🐰 Add Entry" }} />
+              <Stack.Screen name="entry/textListSelection" options={{ headerShown: true, headerTitle: "🐰" }} />
+              <Stack.Screen name="tracker/addTracker" options={{ headerShown: true, headerTitle: "🐰 Add Tracker" }} />
               <Stack.Screen name="+not-found" />
             </Stack>
             <StatusBar style="auto" />

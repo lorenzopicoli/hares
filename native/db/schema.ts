@@ -1,5 +1,5 @@
 import { relations } from "drizzle-orm";
-import { int, integer, real, sqliteTable, text } from "drizzle-orm/sqlite-core";
+import { int, integer, real, sqliteTable, text, unique } from "drizzle-orm/sqlite-core";
 
 export enum TrackerType {
   Number = "number",
@@ -54,16 +54,21 @@ export const collectionsTable = sqliteTable("collections", {
 export type Collection = typeof collectionsTable.$inferSelect;
 export type NewCollection = typeof collectionsTable.$inferInsert;
 
-export const collectionsTrackersTable = sqliteTable("collections_trackers", {
-  id: int().primaryKey({ autoIncrement: true }),
-  trackerId: int("tracker_id")
-    .notNull()
-    .references(() => trackersTable.id),
-  collectionId: int("collection_id")
-    .notNull()
-    .references(() => collectionsTable.id),
-  index: int().notNull(),
-});
+export const collectionsTrackersTable = sqliteTable(
+  "collections_trackers",
+  {
+    id: int().primaryKey({ autoIncrement: true }),
+    trackerId: int("tracker_id")
+      .notNull()
+      .references(() => trackersTable.id),
+    collectionId: int("collection_id")
+      .notNull()
+      .references(() => collectionsTable.id),
+    index: int().notNull(),
+  },
+  (t) => [unique().on(t.trackerId, t.collectionId)],
+);
+
 export type CollectionTracker = typeof collectionsTrackersTable.$inferSelect;
 export type NewCollectionTracker = typeof collectionsTrackersTable.$inferInsert;
 

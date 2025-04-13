@@ -6,6 +6,7 @@ import m0001 from './0001_curious_morbius.sql';
 import m0002 from './0002_magical_scalphunter.sql';
 import m0003 from './0003_pretty_dakota_north.sql';
 import m0004 from './0004_nasty_liz_osborn.sql';
+import m0005 from './0005_salty_sugar_man.sql';
 
   export default {
     journal,
@@ -14,7 +15,8 @@ import m0004 from './0004_nasty_liz_osborn.sql';
 m0001,
 m0002,
 m0003,
-m0004
+m0004,
+m0005
     }
   }
   

@@ -1,0 +1,1 @@
+CREATE UNIQUE INDEX `collections_trackers_tracker_id_collection_id_unique` ON `collections_trackers` (`tracker_id`,`collection_id`);

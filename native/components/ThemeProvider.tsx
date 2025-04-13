@@ -12,7 +12,8 @@ type ThemeContextType = {
 const ThemeContext = createContext<ThemeContextType | null>(null);
 
 const ThemeProvider = ({ children }: PropsWithChildren) => {
-  const [colors, setColors] = useState(Colors.light);
+  const colorScheme = useColorScheme();
+  const [colors, setColors] = useState(colorScheme === "dark" ? Colors.dark : Colors.light);
 
   const applyColors = (colorTheme: ThemedColors) => {
     setColors(colorTheme);
