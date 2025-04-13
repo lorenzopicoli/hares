@@ -1,5 +1,4 @@
 import { DarkTheme, DefaultTheme, ThemeProvider } from "@react-navigation/native";
-import { useFonts } from "expo-font";
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
@@ -10,13 +9,14 @@ import { ThemeProvider as MyThemeProvider } from "@/components/ThemeProvider";
 import "react-native-reanimated";
 
 import { useColorScheme } from "@/hooks/useColorScheme";
-import { Platform } from "react-native";
+import { Text, Platform } from "react-native";
 import { Colors } from "@/constants/Colors";
 import { db } from "@/db";
 import migrations from "@/drizzle/migrations";
 import { useMigrations } from "drizzle-orm/expo-sqlite/migrator";
 import { ActionSheetProvider } from "@expo/react-native-action-sheet";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
+import { useFonts } from "expo-font";
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
@@ -51,9 +51,13 @@ export default function RootLayout() {
     SystemUI.setBackgroundColorAsync(Colors[colorScheme ?? "dark"].background);
   }, [colorScheme]);
 
-  if (!loaded) {
-    return null;
+  if (error) {
+    return <Text>Failed to load DB {JSON.stringify({ error })}</Text>;
   }
+
+  //   if (!loaded) {
+  //     return null;
+  //   }
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
