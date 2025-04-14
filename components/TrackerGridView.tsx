@@ -1,4 +1,4 @@
-import { db } from "@/db";
+import { useDatabase } from "@/contexts/DatabaseContext";
 import { collectionsTrackersTable, trackersTable, type Tracker } from "@/db/schema";
 import {
   DndProvider,
@@ -22,6 +22,7 @@ interface Props {
 }
 
 export default function TrackerGridView(props: Props) {
+  const { db } = useDatabase();
   const { collectionId, isReordering, horizontalPadding = true, onSelectTracker } = props;
   const { data: allTrackers } = useLiveQuery(db.select().from(trackersTable).orderBy(trackersTable.index));
   const { data: collectionTrackers } = useLiveQuery(

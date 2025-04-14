@@ -12,7 +12,6 @@ import {
   type NewTextListEntry,
   type NewTrackerEntry,
 } from "@/db/schema";
-import { db } from "@/db";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { useLiveQuery } from "drizzle-orm/expo-sqlite";
 import { eq, desc } from "drizzle-orm";
@@ -28,6 +27,7 @@ import EntryNumberInput from "@/components/EntryInputs/EntryNumberInput";
 import EntrySliderInput from "@/components/EntryInputs/EntrySliderInput";
 import { ChipGroup, type ChipData } from "@/components/Chip";
 import { formatEntryDateInformation } from "@/utils/entryDate";
+import { useDatabase } from "@/contexts/DatabaseContext";
 
 export default function AddEntryScreen() {
   const router = useRouter();
@@ -36,6 +36,8 @@ export default function AddEntryScreen() {
     textListSelections?: string;
   }>();
   const { styles } = useStyles(createStyles);
+
+  const { db } = useDatabase();
   const { data: tracker } = useLiveQuery(db.select().from(trackersTable).where(eq(trackersTable.id, +trackerId)));
   const { data: lastEntries } = useLiveQuery(
     db.query.entriesTable.findMany({

@@ -2,7 +2,6 @@ import { FlatList, StyleSheet, View } from "react-native";
 import SearchInput from "@/components/SearchInput";
 import { Separator } from "@/components/Separator";
 import { ThemedView } from "@/components/ThemedView";
-import { db } from "@/db";
 import { entriesTable, textListEntriesTable, type TrackerEntry } from "@/db/schema";
 import { desc, eq } from "drizzle-orm";
 import { useLiveQuery } from "drizzle-orm/expo-sqlite";
@@ -12,10 +11,12 @@ import EntriesListRow from "@/components/EntriesList/EntriesListRow";
 import { useActionSheet } from "@expo/react-native-action-sheet";
 import useStyles from "@/hooks/useStyles";
 import { Sizes } from "@/constants/Sizes";
+import { useDatabase } from "@/contexts/DatabaseContext";
 
 export default function EntriesScreen() {
   const { colors } = useColors();
   const { styles } = useStyles(createStyles);
+  const { db } = useDatabase();
   const [searchText, setSearchText] = useState<string>("");
   const { showActionSheetWithOptions } = useActionSheet();
   const { data: entries } = useLiveQuery(

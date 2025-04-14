@@ -12,7 +12,6 @@ import {
   type NewCollectionTracker,
   type Tracker,
 } from "@/db/schema";
-import { db } from "@/db";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { ThemedText } from "@/components/ThemedText";
 import {
@@ -31,6 +30,7 @@ import { Feather, MaterialIcons } from "@expo/vector-icons";
 import { eq, notExists, sql } from "drizzle-orm";
 import { moveElement } from "@/utils/moveElements";
 import { useLiveQuery } from "drizzle-orm/expo-sqlite";
+import { useDatabase } from "@/contexts/DatabaseContext";
 
 LogBox.ignoreLogs(["VirtualizedLists should never be nested inside plain ScrollViews"]);
 
@@ -105,6 +105,7 @@ function AddCollectionScreenInternal(props: {
   collection?: Collection;
 }) {
   const router = useRouter();
+  const { db } = useDatabase();
   const {
     nonCollectionTrackers: preExistingNonCollectionTrackers,
     collectionTrackers: preExistingCollectionTrackers,

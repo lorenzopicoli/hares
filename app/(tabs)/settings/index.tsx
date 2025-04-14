@@ -4,9 +4,11 @@ import { ThemedView } from "@/components/ThemedView";
 import ThemedScrollView from "@/components/ThemedScrollView";
 import * as SQLite from "expo-sqlite";
 import ThemedButton from "@/components/ThemedButton";
-import { dbConn, dbName } from "@/db";
+import { useDatabase } from "@/contexts/DatabaseContext";
+import { DB_NAME } from "@/db/schema";
 
-export default function TabTwoScreen() {
+export default function SettingsScreen() {
+  const { db } = useDatabase();
   return (
     <ThemedScrollView>
       <ThemedView style={styles.titleContainer}>
@@ -15,12 +17,12 @@ export default function TabTwoScreen() {
       <ThemedButton
         onPress={() => {
           try {
-            dbConn.closeSync();
+            db.$client.closeSync();
           } catch (err) {
             console.log("Error closing connection, maybe already closed?", err);
           }
           try {
-            SQLite.deleteDatabaseSync(dbName);
+            SQLite.deleteDatabaseSync(DB_NAME);
           } catch (err) {
             console.log("Error deleting DB, maybe doesn't exist?", err);
           }

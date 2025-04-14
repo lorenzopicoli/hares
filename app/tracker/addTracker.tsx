@@ -7,11 +7,13 @@ import ThemedButton from "@/components/ThemedButton";
 import { ThemedView } from "@/components/ThemedView";
 import { Sizes } from "@/constants/Sizes";
 import { trackerNames, trackerNamesToType, trackersTable, type NewTracker, type TrackerType } from "@/db/schema";
-import { db } from "@/db";
 import { useRouter } from "expo-router";
+import { useDatabase } from "@/contexts/DatabaseContext";
 
 export default function AddTrackerScreen() {
   const router = useRouter();
+
+  const { db } = useDatabase();
   const [name, setName] = useState("");
   const [description, setDescription] = useState<string>("");
   const [type, setType] = useState<TrackerType | null>(null);

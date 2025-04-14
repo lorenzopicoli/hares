@@ -2,7 +2,6 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { StyleSheet, TouchableOpacity, View } from "react-native";
 import { type NavigationState, type Route, type SceneRendererProps, TabBar, TabView } from "react-native-tab-view";
 import { useLiveQuery } from "drizzle-orm/expo-sqlite";
-import { db } from "@/db";
 import { collectionsTable, type Tracker } from "@/db/schema";
 import TrackerGridView from "@/components/TrackerGridView";
 import { useColors, type ThemedColors } from "@/components/ThemeProvider";
@@ -12,6 +11,7 @@ import SearchInput from "@/components/SearchInput";
 import { Sizes } from "@/constants/Sizes";
 import { Entypo } from "@expo/vector-icons";
 import { useActionSheet } from "@expo/react-native-action-sheet";
+import { useDatabase } from "@/contexts/DatabaseContext";
 
 type TabRoute = Route & {
   key: string;
@@ -22,6 +22,7 @@ export default function TrackScreen() {
   const { styles } = useStyles(createStyles);
   const [index, setIndex] = useState(0);
   const [searchQuery, setSearchQuery] = useState("");
+  const { db } = useDatabase();
   const { data: collectionsDb } = useLiveQuery(db.select().from(collectionsTable).orderBy(collectionsTable.index));
   const collections = useMemo(() => [{ id: -1, name: "All" }, ...collectionsDb], [collectionsDb]);
   const router = useRouter();

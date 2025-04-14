@@ -5,7 +5,7 @@ import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
 import type { ThemedColors } from "@/components/ThemeProvider";
 import { Sizes } from "@/constants/Sizes";
-import { db } from "@/db";
+import { useDatabase } from "@/contexts/DatabaseContext";
 import { textListEntriesTable } from "@/db/schema";
 import useStyles from "@/hooks/useStyles";
 import { Ionicons } from "@expo/vector-icons";
@@ -17,6 +17,7 @@ import { StyleSheet, FlatList, TouchableOpacity, View } from "react-native";
 
 export default function TextListSelectionScreen() {
   const { trackerId } = useLocalSearchParams<{ trackerId: string }>();
+  const { db } = useDatabase();
   const { styles } = useStyles(createStyles);
   const [searchText, setSearchText] = useState<string>("");
   const [selectedItems, setSelectedItems] = useState<Map<string, boolean>>(new Map());

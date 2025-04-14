@@ -1,6 +1,8 @@
 import { relations } from "drizzle-orm";
 import { int, integer, real, sqliteTable, text, unique } from "drizzle-orm/sqlite-core";
 
+export const DB_NAME = "hares.db";
+
 export enum TrackerType {
   Number = "number",
   Scale = "scale",
