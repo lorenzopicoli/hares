@@ -253,6 +253,7 @@ function AddCollectionScreenInternal(props: {
 
 export default function AddCollectionScreen() {
   const { collectionId } = useLocalSearchParams<{ collectionId: string }>();
+  const { db } = useDatabase();
   const { data: collection } = useLiveQuery(
     db
       .select()
