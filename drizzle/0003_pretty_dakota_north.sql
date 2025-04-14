@@ -1,0 +1,1 @@
+DROP INDEX `text_list_entries_name_unique`;
