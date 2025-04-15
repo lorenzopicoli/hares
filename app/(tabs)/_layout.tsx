@@ -1,29 +1,24 @@
 import { Tabs } from "expo-router";
-import { Platform, StyleSheet } from "react-native";
+import { Platform } from "react-native";
 
-import { HapticTab } from "@/components/HapticTab";
 import { IconSymbol } from "@/components/ui/IconSymbol";
-import { useColorScheme } from "@/hooks/useColorScheme";
-import { enableScreens } from "react-native-screens";
-import { Colors } from "@/constants/Colors";
+import { useColors } from "@/components/ThemeProvider";
+import { HapticPressable } from "@/components/HapticPressable";
 
 export default function TabLayout() {
-  const colorScheme = useColorScheme();
-  // Not really sure, but the hook doesn't work here
-  const themedColors = Colors[colorScheme ?? "dark"];
-  enableScreens(true);
+  const { colors } = useColors();
 
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: themedColors.tint,
+        tabBarActiveTintColor: colors.tint,
         headerShown: false,
-        tabBarButton: HapticTab,
-        tabBarInactiveBackgroundColor: themedColors.background,
-        tabBarActiveBackgroundColor: themedColors.background,
+        tabBarButton: HapticPressable,
+        tabBarInactiveBackgroundColor: colors.background,
+        tabBarActiveBackgroundColor: colors.background,
         tabBarStyle: Platform.select({
           ios: {
-            backgroundColor: themedColors.background,
+            backgroundColor: colors.background,
           },
           default: {},
         }),
@@ -66,10 +61,3 @@ export default function TabLayout() {
     </Tabs>
   );
 }
-
-const styles = StyleSheet.create({
-  navbarButtons: {
-    display: "flex",
-    flexDirection: "row",
-  },
-});

@@ -9,19 +9,21 @@ import {
 } from "@mgcrea/react-native-dnd";
 import { eq } from "drizzle-orm";
 import { useLiveQuery } from "drizzle-orm/expo-sqlite";
+import React from "react";
 import { useMemo } from "react";
 import { StyleSheet, TouchableOpacity, Text, View } from "react-native";
 import { State } from "react-native-gesture-handler";
 import Animated from "react-native-reanimated";
 
 interface Props {
+  searchQuery?: string;
   collectionId?: number;
   isReordering: boolean;
   horizontalPadding?: boolean;
   onSelectTracker?: (tracker: Tracker) => void;
 }
 
-export default function TrackerGridView(props: Props) {
+function TrackerGridView(props: Props) {
   const { db } = useDatabase();
   const { collectionId, isReordering, horizontalPadding = true, onSelectTracker } = props;
   const { data: allTrackers } = useLiveQuery(db.select().from(trackersTable).orderBy(trackersTable.index));
@@ -125,3 +127,5 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
 });
+
+export default React.memo(TrackerGridView);

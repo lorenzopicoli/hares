@@ -18,6 +18,7 @@ import { DatabaseProvider } from "@/contexts/DatabaseContext";
 import { SQLiteProvider } from "expo-sqlite";
 import LoadingDatabase from "@/components/LoadingDatabase";
 import { DB_NAME } from "@/db/schema";
+import { enableScreens } from "react-native-screens";
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
@@ -40,6 +41,7 @@ export default function RootLayout() {
   const [loaded] = useFonts({
     SpaceMono: require("../assets/fonts/SpaceMono-Regular.ttf"),
   });
+  enableScreens(true);
 
   const handleDbLoaded = useCallback(() => {
     SplashScreen.hideAsync();
