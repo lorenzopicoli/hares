@@ -16,8 +16,8 @@ interface Props {
 }
 
 function TrackerGridView(props: Props) {
-  const { collectionId, onSelectTracker } = props;
-  const { trackers } = useTrackers(collectionId);
+  const { collectionId, searchQuery, onSelectTracker } = props;
+  const { trackers } = useTrackers({ collectionId, searchQuery });
   const { styles } = useStyles(createStyles);
 
   return (

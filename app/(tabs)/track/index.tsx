@@ -49,7 +49,6 @@ export default function TrackScreen() {
         <TrackerGridView
           searchQuery={searchQuery}
           onSelectTracker={handleTrackerSelection}
-          isReordering={false}
           collectionId={+route.key === -1 ? undefined : +route.key}
         />
       );
