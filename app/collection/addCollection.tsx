@@ -3,14 +3,7 @@ import { FlatList, LogBox, StyleSheet, View, type ListRenderItemInfo } from "rea
 import ThemedButton from "@/components/ThemedButton";
 import { ThemedView } from "@/components/ThemedView";
 import { Sizes } from "@/constants/Sizes";
-import {
-  collectionsTable,
-  collectionsTrackersTable,
-  type Collection,
-  type NewCollection,
-  type NewCollectionTracker,
-  type Tracker,
-} from "@/db/schema";
+import type { Collection, NewCollection, NewCollectionTracker, Tracker } from "@/db/schema";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { ThemedText } from "@/components/ThemedText";
 import {
@@ -26,11 +19,11 @@ import { Separator } from "@/components/Separator";
 import { Spacing } from "@/components/Spacing";
 import ThemedInput from "@/components/ThemedInput";
 import { Feather, MaterialIcons } from "@expo/vector-icons";
-import { eq, sql } from "drizzle-orm";
 import { moveElement } from "@/utils/moveElements";
 import { useDatabase } from "@/contexts/DatabaseContext";
 import { useCollection } from "@/hooks/data/useCollection";
 import { useTrackers, useTrackersNotInCollection } from "@/hooks/data/useTrackers";
+import { useUpsertCollection } from "@/hooks/data/useUpsertCollection";
 
 LogBox.ignoreLogs(["VirtualizedLists should never be nested inside plain ScrollViews"]);
 
@@ -106,6 +99,7 @@ function AddCollectionScreenInternal(props: {
 }) {
   const router = useRouter();
   const { db } = useDatabase();
+  const { upsertCollection } = useUpsertCollection();
   const {
     nonCollectionTrackers: preExistingNonCollectionTrackers,
     collectionTrackers: preExistingCollectionTrackers,
@@ -128,59 +122,18 @@ function AddCollectionScreenInternal(props: {
     if (!name) {
       throw new Error("Missing data");
     }
-    const nextIndex = await db
-      .select({
-        index: collectionsTable.index,
-      })
-      .from(collectionsTable)
-      .orderBy(collectionsTable.index)
-      .limit(1);
-
-    const newCollection: NewCollection = {
+    const newCollection: Omit<NewCollection, "index"> = {
       name,
-      index: (nextIndex?.[0]?.index ?? 0) + 1,
     };
 
-    const { savedCollectionId } = collection
-      ? await db
-          .update(collectionsTable)
-          .set(newCollection)
-          .where(eq(collectionsTable.id, collection.id))
-          .then(() => ({
-            savedCollectionId: collection.id,
-          }))
-          .catch((err) => {
-            console.log("Failed to update collection", err);
-            throw err;
-          })
-      : await db
-          .insert(collectionsTable)
-          .values(newCollection)
-          .returning({ savedCollectionId: collectionsTable.id })
-          .then((values) => values[0])
-          .catch((err) => {
-            console.log("Failed to save collection", err);
-            throw err;
-          });
-
-    const relationship: NewCollectionTracker[] = collectionTrackers.map((t, i) => ({
+    const relationship: Omit<NewCollectionTracker, "collectionId">[] = collectionTrackers.map((t, i) => ({
       index: i,
       trackerId: t.id,
-      collectionId: savedCollectionId,
     }));
 
-    if (collection) {
-      // Easier than finding the diff
-      await db.delete(collectionsTrackersTable).where(eq(collectionsTrackersTable.collectionId, collection.id));
-    }
-    await db
-      .insert(collectionsTrackersTable)
-      .values(relationship)
-      // Shouldn't happen, but it looks nice
-      .onConflictDoUpdate({
-        target: [collectionsTrackersTable.trackerId, collectionsTrackersTable.collectionId],
-        set: { index: sql.raw('"excluded"."index"') },
-      });
+    await upsertCollection(newCollection, relationship, collection?.id).catch((e) => {
+      console.log("FAILEd", e);
+    });
 
     router.dismiss();
   };
