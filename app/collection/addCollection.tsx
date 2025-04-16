@@ -6,7 +6,6 @@ import { Sizes } from "@/constants/Sizes";
 import {
   collectionsTable,
   collectionsTrackersTable,
-  trackersTable,
   type Collection,
   type NewCollection,
   type NewCollectionTracker,
@@ -27,10 +26,11 @@ import { Separator } from "@/components/Separator";
 import { Spacing } from "@/components/Spacing";
 import ThemedInput from "@/components/ThemedInput";
 import { Feather, MaterialIcons } from "@expo/vector-icons";
-import { eq, notExists, sql } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 import { moveElement } from "@/utils/moveElements";
-import { useLiveQuery } from "drizzle-orm/expo-sqlite";
 import { useDatabase } from "@/contexts/DatabaseContext";
+import { useCollection } from "@/hooks/data/useCollection";
+import { useTrackers, useTrackersNotInCollection } from "@/hooks/data/useTrackers";
 
 LogBox.ignoreLogs(["VirtualizedLists should never be nested inside plain ScrollViews"]);
 
@@ -252,51 +252,16 @@ function AddCollectionScreenInternal(props: {
 }
 
 export default function AddCollectionScreen() {
-  const { collectionId } = useLocalSearchParams<{ collectionId: string }>();
-  const { db } = useDatabase();
-  const { data: collection } = useLiveQuery(
-    db
-      .select()
-      .from(collectionsTable)
-      .where(eq(collectionsTable.id, collectionId ? +collectionId : -1)),
-  );
-  const { data: collectionTrackers } = useLiveQuery(
-    db
-      .select()
-      .from(trackersTable)
-      .innerJoin(collectionsTrackersTable, eq(collectionsTrackersTable.trackerId, trackersTable.id))
-      .where(eq(collectionsTrackersTable.collectionId, Number(collectionId) || -1))
-      .orderBy(collectionsTrackersTable.index),
-  );
-  const { data: nonCollectionTrackers } = useLiveQuery(
-    db
-      .select()
-      .from(trackersTable)
-      .where(
-        notExists(
-          db
-            .select()
-            .from(collectionsTrackersTable)
-            .where(sql`${collectionsTrackersTable.collectionId} = ${Number(collectionId) || -1} AND
-            ${collectionsTrackersTable.trackerId} = ${trackersTable.id}`),
-        ),
-      )
-      .orderBy(trackersTable.index),
-  );
-  const { data: all } = useLiveQuery(
-    db
-      .select()
-      .from(collectionsTrackersTable)
-      .where(eq(collectionsTrackersTable.collectionId, Number(collectionId) || -1)),
-  );
-
-  console.log("non", all);
+  const { collectionId } = useLocalSearchParams<{ collectionId?: string }>();
+  const { collection } = useCollection(+(collectionId ?? -1));
+  const { trackers: collectionTrackers } = useTrackers({ collectionId: collectionId ? +collectionId : undefined });
+  const { trackers: nonCollectionTrackers } = useTrackersNotInCollection({ collectionId: +(collectionId ?? -1) });
 
   return (
     <AddCollectionScreenInternal
-      collectionTrackers={collectionTrackers.map((ct) => ct.trackers)}
+      collectionTrackers={collectionTrackers}
       nonCollectionTrackers={nonCollectionTrackers}
-      collection={collection[0]}
+      collection={collection}
     />
   );
 }

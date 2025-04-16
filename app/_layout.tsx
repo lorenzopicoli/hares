@@ -15,9 +15,7 @@ import { ActionSheetProvider } from "@expo/react-native-action-sheet";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { useFonts } from "expo-font";
 import { DatabaseProvider } from "@/contexts/DatabaseContext";
-import { SQLiteProvider } from "expo-sqlite";
 import LoadingDatabase from "@/components/LoadingDatabase";
-import { DB_NAME } from "@/db/schema";
 import { enableScreens } from "react-native-screens";
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
@@ -60,12 +58,10 @@ export default function RootLayout() {
         <ActionSheetProvider>
           <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
             <Suspense fallback={<LoadingDatabase />}>
-              <SQLiteProvider databaseName={DB_NAME} useSuspense>
-                <DatabaseProvider onLoad={handleDbLoaded}>
-                  <RootStack />
-                  <StatusBar style="auto" />
-                </DatabaseProvider>
-              </SQLiteProvider>
+              <DatabaseProvider onLoad={handleDbLoaded}>
+                <RootStack />
+                <StatusBar style="auto" />
+              </DatabaseProvider>
             </Suspense>
           </ThemeProvider>
         </ActionSheetProvider>

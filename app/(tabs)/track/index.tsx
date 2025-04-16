@@ -21,7 +21,6 @@ export default function TrackScreen() {
   const { styles } = useStyles(createStyles);
   const router = useRouter();
   const navigation = useNavigation();
-
   const [tabIndex, setTabIndex] = useState(0);
   const [searchQuery, setSearchQuery] = useState("");
 

@@ -1,11 +1,12 @@
 import { drizzle, type ExpoSQLiteDatabase } from "drizzle-orm/expo-sqlite";
 import { createContext, useContext, useEffect, useState, type PropsWithChildren } from "react";
 import * as schema from "@/db/schema";
-import { useSQLiteContext, type SQLiteDatabase } from "expo-sqlite";
+import type { SQLiteDatabase } from "expo-sqlite";
 import { migrate } from "drizzle-orm/expo-sqlite/migrator";
 import migrations from "@/drizzle/migrations";
 import { ThemedText } from "@/components/ThemedText";
 import LoadingDatabase from "@/components/LoadingDatabase";
+import * as SQLite from "expo-sqlite";
 
 type DrizzleDb = ExpoSQLiteDatabase<typeof schema> & {
   $client: SQLiteDatabase;
@@ -16,32 +17,29 @@ type DatabaseContextType = {
 };
 
 export const DatabaseContext = createContext<DatabaseContextType | null>(null);
+const dbCon = SQLite.openDatabaseSync("hares.db", { enableChangeListener: true });
+const db = drizzle(dbCon, { schema });
 
 export const DatabaseProvider = ({ children, onLoad }: PropsWithChildren & { onLoad?: () => void }) => {
-  const [db, setDb] = useState<DrizzleDb>();
   const [migrationError, setMigrationError] = useState<string>();
+  const [migrationDone, setMigrationDone] = useState<boolean>(false);
   const [calledLoaded, setCalledLoaded] = useState<boolean>(false);
-  const dbCon = useSQLiteContext();
 
   useEffect(() => {
     (async () => {
-      if (db) {
-        return;
-      }
-      const dbDrizzle = drizzle(dbCon, { schema });
-      await migrate(dbDrizzle, migrations).catch((e) => {
+      await migrate(db, migrations).catch((e) => {
         setMigrationError(JSON.stringify(e));
       });
-      setDb(dbDrizzle);
+      setMigrationDone(true);
     })();
-  }, [dbCon, db]);
+  }, []);
 
   useEffect(() => {
     if (db && !calledLoaded) {
       onLoad?.();
       setCalledLoaded(true);
     }
-  }, [db, onLoad, calledLoaded]);
+  }, [onLoad, calledLoaded]);
 
   if (migrationError) {
     return <ThemedText>Failed to run migrations {migrationError}</ThemedText>;
@@ -49,7 +47,9 @@ export const DatabaseProvider = ({ children, onLoad }: PropsWithChildren & { onL
 
   return (
     <>
-      <DatabaseContext.Provider value={{ db }}>{!db ? <LoadingDatabase /> : children}</DatabaseContext.Provider>
+      <DatabaseContext.Provider value={{ db }}>
+        {!migrationDone ? <LoadingDatabase /> : children}
+      </DatabaseContext.Provider>
     </>
   );
 };

@@ -1,7 +1,7 @@
 import { useDatabase } from "@/contexts/DatabaseContext";
 import { collectionsTrackersTable, trackersTable } from "@/db/schema";
+import { notExists, eq, getTableColumns, isNotNull, sql } from "drizzle-orm";
 import { useLiveQuery } from "drizzle-orm/expo-sqlite";
-import { eq, getTableColumns, isNotNull, sql } from "drizzle-orm";
 
 export function useTrackers(params: { collectionId?: number; searchQuery?: string }) {
   const { collectionId, searchQuery } = params;
@@ -15,8 +15,31 @@ export function useTrackers(params: { collectionId?: number; searchQuery?: strin
         ${searchQuery === "" && collectionId ? isNotNull(collectionsTrackersTable.id) : "1 = 1"} AND
         ${trackersTable.name} LIKE ${`%${searchQuery}%`}
       `)
-      .orderBy(collectionsTrackersTable.index, trackersTable.index)
+      .orderBy(collectionId ? collectionsTrackersTable.index : trackersTable.index)
       .groupBy(trackersTable.id),
+    [collectionId, searchQuery],
+  );
+
+  return { trackers };
+}
+
+export function useTrackersNotInCollection(params: { collectionId: number; searchQuery?: string }) {
+  const { collectionId, searchQuery } = params;
+  const { db } = useDatabase();
+  const { data: trackers } = useLiveQuery(
+    db
+      .select()
+      .from(trackersTable)
+      .where(
+        notExists(
+          db
+            .select()
+            .from(collectionsTrackersTable)
+            .where(sql`${collectionsTrackersTable.collectionId} = ${collectionId} AND
+            ${collectionsTrackersTable.trackerId} = ${trackersTable.id}`),
+        ),
+      )
+      .orderBy(trackersTable.index),
     [collectionId, searchQuery],
   );
 
