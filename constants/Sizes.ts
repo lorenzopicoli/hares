@@ -17,4 +17,8 @@ export const Sizes = {
   scrollView: {
     padding: 24,
   },
+  font: {
+    normal: 14,
+    larger: 16,
+  },
 };

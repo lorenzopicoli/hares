@@ -1,14 +1,28 @@
-import type { BottomTabBarButtonProps } from "@react-navigation/bottom-tabs";
-import { PlatformPressable } from "@react-navigation/elements";
 import * as Haptics from "expo-haptics";
+import type { ReactNode } from "react";
+import { Pressable, type PressableProps } from "react-native";
 
-export function HapticPressable(props: BottomTabBarButtonProps) {
+interface Props extends PressableProps {
+  children: ReactNode;
+}
+
+export function HapticPressable(props: Props) {
   return (
-    <PlatformPressable
+    <Pressable
       {...props}
       onPressIn={(ev) => {
-        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-        props.onPressIn?.(ev);
+        if (props.onPressIn) {
+          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+          props.onPressIn?.(ev);
+        }
+      }}
+      onPress={(ev) => {
+        if (props.onPress) {
+          if (!props.onPressIn) {
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+          }
+          props.onPress?.(ev);
+        }
       }}
     />
   );
