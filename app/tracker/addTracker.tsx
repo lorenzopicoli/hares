@@ -48,7 +48,7 @@ export default function AddTrackerScreen() {
 
   return (
     <ThemedView>
-      <ThemedScrollView>
+      <ThemedScrollView keyboardShouldPersistTaps>
         <ThemedInput autoCapitalize="sentences" label="Tracker name" value={name} onChangeText={setName} />
         <ThemedInput
           autoCapitalize="sentences"
