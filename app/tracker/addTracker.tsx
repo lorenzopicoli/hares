@@ -6,44 +6,43 @@ import { StyleSheet, View } from "react-native";
 import ThemedButton from "@/components/ThemedButton";
 import { ThemedView } from "@/components/ThemedView";
 import { Sizes } from "@/constants/Sizes";
-import { trackerNames, trackerNamesToType, trackersTable, type NewTracker, type TrackerType } from "@/db/schema";
+import { trackerNames, trackerNamesToType, TrackerType, type NewTracker } from "@/db/schema";
 import { useRouter } from "expo-router";
-import { useDatabase } from "@/contexts/DatabaseContext";
+import { useCreateTracker } from "@/hooks/data/useCreateTracker";
 
 export default function AddTrackerScreen() {
   const router = useRouter();
 
-  const { db } = useDatabase();
   const [name, setName] = useState("");
   const [description, setDescription] = useState<string>("");
   const [type, setType] = useState<TrackerType | null>(null);
   const [suffix, setSuffix] = useState<string>("");
   const [prefix, setPrefix] = useState<string>("");
-  const [scaleMin, setScaleMin] = useState<number | null>(null);
-  const [scaleMax, setScaleMax] = useState<number | null>(null);
+  const [rangeMin, setRangeMin] = useState<string>("");
+  const [rangeMax, setRangeMax] = useState<string>("");
+
+  const { createTracker } = useCreateTracker();
+
+  const handleTypeChange = (option: string) => {
+    setType(trackerNamesToType[option]);
+  };
 
   const handleSubmit = async () => {
     if (!type || !name) {
       throw new Error("Missing data");
     }
-    const nextIndex = await db
-      .select({
-        index: trackersTable.index,
-      })
-      .from(trackersTable)
-      .orderBy(trackersTable.index)
-      .limit(1);
 
-    const tracker: NewTracker = {
+    const tracker: Omit<NewTracker, "index"> = {
       name,
       type,
       description,
       prefix,
       suffix,
-      index: (nextIndex?.[0]?.index ?? 0) + 1,
+      rangeMax: rangeMax === "" ? null : +rangeMax || null,
+      rangeMin: rangeMin === "" ? null : +rangeMin || null,
     };
-    await db.insert(trackersTable).values(tracker);
-    router.back();
+    await createTracker(tracker);
+    router.dismiss();
   };
 
   return (
@@ -56,7 +55,7 @@ export default function AddTrackerScreen() {
           value={description}
           onChangeText={setDescription}
         />
-        <View style={styles.prefixSuffix}>
+        <View style={styles.sideBySide}>
           <ThemedInput style={styles.flex1} label="Prefix (optional)" value={prefix} onChangeText={setPrefix} />
           <ThemedInput style={styles.flex1} label="Suffix (optional)" value={suffix} onChangeText={setSuffix} />
         </View>
@@ -64,8 +63,15 @@ export default function AddTrackerScreen() {
           label="Value type"
           columns={2}
           options={Object.values(trackerNames)}
-          onChangeSelection={(option) => setType(trackerNamesToType[option])}
+          onChangeSelection={handleTypeChange}
         />
+
+        {type === TrackerType.Scale ? (
+          <View style={styles.sideBySide}>
+            <ThemedInput style={styles.flex1} label="Range min" value={prefix} onChangeText={setRangeMin} />
+            <ThemedInput style={styles.flex1} label="Range max" value={suffix} onChangeText={setRangeMax} />
+          </View>
+        ) : null}
       </ThemedScrollView>
       <View style={styles.submitButtonContainer}>
         <ThemedButton fullWidth title="Create tracker" onPress={handleSubmit} />
@@ -79,7 +85,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: Sizes.medium,
     marginBottom: Sizes.medium,
   },
-  prefixSuffix: {
+  sideBySide: {
     flexDirection: "row",
     gap: Sizes.small,
   },
