@@ -78,7 +78,7 @@ export default function AddEntryScreen() {
         }));
         await db.insert(textListEntriesTable).values(textListEntries);
       }
-      router.back();
+      router.dismiss();
     } catch (e) {
       console.log(e);
     }
@@ -117,7 +117,7 @@ export default function AddEntryScreen() {
               title="Select items"
               mode="ghost"
               onPress={() => {
-                router.navigate({ pathname: "/textListSelection", params: { trackerId: trackerId } });
+                router.navigate({ pathname: "./textListSelection", params: { trackerId: trackerId } });
               }}
             />
             <ChipGroup

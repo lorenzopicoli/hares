@@ -20,7 +20,6 @@ export default function EntriesListRow(props: EntriesListRowProps) {
 
   const value = useMemo(() => {
     let v = "-";
-    console.log("a", entry);
     if (isDefined(entry.numberValue)) {
       v = entry.numberValue.toString();
     }

@@ -43,7 +43,7 @@ export default function TextListSelectionScreen() {
           {/* On press in because of: https://github.com/expo/expo/issues/29489 */}
           <TouchableOpacity
             onPressIn={() => {
-              router.navigate({
+              router.dismissTo({
                 pathname: "/entry/addEntry",
                 params: {
                   trackerId: trackerId,

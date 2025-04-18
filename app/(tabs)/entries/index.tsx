@@ -3,8 +3,7 @@ import SearchInput from "@/components/SearchInput";
 import { Separator } from "@/components/Separator";
 import { ThemedView } from "@/components/ThemedView";
 import { entriesTable, textListEntriesTable, type TrackerEntry } from "@/db/schema";
-import { desc, eq } from "drizzle-orm";
-import { useLiveQuery } from "drizzle-orm/expo-sqlite";
+import { eq } from "drizzle-orm";
 import { useState } from "react";
 import { useColors, type ThemedColors } from "@/components/ThemeProvider";
 import EntriesListRow from "@/components/EntriesList/EntriesListRow";
@@ -12,6 +11,7 @@ import { useActionSheet } from "@expo/react-native-action-sheet";
 import useStyles from "@/hooks/useStyles";
 import { Sizes } from "@/constants/Sizes";
 import { useDatabase } from "@/contexts/DatabaseContext";
+import { useEntries } from "@/hooks/data/useEntries";
 
 export default function EntriesScreen() {
   const { colors } = useColors();
@@ -19,16 +19,7 @@ export default function EntriesScreen() {
   const { db } = useDatabase();
   const [searchText, setSearchText] = useState<string>("");
   const { showActionSheetWithOptions } = useActionSheet();
-  const { data: entries } = useLiveQuery(
-    db.query.entriesTable.findMany({
-      orderBy: desc(entriesTable.date),
-      with: {
-        textListValues: true,
-        tracker: true,
-      },
-    }),
-    [searchText],
-  );
+  const { entries } = useEntries(searchText);
 
   const handleEntryPress = (entry: TrackerEntry) => {
     const options = ["Edit", "Delete", "Cancel"];

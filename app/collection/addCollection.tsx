@@ -1,5 +1,5 @@
-import React, { memo, useEffect, useState } from "react";
-import { FlatList, LogBox, StyleSheet, View, type ListRenderItemInfo } from "react-native";
+import React, { useEffect, useState } from "react";
+import { FlatList, LogBox, StyleSheet, TouchableOpacity, View, type ListRenderItemInfo } from "react-native";
 import ThemedButton from "@/components/ThemedButton";
 import { ThemedView } from "@/components/ThemedView";
 import { Sizes } from "@/constants/Sizes";
@@ -12,7 +12,7 @@ import {
   useReorderableDrag,
   type ReorderableListReorderEvent,
 } from "react-native-reorderable-list";
-import { Pressable, TouchableOpacity } from "react-native-gesture-handler";
+import { Pressable } from "react-native-gesture-handler";
 import type { ThemedColors } from "@/components/ThemeProvider";
 import useStyles from "@/hooks/useStyles";
 import { Separator } from "@/components/Separator";
@@ -20,85 +20,56 @@ import { Spacing } from "@/components/Spacing";
 import ThemedInput from "@/components/ThemedInput";
 import { Feather, MaterialIcons } from "@expo/vector-icons";
 import { moveElement } from "@/utils/moveElements";
-import { useDatabase } from "@/contexts/DatabaseContext";
 import { useCollection } from "@/hooks/data/useCollection";
 import { useTrackers, useTrackersNotInCollection } from "@/hooks/data/useTrackers";
 import { useUpsertCollection } from "@/hooks/data/useUpsertCollection";
 
 LogBox.ignoreLogs(["VirtualizedLists should never be nested inside plain ScrollViews"]);
 
-const createStyles = (theme: ThemedColors) =>
-  StyleSheet.create({
-    title: {
-      marginLeft: Sizes.medium,
-    },
-    scrollView: {
-      marginTop: Sizes.medium,
-    },
-    form: {
-      margin: Sizes.medium,
-    },
-    itemContainer: {
-      display: "flex",
-      flexDirection: "row",
-      height: Sizes.list.large,
-      paddingHorizontal: Sizes.large,
-      alignItems: "center",
-      justifyContent: "space-between",
-      overflow: "visible",
-    },
-    itemActions: {
-      display: "flex",
-      gap: Sizes.small,
-      flexDirection: "row",
-    },
-    reorderableList: {
-      overflow: "visible",
-    },
-    submitButtonContainer: {
-      paddingHorizontal: Sizes.medium,
-      marginBottom: Sizes.medium,
-    },
-  });
+interface TrackItemProps {
+  tracker: Tracker;
+  onPress?: (tracker: Tracker) => void;
+  onRemove?: (tracker: Tracker) => void;
+  onLongPress?: () => void;
+}
 
-const DraggableTrackerItem: React.FC<{ tracker: Tracker; onRemove: (tracker: Tracker) => void }> = memo((props) => {
-  const drag = useReorderableDrag();
-  const { styles } = useStyles(createStyles);
-
-  return (
-    <Pressable onLongPress={drag}>
-      <View style={styles.itemContainer}>
-        <ThemedText>{props.tracker.name}</ThemedText>
-        <View style={styles.itemActions}>
-          <Pressable onPress={() => props.onRemove(props.tracker)}>
-            <Feather name="x" size={25} color="#fff" />
-          </Pressable>
-          <MaterialIcons name="drag-indicator" size={25} color="#fff" />
-        </View>
-      </View>
-    </Pressable>
-  );
-});
-
-const NonDraggableTrackerItem: React.FC<{ tracker: Tracker; onPress: (tracker: Tracker) => void }> = memo((props) => {
-  const { styles } = useStyles(createStyles);
-
-  return (
-    <TouchableOpacity onPress={() => props.onPress(props.tracker)}>
-      <View style={styles.itemContainer}>
-        <ThemedText>{props.tracker.name}</ThemedText>
-      </View>
-    </TouchableOpacity>
-  );
-});
-
-function AddCollectionScreenInternal(props: {
+interface AddCollectionInternalProps {
   collectionTrackers: Tracker[];
   nonCollectionTrackers: Tracker[];
   collection?: Collection;
-}) {
+}
+
+function DraggableTrackerItem(props: TrackItemProps) {
+  const drag = useReorderableDrag();
+  return <TrackerItem onLongPress={drag} {...props} />;
+}
+function TrackerItem(props: TrackItemProps) {
+  const { styles } = useStyles(createStyles);
+  const handleRemove = () => {
+    props.onRemove?.(props.tracker);
+  };
+  const handlePress = () => {
+    props.onPress?.(props.tracker);
+  };
+  return (
+    <TouchableOpacity onPress={handlePress} onLongPress={props.onLongPress}>
+      <View style={styles.itemContainer}>
+        <ThemedText>{props.tracker.name}</ThemedText>
+        {props.onRemove ? (
+          <View style={styles.itemActions}>
+            <Pressable onPress={handleRemove}>
+              <Feather name="x" size={25} color="#fff" />
+            </Pressable>
+            <MaterialIcons name="drag-indicator" size={25} color="#fff" />
+          </View>
+        ) : null}
+      </View>
+    </TouchableOpacity>
+  );
+}
+
+function AddCollectionScreenInternal(props: AddCollectionInternalProps) {
   const router = useRouter();
-  const { db } = useDatabase();
   const { upsertCollection } = useUpsertCollection();
   const {
     nonCollectionTrackers: preExistingNonCollectionTrackers,
@@ -132,7 +103,7 @@ function AddCollectionScreenInternal(props: {
     }));
 
     await upsertCollection(newCollection, relationship, collection?.id).catch((e) => {
-      console.log("FAILEd", e);
+      console.log("Failed to upsert collection", e);
     });
 
     router.dismiss();
@@ -156,7 +127,7 @@ function AddCollectionScreenInternal(props: {
     return <DraggableTrackerItem onRemove={handleRemoveTracker} tracker={item} />;
   };
   const renderNonDraggableTracker = ({ item }: ListRenderItemInfo<Tracker>) => {
-    return <NonDraggableTrackerItem onPress={addTrackerToCollection} tracker={item} />;
+    return <TrackerItem onPress={addTrackerToCollection} tracker={item} />;
   };
   const trackerKeyExtractor = (tracker: Tracker, _index: number) => String(tracker.id);
 
@@ -218,3 +189,37 @@ export default function AddCollectionScreen() {
     />
   );
 }
+
+const createStyles = (theme: ThemedColors) =>
+  StyleSheet.create({
+    title: {
+      marginLeft: Sizes.medium,
+    },
+    scrollView: {
+      marginTop: Sizes.medium,
+    },
+    form: {
+      margin: Sizes.medium,
+    },
+    itemContainer: {
+      display: "flex",
+      flexDirection: "row",
+      height: Sizes.list.large,
+      paddingHorizontal: Sizes.large,
+      alignItems: "center",
+      justifyContent: "space-between",
+      overflow: "visible",
+    },
+    itemActions: {
+      display: "flex",
+      gap: Sizes.small,
+      flexDirection: "row",
+    },
+    reorderableList: {
+      overflow: "visible",
+    },
+    submitButtonContainer: {
+      paddingHorizontal: Sizes.medium,
+      marginBottom: Sizes.medium,
+    },
+  });
