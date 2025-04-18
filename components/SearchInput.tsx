@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from "react";
-import { TextInput, View, StyleSheet } from "react-native";
+import { TextInput, View, StyleSheet, type StyleProp, type TextStyle } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import useStyles from "@/hooks/useStyles";
 import { useColors, type ThemedColors } from "./ThemeProvider";
@@ -10,7 +10,7 @@ interface SearchInputProps {
   onChange: (text: string) => void;
   autoFocus?: boolean;
   placeholder?: string;
-  style?: any;
+  style?: StyleProp<TextStyle>;
 }
 
 function SearchInput(props: SearchInputProps) {
