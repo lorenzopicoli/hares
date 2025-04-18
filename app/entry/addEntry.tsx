@@ -122,17 +122,29 @@ export default function AddEntryScreen() {
   return (
     <ThemedView>
       <ThemedScrollView>
+        {tracker?.description ? (
+          <ThemedText>
+            <ThemedText style={styles.bold}>Description: </ThemedText>
+            {tracker?.description}
+          </ThemedText>
+        ) : null}
         <ThemedView>{renderEntryInput()}</ThemedView>
 
         <Spacing size="small" />
-        <ThemedText type="title">Date options</ThemedText>
-        <ThemedText style={styles.currentDate}>{currentDateFormatted}</ThemedText>
+        <ThemedText>
+          <ThemedText style={styles.bold}>Date: </ThemedText>
+          {currentDateFormatted}
+        </ThemedText>
         <EntryDateSelection initialDate={initialDate} onSelectionChange={handleDateSelectionChange} />
         <Spacing size="small" />
-        <ThemedText type="title">Previous entries</ThemedText>
-        {lastEntries.map((entry) => (
-          <EntriesListRow key={entry.id} entry={entry} />
-        ))}
+        {lastEntries.length > 0 ? (
+          <>
+            <ThemedText type="title">Previous entries</ThemedText>
+            {lastEntries.map((entry) => (
+              <EntriesListRow key={entry.id} entry={entry} />
+            ))}
+          </>
+        ) : null}
       </ThemedScrollView>
       <View style={styles.submitButtonContainer}>
         <ThemedButton fullWidth title="Log entry" onPress={handleSubmit} />
@@ -143,7 +155,7 @@ export default function AddEntryScreen() {
 
 const createStyles = (theme: ThemedColors) =>
   StyleSheet.create({
-    currentDate: {
+    bold: {
       fontWeight: 700,
     },
     textListControls: {

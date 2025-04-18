@@ -71,7 +71,9 @@ export default function TextListSelectionScreen() {
   };
 
   const handleAdd = () => {
-    toggleItem(searchQuery);
+    if (searchQuery) {
+      toggleItem(searchQuery);
+    }
   };
 
   const renderItem = ({ item }: { item: string }) => {
@@ -99,7 +101,7 @@ export default function TextListSelectionScreen() {
         keyExtractor={(item) => item}
         ItemSeparatorComponent={Separator}
       />
-      <ThemedButton title={`Add ${searchQuery}`} onPress={handleAdd} />
+      <ThemedButton disabled={searchQuery === ""} title={`Add ${searchQuery}`} onPress={handleAdd} />
     </ThemedView>
   );
 }

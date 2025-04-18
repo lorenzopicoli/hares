@@ -30,9 +30,9 @@ const ThemedButton: React.FC<ThemedButtonProps> = ({
       style={[
         styles.button,
         fullWidth && styles.fullWidth,
-        disabled && styles.disabled,
         mode === "accent" && styles.accentButton,
         mode === "ghost" && styles.ghostButton,
+        disabled && styles.disabled,
         style,
       ]}
       onPress={onPress}
@@ -64,8 +64,8 @@ const createStyles = (theme: ThemedColors) =>
       width: "100%",
     },
     disabled: {
-      backgroundColor: theme.input.backgroundDisabled,
-      borderColor: theme.input.border,
+      backgroundColor: theme.darkTint,
+      //   borderColor: theme.input.border,
     },
     text: {
       color: theme.text,

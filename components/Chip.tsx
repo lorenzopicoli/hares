@@ -13,6 +13,19 @@ interface ChipProps {
   style?: StyleProp<ViewStyle>;
 }
 
+interface ChipGroupProps {
+  chips: ChipData[];
+  onChipPress?: (chip: ChipData, index: number) => void;
+  showDelete?: boolean;
+  style?: StyleProp<ViewStyle>;
+}
+
+export interface ChipData {
+  id: string | number;
+  label: string;
+  disabled?: boolean;
+}
+
 function Chip(props: ChipProps) {
   const { label, onPress, showDelete, disabled = false, style } = props;
   const { colors } = useColors();
@@ -32,19 +45,6 @@ function Chip(props: ChipProps) {
       {showDelete && <Feather style={styles.icon} size={15} name="x" />}
     </TouchableOpacity>
   );
-}
-
-export interface ChipData {
-  id: string | number;
-  label: string;
-  disabled?: boolean;
-}
-
-interface ChipGroupProps {
-  chips: ChipData[];
-  onChipPress?: (chip: ChipData, index: number) => void;
-  showDelete?: boolean;
-  style?: StyleProp<ViewStyle>;
 }
 
 export function ChipGroup(props: ChipGroupProps) {
