@@ -11,7 +11,7 @@ import { formatEntryDate } from "@/utils/entryDate";
 
 export interface EntriesListRowProps {
   entry: TrackerEntry;
-  onPress?: (entry: TrackerEntry) => void;
+  onPress?: (entryId: number) => void;
 }
 
 export default function EntriesListRow(props: EntriesListRowProps) {
@@ -38,7 +38,7 @@ export default function EntriesListRow(props: EntriesListRowProps) {
     return v;
   }, [entry]);
 
-  const handlePress = () => props.onPress?.(entry);
+  const handlePress = () => props.onPress?.(entry.id);
 
   return (
     <TouchableOpacity disabled={!props.onPress} onPress={handlePress}>
