@@ -18,11 +18,11 @@ export default function EntriesScreen() {
   const { handleEntryActions } = useEntryActions();
 
   const renderItem = ({ item }: { item: TrackerEntry }) => {
-    return <EntriesListRow entry={item} onPress={handleEntryActions} />;
+    return <EntriesListRow style={styles.listItem} entry={item} onPress={handleEntryActions} />;
   };
 
   return (
-    <ThemedView style={styles.container}>
+    <ThemedView>
       <View style={styles.searchContainer}>
         <SearchInput
           value={searchText}
@@ -32,20 +32,27 @@ export default function EntriesScreen() {
           placeholder="Search..."
         />
       </View>
-      <FlatList
-        data={entries}
-        renderItem={renderItem}
-        keyboardShouldPersistTaps="always"
-        keyExtractor={(item) => item.id.toString()}
-        ItemSeparatorComponent={Separator}
-      />
+      <ThemedView style={styles.listContainer}>
+        <FlatList
+          data={entries}
+          renderItem={renderItem}
+          keyboardShouldPersistTaps="always"
+          keyExtractor={(item) => item.id.toString()}
+          ItemSeparatorComponent={Separator}
+        />
+      </ThemedView>
     </ThemedView>
   );
 }
 
 const createStyles = (theme: ThemedColors) =>
   StyleSheet.create({
-    container: {},
+    listContainer: {
+      paddingVertical: Sizes.medium,
+    },
+    listItem: {
+      padding: Sizes.medium,
+    },
     searchContainer: {
       paddingHorizontal: Sizes.small,
     },

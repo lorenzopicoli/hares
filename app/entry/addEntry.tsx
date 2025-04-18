@@ -108,7 +108,7 @@ export default function AddEntryScreen() {
 
       case TrackerType.TextList:
         return (
-          <View>
+          <View style={styles.textListControls}>
             <ThemedButton title="Select items" mode="ghost" onPress={handleGoToSelectItems} />
             <ChipGroup onChipPress={handleChipPress} showDelete chips={chips} />
           </View>
@@ -122,11 +122,11 @@ export default function AddEntryScreen() {
   return (
     <ThemedView>
       <ThemedScrollView>
-        <ThemedText>{currentDateFormatted}</ThemedText>
         <ThemedView>{renderEntryInput()}</ThemedView>
 
         <Spacing size="small" />
         <ThemedText type="title">Date options</ThemedText>
+        <ThemedText style={styles.currentDate}>{currentDateFormatted}</ThemedText>
         <EntryDateSelection initialDate={initialDate} onSelectionChange={handleDateSelectionChange} />
         <Spacing size="small" />
         <ThemedText type="title">Previous entries</ThemedText>
@@ -143,6 +143,12 @@ export default function AddEntryScreen() {
 
 const createStyles = (theme: ThemedColors) =>
   StyleSheet.create({
+    currentDate: {
+      fontWeight: 700,
+    },
+    textListControls: {
+      gap: Sizes.medium,
+    },
     submitButtonContainer: {
       paddingHorizontal: Sizes.medium,
       marginBottom: Sizes.medium,

@@ -3,6 +3,7 @@ import { TextInput, View, StyleSheet } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import useStyles from "@/hooks/useStyles";
 import { useColors, type ThemedColors } from "./ThemeProvider";
+import { Sizes } from "@/constants/Sizes";
 
 interface SearchInputProps {
   value: string;
@@ -12,7 +13,8 @@ interface SearchInputProps {
   style?: any;
 }
 
-const SearchInput = ({ autoFocus, value, onChange, placeholder = "Search...", style }: SearchInputProps) => {
+function SearchInput(props: SearchInputProps) {
+  const { autoFocus, value, onChange, placeholder = "Search...", style } = props;
   const inputRef = useRef<TextInput>(null);
   const { colors } = useColors();
   const { styles: customStyles } = useStyles(createSearchStyles);
@@ -52,22 +54,22 @@ const SearchInput = ({ autoFocus, value, onChange, placeholder = "Search...", st
       )}
     </View>
   );
-};
+}
 
 const createSearchStyles = (theme: ThemedColors) =>
   StyleSheet.create({
     searchContainer: {
       flexDirection: "row",
       alignItems: "center",
-      borderRadius: 8,
-      paddingHorizontal: 10,
-      height: 40,
+      borderRadius: Sizes.radius.small,
+      paddingHorizontal: Sizes.small,
+      height: Sizes.inputHeight,
       marginHorizontal: 2,
-      marginVertical: 8,
+      marginVertical: Sizes.small,
       backgroundColor: theme.input.background,
     },
     searchIcon: {
-      marginRight: 8,
+      marginRight: Sizes.small,
     },
     searchInput: {
       flex: 1,
@@ -77,7 +79,7 @@ const createSearchStyles = (theme: ThemedColors) =>
       padding: 0,
     },
     clearIcon: {
-      padding: 4,
+      padding: Sizes.xSmall,
     },
   });
 

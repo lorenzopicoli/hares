@@ -1,4 +1,4 @@
-import { StyleSheet, TouchableOpacity, View } from "react-native";
+import { StyleSheet, TouchableOpacity, View, type StyleProp, type ViewStyle } from "react-native";
 import { Separator } from "../Separator";
 import { ThemedText } from "../ThemedText";
 import type { ThemedColors } from "../ThemeProvider";
@@ -12,10 +12,11 @@ import { formatEntryDate } from "@/utils/entryDate";
 export interface EntriesListRowProps {
   entry: TrackerEntry;
   onPress?: (entryId: number) => void;
+  style?: StyleProp<ViewStyle>;
 }
 
 export default function EntriesListRow(props: EntriesListRowProps) {
-  const { entry } = props;
+  const { entry, style } = props;
   const { styles } = useStyles(createStyles);
 
   const value = useMemo(() => {
@@ -42,7 +43,7 @@ export default function EntriesListRow(props: EntriesListRowProps) {
 
   return (
     <TouchableOpacity disabled={!props.onPress} onPress={handlePress}>
-      <View style={styles.container}>
+      <View style={[styles.container, style]}>
         {entry.tracker?.name ? <ThemedText type="subtitle">{entry.tracker.name}</ThemedText> : null}
 
         <View style={styles.innerContainer}>
@@ -65,7 +66,7 @@ export default function EntriesListRow(props: EntriesListRowProps) {
 const createStyles = (theme: ThemedColors) =>
   StyleSheet.create({
     container: {
-      padding: Sizes.medium,
+      paddingBottom: Sizes.medium,
       flexDirection: "column",
       gap: Sizes.large,
       minHeight: Sizes.list.large,

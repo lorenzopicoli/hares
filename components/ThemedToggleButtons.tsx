@@ -1,5 +1,5 @@
 import React, { useMemo, useState, type PropsWithChildren } from "react";
-import { Pressable, StyleSheet, View } from "react-native";
+import { Pressable, StyleSheet, View, type StyleProp, type ViewStyle } from "react-native";
 import type { ThemedColors } from "./ThemeProvider";
 import useStyles from "@/hooks/useStyles";
 import { ThemedText } from "./ThemedText";
@@ -10,14 +10,34 @@ type ThemedToggleButtonsProps = {
   options: string[];
   columns: number;
   label?: string;
+  buttonContainerStyle?: StyleProp<ViewStyle>;
+  selectedOption?: string | null;
   onChangeSelection?: (option: string) => void;
 };
 
-const ThemedToggleButtons: React.FC<ThemedToggleButtonsProps> = ({ options, columns, label, onChangeSelection }) => {
+function ThemedToggleButtons(props: ThemedToggleButtonsProps) {
+  const {
+    options,
+    columns,
+    label,
+    onChangeSelection,
+    buttonContainerStyle,
+    selectedOption: controlledSelectedOption,
+  } = props;
   const { styles } = useStyles(createStyles);
-  const [selectedOption, setSelectedOption] = useState<string | null>(null);
+  const [internalSelectedOption, setInternalSelectedOption] = useState<string | null>(null);
+  const isControlled = controlledSelectedOption !== undefined;
+  const selectedOption = useMemo(() => {
+    if (isControlled) {
+      return controlledSelectedOption;
+    }
+    return internalSelectedOption;
+  }, [internalSelectedOption, controlledSelectedOption, isControlled]);
+
   const handleSelectOption = (option: string) => () => {
-    setSelectedOption(option);
+    if (!isControlled) {
+      setInternalSelectedOption(option);
+    }
     onChangeSelection?.(option);
   };
   const Row = ({ children }: PropsWithChildren) => <View style={styles.row}>{children}</View>;
@@ -48,10 +68,11 @@ const ThemedToggleButtons: React.FC<ThemedToggleButtonsProps> = ({ options, colu
             {chunkedOption.map((option) => (
               <View
                 key={option}
-                style={{
-                  ...styles.buttonContainer,
-                  ...(selectedOption === option ? styles.buttonSelected : {}),
-                }}
+                style={[
+                  styles.buttonContainer,
+                  selectedOption === option && styles.buttonSelected,
+                  buttonContainerStyle,
+                ]}
               >
                 <Pressable style={styles.pressable} onPress={handleSelectOption(option)}>
                   <ThemedText>{option}</ThemedText>
@@ -63,7 +84,7 @@ const ThemedToggleButtons: React.FC<ThemedToggleButtonsProps> = ({ options, colu
       </View>
     </View>
   );
-};
+}
 
 const createStyles = (theme: ThemedColors) =>
   StyleSheet.create({

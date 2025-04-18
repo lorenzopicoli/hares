@@ -1,6 +1,8 @@
 const spaceUnit = 8;
 export const Sizes = {
+  inputHeight: 40,
   buttonHeight: 48,
+  xSmall: spaceUnit / 2,
   small: spaceUnit,
   medium: spaceUnit * 2,
   large: spaceUnit * 3,

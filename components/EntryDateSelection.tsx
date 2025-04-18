@@ -7,8 +7,8 @@ import DateTimePicker, { type DateType, useDefaultStyles } from "react-native-ui
 import type { SingleChange } from "react-native-ui-datepicker/lib/typescript/types";
 import ThemedButton from "./ThemedButton";
 import ThemedModal from "./ThemedModal";
-import { ThemedText } from "./ThemedText";
 import type { ThemedColors } from "./ThemeProvider";
+import ThemedToggleButtons from "./ThemedToggleButtons";
 
 export interface EntryDateSelectionProps {
   initialDate: Date;
@@ -19,25 +19,47 @@ export default function EntryDateSelection(props: EntryDateSelectionProps) {
   const [selectedDate, setSelectedDate] = useState<DateType | null>(props.initialDate);
   const [periodOfDay, setSelectedPeriodOfDay] = useState<PeriodOfDay | null>(null);
   const [showDatePicker, setShowDatePicker] = useState(false);
+  const [toggleButtonsSelectedOption, setToggleButtonsSelectedOption] = useState<string | null>("Now");
+
   const datePickerDefaultStyles = useDefaultStyles();
-  const handlePressNow = () => {
-    setSelectedDate(new Date());
-    setSelectedPeriodOfDay(null);
-  };
-  const handlePressPeriodOfDay = (p: PeriodOfDay) => {
-    setSelectedPeriodOfDay(p);
-    setSelectedDate(null);
-  };
   const handleDatePickerChange: SingleChange = ({ date }) => {
     setSelectedDate(date);
     setSelectedPeriodOfDay(null);
   };
 
   const toggleDatePicker = () => {
+    setToggleButtonsSelectedOption(null);
     if (!showDatePicker) {
       setSelectedDate(new Date());
     }
     setShowDatePicker(!showDatePicker);
+  };
+
+  const handlePressToggleButton = (option: string) => {
+    setToggleButtonsSelectedOption(option);
+    switch (option) {
+      case "Now":
+        setSelectedDate(new Date());
+        setSelectedPeriodOfDay(null);
+        break;
+      case "Morning":
+        setSelectedPeriodOfDay(PeriodOfDay.Morning);
+        setSelectedDate(null);
+        break;
+      case "Afternoon":
+        setSelectedPeriodOfDay(PeriodOfDay.Afternoon);
+        setSelectedDate(null);
+        break;
+      case "Evening":
+        setSelectedPeriodOfDay(PeriodOfDay.Evening);
+        setSelectedDate(null);
+        break;
+
+      default:
+        setSelectedDate(new Date());
+        setSelectedPeriodOfDay(null);
+        break;
+    }
   };
 
   useEffect(() => {
@@ -52,27 +74,14 @@ export default function EntryDateSelection(props: EntryDateSelectionProps) {
   const { styles } = useStyles(createStyles);
   return (
     <View>
-      <View style={styles.dateSelectionButtonsContainer}>
-        <ThemedButton title="Now" mode="ghost" style={styles.dateSelectionButton} onPress={handlePressNow} />
-        <ThemedButton
-          title="Morning"
-          mode="ghost"
-          style={styles.dateSelectionButton}
-          onPress={() => handlePressPeriodOfDay(PeriodOfDay.Morning)}
-        />
-        <ThemedButton
-          title="Afternoon"
-          mode="ghost"
-          style={styles.dateSelectionButton}
-          onPress={() => handlePressPeriodOfDay(PeriodOfDay.Afternoon)}
-        />
-        <ThemedButton
-          title="Evening"
-          mode="ghost"
-          style={styles.dateSelectionButton}
-          onPress={() => handlePressPeriodOfDay(PeriodOfDay.Evening)}
-        />
-      </View>
+      <ThemedToggleButtons
+        buttonContainerStyle={{ height: Sizes.buttonHeight }}
+        label=""
+        selectedOption={toggleButtonsSelectedOption}
+        columns={4}
+        options={["Now", "Morning", "Afternoon", "Evening"]}
+        onChangeSelection={handlePressToggleButton}
+      />
       <ThemedButton title="Custom" mode="ghost" onPress={toggleDatePicker} style={styles.dateSelectionButton} />
       <ThemedModal
         visible={showDatePicker}
@@ -82,7 +91,6 @@ export default function EntryDateSelection(props: EntryDateSelectionProps) {
         onConfirm={toggleDatePicker}
       >
         <View style={styles.datePickerContainer}>
-          <ThemedText>{selectedDate?.toLocaleString()}</ThemedText>
           <DateTimePicker
             mode="single"
             initialView="time"
@@ -106,12 +114,8 @@ const createStyles = (theme: ThemedColors) =>
     datePicker: {
       backgroundColor: "blue",
     },
-    dateSelectionButtonsContainer: {
-      flexDirection: "row",
-      gap: Sizes.small,
-      marginBottom: Sizes.small,
-    },
     dateSelectionButton: {
+      marginTop: Sizes.small,
       flex: 1,
     },
     datePickerContainer: {

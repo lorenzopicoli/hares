@@ -13,7 +13,8 @@ interface ChipProps {
   style?: StyleProp<ViewStyle>;
 }
 
-export const Chip: React.FC<ChipProps> = ({ label, onPress, showDelete, disabled = false, style }) => {
+function Chip(props: ChipProps) {
+  const { label, onPress, showDelete, disabled = false, style } = props;
   const { colors } = useColors();
   const styles = createChipStyles(colors);
 
@@ -31,7 +32,7 @@ export const Chip: React.FC<ChipProps> = ({ label, onPress, showDelete, disabled
       {showDelete && <Feather style={styles.icon} size={15} name="x" />}
     </TouchableOpacity>
   );
-};
+}
 
 export interface ChipData {
   id: string | number;
@@ -46,7 +47,8 @@ interface ChipGroupProps {
   style?: StyleProp<ViewStyle>;
 }
 
-export const ChipGroup: React.FC<ChipGroupProps> = ({ chips, onChipPress, showDelete, style }) => {
+export function ChipGroup(props: ChipGroupProps) {
+  const { chips, onChipPress, showDelete, style } = props;
   const { colors } = useColors();
   const styles = createChipGroupStyles(colors);
 
@@ -64,9 +66,8 @@ export const ChipGroup: React.FC<ChipGroupProps> = ({ chips, onChipPress, showDe
       ))}
     </View>
   );
-};
+}
 
-// Styles
 const createChipStyles = (theme: ReturnType<typeof useColors>["colors"]) =>
   StyleSheet.create({
     chip: {
@@ -106,6 +107,6 @@ const createChipGroupStyles = (theme: ReturnType<typeof useColors>["colors"]) =>
       flexWrap: "wrap",
     },
     chipMargin: {
-      margin: Sizes.small,
+      margin: Sizes.xSmall,
     },
   });
