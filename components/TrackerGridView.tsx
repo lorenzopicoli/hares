@@ -1,61 +1,60 @@
 import type { Tracker } from "@/db/schema";
 import { useTrackers } from "@/hooks/data/useTrackers";
-import { DndProvider, DraggableGrid } from "@mgcrea/react-native-dnd";
 import React from "react";
-import { StyleSheet, Text, View } from "react-native";
-import Animated from "react-native-reanimated";
+import { FlatList, StyleSheet, Text, View } from "react-native";
 import { HapticPressable } from "./HapticPressable";
 import { Sizes } from "@/constants/Sizes";
 import useStyles from "@/hooks/useStyles";
 import type { ThemedColors } from "./ThemeProvider";
+import { ThemedView } from "./ThemedView";
 
 interface Props {
   searchQuery?: string;
   collectionId?: number;
   onSelectTracker?: (tracker: Tracker) => void;
+  onLongPressTracker?: (tracker: Tracker) => void;
 }
 
 function TrackerGridView(props: Props) {
-  const { collectionId, searchQuery, onSelectTracker } = props;
+  const { collectionId, searchQuery, onSelectTracker, onLongPressTracker } = props;
   const { trackers } = useTrackers({ collectionId, searchQuery });
   const { styles } = useStyles(createStyles);
 
+  const renderItem = ({ item: tracker }: { item: Tracker }) => {
+    return (
+      <View style={styles.gridItem}>
+        <HapticPressable
+          style={styles.card}
+          onLongPress={() => onLongPressTracker?.(tracker)}
+          onPress={() => onSelectTracker?.(tracker)}
+        >
+          <Text style={styles.cardText}>{tracker.name}</Text>
+        </HapticPressable>
+      </View>
+    );
+  };
+
   return (
-    <DndProvider activationDelay={200}>
-      <Animated.ScrollView>
-        <DraggableGrid direction="row" size={2} style={styles.gridContainer}>
-          {trackers.map((tracker) => (
-            // Initially you could reorder trackers in this screen, but I had so many problems with draggable grids that I gave up
-            // Should either refactor this to something more performant or find something that actually works on drag
-            //   <Draggable key={item.id} id={String(item.id)} style={styles.gridItem}>
-            //     {renderGridElement(item)}
-            //   </Draggable>
-            <View key={tracker.id} style={styles.gridItem}>
-              <HapticPressable style={styles.card} onPress={() => onSelectTracker?.(tracker)}>
-                <Text style={styles.cardText}>{tracker.name}</Text>
-              </HapticPressable>
-            </View>
-          ))}
-        </DraggableGrid>
-      </Animated.ScrollView>
-    </DndProvider>
+    <ThemedView style={styles.container}>
+      <FlatList
+        data={trackers}
+        renderItem={renderItem}
+        keyboardShouldPersistTaps="always"
+        keyExtractor={(item) => item.id.toString()}
+        numColumns={2}
+      />
+    </ThemedView>
   );
 }
 
 const createStyles = (theme: ThemedColors) =>
   StyleSheet.create({
     container: {
-      flex: 1,
-    },
-    gridContainer: {
-      flexDirection: "row",
-      flexWrap: "wrap",
-      paddingRight: Sizes.small,
+      padding: Sizes.xSmall,
     },
     gridItem: {
-      width: "50%",
-      paddingTop: Sizes.small,
-      paddingLeft: Sizes.small,
+      flex: 1,
+      padding: Sizes.xSmall,
     },
     card: {
       backgroundColor: theme.toggleButton.background,

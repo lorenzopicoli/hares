@@ -1,0 +1,1 @@
+ALTER TABLE `trackers` ADD `deletedAt` integer;

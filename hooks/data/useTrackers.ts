@@ -1,6 +1,6 @@
 import { useDatabase } from "@/contexts/DatabaseContext";
 import { collectionsTrackersTable, trackersTable } from "@/db/schema";
-import { notExists, eq, getTableColumns, isNotNull, sql } from "drizzle-orm";
+import { notExists, eq, getTableColumns, isNotNull, sql, and, isNull } from "drizzle-orm";
 import { useLiveQuery } from "drizzle-orm/expo-sqlite";
 
 export function useTrackers(params: { collectionId?: number; searchQuery?: string }) {
@@ -13,6 +13,7 @@ export function useTrackers(params: { collectionId?: number; searchQuery?: strin
       .leftJoin(collectionsTrackersTable, eq(collectionsTrackersTable.trackerId, trackersTable.id))
       .where(sql`
         ${searchQuery === "" && collectionId ? isNotNull(collectionsTrackersTable.id) : "1 = 1"} AND
+        ${trackersTable.deletedAt} IS NULL AND
         ${trackersTable.name} LIKE ${`%${searchQuery}%`}
       `)
       .orderBy(collectionId ? collectionsTrackersTable.index : trackersTable.index)
@@ -31,12 +32,15 @@ export function useTrackersNotInCollection(params: { collectionId: number; searc
       .select()
       .from(trackersTable)
       .where(
-        notExists(
-          db
-            .select()
-            .from(collectionsTrackersTable)
-            .where(sql`${collectionsTrackersTable.collectionId} = ${collectionId} AND
+        and(
+          notExists(
+            db
+              .select()
+              .from(collectionsTrackersTable)
+              .where(sql`${collectionsTrackersTable.collectionId} = ${collectionId} AND
             ${collectionsTrackersTable.trackerId} = ${trackersTable.id}`),
+          ),
+          isNull(trackersTable.deletedAt),
         ),
       )
       .orderBy(trackersTable.index),

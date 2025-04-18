@@ -65,7 +65,6 @@ const createStyles = (theme: ThemedColors) =>
     },
     disabled: {
       backgroundColor: theme.darkTint,
-      //   borderColor: theme.input.border,
     },
     text: {
       color: theme.text,

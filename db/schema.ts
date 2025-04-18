@@ -44,6 +44,7 @@ export const trackersTable = sqliteTable("trackers", {
   rangeMax: int(),
   textGroupId: text(),
   index: int().notNull(),
+  deletedAt: integer({ mode: "timestamp" }),
 });
 export type Tracker = typeof trackersTable.$inferSelect;
 export type NewTracker = typeof trackersTable.$inferInsert;

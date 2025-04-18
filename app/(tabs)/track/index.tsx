@@ -10,7 +10,7 @@ import SearchInput from "@/components/SearchInput";
 import { Sizes } from "@/constants/Sizes";
 import { Entypo } from "@expo/vector-icons";
 import { useCollections } from "@/hooks/data/useCollections";
-import { useTrackScreenActions } from "@/hooks/useTrackerActions";
+import { useTrackerActions, useTrackScreenActions } from "@/hooks/useTrackerActions";
 
 type TabRoute = Route & {
   key: string;
@@ -26,6 +26,7 @@ export default function TrackScreen() {
 
   const { collectionsWithAll: collections } = useCollections();
   const { handleTrackScreenOptions } = useTrackScreenActions(collections[tabIndex].id);
+  const { handleTrackerActions } = useTrackerActions();
   const tabs = useMemo(
     () =>
       collections.map((collection) => ({
@@ -42,17 +43,26 @@ export default function TrackScreen() {
     [router],
   );
 
+  const handleTrackerLongPress = useCallback(
+    (tracker: Tracker) => {
+      console.log("aha");
+      handleTrackerActions(tracker.id);
+    },
+    [handleTrackerActions],
+  );
+
   const renderTrackers = useCallback(
     ({ route }: SceneRendererProps & { route: TabRoute }) => {
       return (
         <TrackerGridView
           searchQuery={searchQuery}
           onSelectTracker={handleTrackerSelection}
+          onLongPressTracker={handleTrackerLongPress}
           collectionId={+route.key === -1 ? undefined : +route.key}
         />
       );
     },
-    [handleTrackerSelection, searchQuery],
+    [handleTrackerSelection, handleTrackerLongPress, searchQuery],
   );
 
   useEffect(() => {
