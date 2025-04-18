@@ -5,35 +5,30 @@ import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
 import type { ThemedColors } from "@/components/ThemeProvider";
 import { Sizes } from "@/constants/Sizes";
-import { useDatabase } from "@/contexts/DatabaseContext";
-import { textListEntriesTable } from "@/db/schema";
+import { useEntryTextList } from "@/hooks/data/useEntryTextList";
 import useStyles from "@/hooks/useStyles";
 import { Ionicons } from "@expo/vector-icons";
-import { sql } from "drizzle-orm";
-import { useLiveQuery } from "drizzle-orm/expo-sqlite";
 import { useLocalSearchParams, useNavigation, useRouter } from "expo-router";
 import { useEffect, useMemo, useState } from "react";
 import { StyleSheet, FlatList, TouchableOpacity, View } from "react-native";
 
 export default function TextListSelectionScreen() {
   const { trackerId } = useLocalSearchParams<{ trackerId: string }>();
-  const { db } = useDatabase();
   const { styles } = useStyles(createStyles);
-  const [searchText, setSearchText] = useState<string>("");
-  const [selectedItems, setSelectedItems] = useState<Map<string, boolean>>(new Map());
   const router = useRouter();
   const navigation = useNavigation();
 
-  const { data: dbData } = useLiveQuery(
-    db
-      .select()
-      .from(textListEntriesTable)
-      .where(sql`
-          ${textListEntriesTable.trackerId} = ${+trackerId} AND
-          ${textListEntriesTable.name} LIKE ${`%${searchText}%`}
-          `)
-      .groupBy(textListEntriesTable.name),
-    [searchText],
+  const [searchQuery, setSearchQuery] = useState<string>("");
+
+  const [selectedItems, setSelectedItems] = useState<Map<string, boolean>>(new Map());
+
+  const { textListEntries } = useEntryTextList({ trackerId: +trackerId, searchQuery });
+  const data = useMemo(
+    () => [
+      ...Array.from(selectedItems, ([value, _label]) => value),
+      ...textListEntries.filter((d) => !selectedItems.has(d.name)).map((v) => v.name),
+    ],
+    [selectedItems, textListEntries],
   );
 
   useEffect(() => {
@@ -68,20 +63,19 @@ export default function TextListSelectionScreen() {
       newMap.set(item, true);
       setSelectedItems(newMap);
     }
-    setSearchText("");
+    setSearchQuery("");
   };
 
-  const data = useMemo(
-    () => [
-      ...Array.from(selectedItems, ([value, _label]) => value),
-      ...dbData.filter((d) => !selectedItems.has(d.name)).map((v) => v.name),
-    ],
-    [selectedItems, dbData],
-  );
+  const handleAdd = () => {
+    toggleItem(searchQuery);
+  };
 
   const renderItem = ({ item }: { item: string }) => {
+    const handlePress = () => {
+      toggleItem(item);
+    };
     return (
-      <TouchableOpacity onPress={() => toggleItem(item)}>
+      <TouchableOpacity onPress={handlePress}>
         <ThemedView style={styles.itemInnerContainer}>
           <ThemedText>{item}</ThemedText>
           {selectedItems.has(item) ? <Ionicons style={styles.itemIcon} name="checkmark" size={20} /> : null}
@@ -93,14 +87,7 @@ export default function TextListSelectionScreen() {
 
   return (
     <ThemedView>
-      <SearchInput
-        value={searchText}
-        onChange={(text) => {
-          setSearchText(text);
-        }}
-        autoFocus
-        placeholder="Search..."
-      />
+      <SearchInput value={searchQuery} onChange={setSearchQuery} autoFocus placeholder="Search..." />
       <FlatList
         data={data}
         renderItem={renderItem}
@@ -108,7 +95,7 @@ export default function TextListSelectionScreen() {
         keyExtractor={(item) => item}
         ItemSeparatorComponent={Separator}
       />
-      <ThemedButton title={`Add ${searchText}`} onPress={() => toggleItem(searchText)} />
+      <ThemedButton title={`Add ${searchQuery}`} onPress={handleAdd} />
     </ThemedView>
   );
 }
