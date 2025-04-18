@@ -3,20 +3,10 @@ import { StyleSheet, View } from "react-native";
 import ThemedButton from "@/components/ThemedButton";
 import { ThemedView } from "@/components/ThemedView";
 import { Sizes } from "@/constants/Sizes";
-import {
-  entriesTable,
-  textListEntriesTable,
-  trackersTable,
-  TrackerType,
-  type EntryDateInformation,
-  type NewTextListEntry,
-  type NewTrackerEntry,
-} from "@/db/schema";
+import { TrackerType, type EntryDateInformation, type NewTrackerEntry } from "@/db/schema";
 import { useRouter, useLocalSearchParams } from "expo-router";
-import { useLiveQuery } from "drizzle-orm/expo-sqlite";
-import { eq, desc } from "drizzle-orm";
 import { ThemedText } from "@/components/ThemedText";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import type { ThemedColors } from "@/components/ThemeProvider";
 import useStyles from "@/hooks/useStyles";
 import ThemedToggleButtons from "@/components/ThemedToggleButtons";
@@ -27,39 +17,51 @@ import EntryNumberInput from "@/components/EntryInputs/EntryNumberInput";
 import EntrySliderInput from "@/components/EntryInputs/EntrySliderInput";
 import { ChipGroup, type ChipData } from "@/components/Chip";
 import { formatEntryDateInformation } from "@/utils/entryDate";
-import { useDatabase } from "@/contexts/DatabaseContext";
+import { useEntries } from "@/hooks/data/useEntries";
+import { useTracker } from "@/hooks/data/useTracker";
+import { useCreateEntry } from "@/hooks/data/useCreateEntry";
 
 export default function AddEntryScreen() {
   const router = useRouter();
-  const { trackerId, textListSelections } = useLocalSearchParams<{
+  const { styles } = useStyles(createStyles);
+  const { trackerId, textListSelections: textListSelectionsParam } = useLocalSearchParams<{
     trackerId: string;
     textListSelections?: string;
   }>();
-  const { styles } = useStyles(createStyles);
 
-  const { db } = useDatabase();
-  const { data: tracker } = useLiveQuery(db.select().from(trackersTable).where(eq(trackersTable.id, +trackerId)));
-  const { data: lastEntries } = useLiveQuery(
-    db.query.entriesTable.findMany({
-      where: eq(entriesTable.trackerId, +trackerId),
-      orderBy: desc(entriesTable.date),
-      limit: 10,
-      with: {
-        textListValues: true,
-      },
-    }),
-  );
+  const { tracker } = useTracker(+trackerId);
+  const { entries: lastEntries } = useEntries({ trackerId: +trackerId, limit: 10 });
+  const { createEntry } = useCreateEntry();
+
   const initialDate = useMemo(() => new Date(), []);
   const [dateSelected, setSelectedDate] = useState<EntryDateInformation>({ date: initialDate });
 
   const [numberValue, setNumberValue] = useState<number | null>(null);
   const [yesOrNoValue, setYesOrNoValue] = useState<boolean | null>(null);
-  const [textListValue, setTextListValue] = useState<string[]>(
-    textListSelections ? JSON.parse(textListSelections) : [],
+  const [textListValues, setTextListValues] = useState<string[]>(
+    textListSelectionsParam ? JSON.parse(textListSelectionsParam) : [],
   );
+
+  const currentDateFormatted = useMemo(() => formatEntryDateInformation(dateSelected), [dateSelected]);
+  const chips = useMemo(() => textListValues.map((t) => ({ label: t, id: t })) ?? [], [textListValues]);
+  const yesOrNoOptions = ["Yes", "No"];
 
   const handleDateSelectionChange = useCallback((data: EntryDateInformation) => setSelectedDate(data), []);
   const handleNumberInputChange = useCallback((value: number | null) => setNumberValue(value), []);
+  const handleChipPress = (data: ChipData) => {
+    setTextListValues([...textListValues.filter((t) => t !== data.id)]);
+  };
+  const handleYesOrNoChange = useCallback((option: string) => setYesOrNoValue(option === "Yes"), []);
+  const handleGoToSelectItems = useCallback(() => {
+    router.navigate({
+      pathname: "./textListSelection",
+      params: {
+        trackerId: trackerId,
+        preSelectedItems: JSON.stringify(textListValues),
+      },
+    });
+  }, [router, trackerId, textListValues]);
+
   const handleSubmit = async () => {
     try {
       const entry: NewTrackerEntry = {
@@ -69,62 +71,46 @@ export default function AddEntryScreen() {
         numberValue: numberValue,
         booleanValue: yesOrNoValue !== null ? (yesOrNoValue ? 1 : 0) : null,
       };
-      const savedEntry = await db.insert(entriesTable).values(entry).returning({ id: entriesTable.id });
-      if (textListValue.length > 0) {
-        const textListEntries: NewTextListEntry[] = textListValue.map((value) => ({
-          trackerId: +trackerId,
-          entryId: savedEntry[0].id,
-          name: value,
-        }));
-        await db.insert(textListEntriesTable).values(textListEntries);
-      }
+
+      await createEntry(entry, textListValues);
       router.dismiss();
     } catch (e) {
       console.log(e);
     }
   };
 
-  const handleChipPress = (data: ChipData) => {
-    setTextListValue([...textListValue.filter((t) => t !== data.id)]);
-  };
+  useEffect(() => {
+    setTextListValues(textListSelectionsParam ? JSON.parse(textListSelectionsParam) : []);
+  }, [textListSelectionsParam]);
 
   const renderEntryInput = () => {
-    if (!tracker || !tracker[0]) return null;
+    if (!tracker) return null;
 
-    const { type: trackerType, prefix, suffix } = tracker[0];
+    const { type: trackerType, prefix, suffix } = tracker;
 
     switch (trackerType) {
       case TrackerType.Number:
         return <EntryNumberInput suffix={suffix} prefix={prefix} onChange={handleNumberInputChange} />;
 
       case TrackerType.Scale:
-        return <EntrySliderInput onChange={handleNumberInputChange} min={0} max={100} />;
+        return (
+          <EntrySliderInput
+            onChange={handleNumberInputChange}
+            min={tracker.rangeMin ?? 0}
+            max={tracker.rangeMax ?? 100}
+          />
+        );
 
       case TrackerType.Boolean:
         return (
-          <ThemedToggleButtons
-            label=""
-            columns={2}
-            options={["Yes", "No"]}
-            onChangeSelection={(option) => setYesOrNoValue(option === "Yes")}
-          />
+          <ThemedToggleButtons label="" columns={2} options={yesOrNoOptions} onChangeSelection={handleYesOrNoChange} />
         );
 
       case TrackerType.TextList:
         return (
           <View>
-            <ThemedButton
-              title="Select items"
-              mode="ghost"
-              onPress={() => {
-                router.navigate({ pathname: "./textListSelection", params: { trackerId: trackerId } });
-              }}
-            />
-            <ChipGroup
-              onChipPress={handleChipPress}
-              showDelete
-              chips={textListValue.map((t) => ({ label: t, id: t })) ?? []}
-            />
+            <ThemedButton title="Select items" mode="ghost" onPress={handleGoToSelectItems} />
+            <ChipGroup onChipPress={handleChipPress} showDelete chips={chips} />
           </View>
         );
 
@@ -132,8 +118,6 @@ export default function AddEntryScreen() {
         return <ThemedText>Unsupported tracker type: {trackerType}</ThemedText>;
     }
   };
-
-  const currentDateFormatted = useMemo(() => formatEntryDateInformation(dateSelected), [dateSelected]);
 
   return (
     <ThemedView>
@@ -162,18 +146,5 @@ const createStyles = (theme: ThemedColors) =>
     submitButtonContainer: {
       paddingHorizontal: Sizes.medium,
       marginBottom: Sizes.medium,
-    },
-    numberInput: {
-      flex: 1,
-      color: theme.input.text,
-      fontSize: 70,
-      fontWeight: 600,
-      textAlign: "center",
-    },
-    numberCounterButtonsContainer: {
-      flex: 1,
-      flexDirection: "row",
-      justifyContent: "center",
-      gap: Sizes.medium,
     },
   });

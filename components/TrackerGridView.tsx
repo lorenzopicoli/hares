@@ -55,7 +55,6 @@ const createStyles = (theme: ThemedColors) =>
     gridItem: {
       width: "50%",
       paddingTop: Sizes.small,
-      paddingBottom: Sizes.small,
       paddingLeft: Sizes.small,
     },
     card: {

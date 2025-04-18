@@ -10,8 +10,9 @@ import { eq, desc, sql, inArray } from "drizzle-orm";
 import { useLiveQuery } from "drizzle-orm/expo-sqlite";
 import { useMemo } from "react";
 
-export function useEntries(searchText?: string) {
+export function useEntries(params: { searchText?: string; trackerId?: number; limit?: number }) {
   const { db } = useDatabase();
+  const { searchText, trackerId, limit } = params;
   const { data: entryIdsDb, error } = useLiveQuery(
     db
       .select({
@@ -19,20 +20,25 @@ export function useEntries(searchText?: string) {
       })
       .from(entriesTable)
       .where(
-        searchText
-          ? sql`
-            ${textListEntriesTable.name} LIKE ${`%${searchText}%`} OR 
-            ${collectionsTable.name} LIKE ${`%${searchText}%`} OR 
-            ${trackersTable.name} LIKE ${`%${searchText}%`}
-        `
-          : sql`1=1`,
+        sql`
+            ${
+              searchText
+                ? sql`(${textListEntriesTable.name} LIKE ${`%${searchText}%`} OR 
+                        ${collectionsTable.name} LIKE ${`%${searchText}%`} OR 
+                        ${trackersTable.name} LIKE ${`%${searchText}%`})`
+                : sql`1=1`
+            } AND
+            ${trackerId ? sql`${entriesTable.trackerId} = ${trackerId}` : sql`1=1`}
+        `,
       )
       .leftJoin(textListEntriesTable, eq(textListEntriesTable.entryId, entriesTable.id))
       .leftJoin(trackersTable, eq(trackersTable.id, entriesTable.trackerId))
       .leftJoin(collectionsTrackersTable, eq(collectionsTrackersTable.trackerId, trackersTable.id))
       .leftJoin(collectionsTable, eq(collectionsTable.id, collectionsTrackersTable.collectionId))
+      // Properly limit and paginate
+      .limit(limit ?? 10000000)
       .groupBy(entriesTable.id),
-    [searchText],
+    [searchText, limit, trackerId],
   );
   const entryIds = useMemo(() => entryIdsDb.map((e) => e.id), [entryIdsDb]);
   const { data: entries, error: error2 } = useLiveQuery(

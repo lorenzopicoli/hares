@@ -14,7 +14,7 @@ import { useEntryActions } from "@/hooks/useEntryActions";
 export default function EntriesScreen() {
   const { styles } = useStyles(createStyles);
   const [searchText, setSearchText] = useState<string>("");
-  const { entries } = useEntries(searchText);
+  const { entries } = useEntries({ searchText });
   const { handleEntryActions } = useEntryActions();
 
   const renderItem = ({ item }: { item: TrackerEntry }) => {

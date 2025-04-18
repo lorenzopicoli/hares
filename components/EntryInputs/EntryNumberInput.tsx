@@ -7,8 +7,8 @@ import type { ThemedColors } from "../ThemeProvider";
 
 export interface EntryNumberInputProps {
   onChange?: (value: number | null) => void;
-  prefix?: string;
-  suffix?: string;
+  prefix?: string | null;
+  suffix?: string | null;
 }
 
 // TODO: use a hidden input to format result and avoid flickering

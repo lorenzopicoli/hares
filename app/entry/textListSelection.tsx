@@ -13,14 +13,18 @@ import { useEffect, useMemo, useState } from "react";
 import { StyleSheet, FlatList, TouchableOpacity, View } from "react-native";
 
 export default function TextListSelectionScreen() {
-  const { trackerId } = useLocalSearchParams<{ trackerId: string }>();
+  const { trackerId, preSelectedItems = "[]" } = useLocalSearchParams<{
+    trackerId: string;
+    preSelectedItems?: string;
+  }>();
   const { styles } = useStyles(createStyles);
   const router = useRouter();
   const navigation = useNavigation();
 
   const [searchQuery, setSearchQuery] = useState<string>("");
-
-  const [selectedItems, setSelectedItems] = useState<Map<string, boolean>>(new Map());
+  const [selectedItems, setSelectedItems] = useState<Map<string, boolean>>(
+    new Map(JSON.parse(preSelectedItems).map((item: string) => [item, true])),
+  );
 
   const { textListEntries } = useEntryTextList({ trackerId: +trackerId, searchQuery });
   const data = useMemo(
