@@ -47,7 +47,7 @@ export default function AddTrackerScreen() {
 
   return (
     <ThemedView>
-      <ThemedScrollView keyboardShouldPersistTaps>
+      <ThemedScrollView keyboardShouldPersistTaps="always">
         <ThemedInput autoCapitalize="sentences" label="Tracker name" value={name} onChangeText={setName} />
         <ThemedInput
           autoCapitalize="sentences"
@@ -68,8 +68,20 @@ export default function AddTrackerScreen() {
 
         {type === TrackerType.Scale ? (
           <View style={styles.sideBySide}>
-            <ThemedInput style={styles.flex1} label="Range min" value={prefix} onChangeText={setRangeMin} />
-            <ThemedInput style={styles.flex1} label="Range max" value={suffix} onChangeText={setRangeMax} />
+            <ThemedInput
+              style={styles.flex1}
+              label="Range min"
+              value={rangeMin}
+              onChangeText={setRangeMin}
+              keyboardType="numeric"
+            />
+            <ThemedInput
+              style={styles.flex1}
+              label="Range max"
+              value={rangeMax}
+              onChangeText={setRangeMax}
+              keyboardType="numeric"
+            />
           </View>
         ) : null}
       </ThemedScrollView>

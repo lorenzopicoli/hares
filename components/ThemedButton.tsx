@@ -1,5 +1,5 @@
 import React from "react";
-import { StyleSheet, Text, TouchableOpacity, type StyleProp, type ViewStyle } from "react-native";
+import { StyleSheet, Text, TouchableOpacity, type StyleProp, type TextStyle, type ViewStyle } from "react-native";
 import type { ThemedColors } from "./ThemeProvider";
 import useStyles from "@/hooks/useStyles";
 import { Sizes } from "@/constants/Sizes";
@@ -10,6 +10,7 @@ interface ThemedButtonProps {
   fullWidth?: boolean;
   disabled?: boolean;
   style?: StyleProp<ViewStyle>;
+  textStyle?: StyleProp<TextStyle>;
   mode?: "accent" | "ghost";
 }
 
@@ -19,6 +20,7 @@ const ThemedButton: React.FC<ThemedButtonProps> = ({
   fullWidth = false,
   disabled = false,
   style,
+  textStyle,
   mode = "accent",
 }) => {
   const { styles } = useStyles(createStyles);
@@ -36,7 +38,7 @@ const ThemedButton: React.FC<ThemedButtonProps> = ({
       onPress={onPress}
       disabled={disabled}
     >
-      <Text style={[styles.text, disabled && styles.disabledText]}>{title}</Text>
+      <Text style={[styles.text, disabled && styles.disabledText, textStyle]}>{title}</Text>
     </TouchableOpacity>
   );
 };
