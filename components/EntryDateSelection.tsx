@@ -20,6 +20,12 @@ export default function EntryDateSelection(props: EntryDateSelectionProps) {
   const [periodOfDay, setSelectedPeriodOfDay] = useState<PeriodOfDay | null>(null);
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [toggleButtonsSelectedOption, setToggleButtonsSelectedOption] = useState<string | null>("Now");
+  const presetOptions = [
+    { value: "now", label: "Now" },
+    { value: PeriodOfDay.Morning, label: "Morning" },
+    { value: PeriodOfDay.Afternoon, label: "Afternoon" },
+    { value: PeriodOfDay.Evening, label: "Evening" },
+  ];
 
   const datePickerDefaultStyles = useDefaultStyles();
   const handleDatePickerChange: SingleChange = ({ date }) => {
@@ -38,19 +44,19 @@ export default function EntryDateSelection(props: EntryDateSelectionProps) {
   const handlePressToggleButton = (option: string) => {
     setToggleButtonsSelectedOption(option);
     switch (option) {
-      case "Now":
+      case "now":
         setSelectedDate(new Date());
         setSelectedPeriodOfDay(null);
         break;
-      case "Morning":
+      case PeriodOfDay.Morning:
         setSelectedPeriodOfDay(PeriodOfDay.Morning);
         setSelectedDate(null);
         break;
-      case "Afternoon":
+      case PeriodOfDay.Afternoon:
         setSelectedPeriodOfDay(PeriodOfDay.Afternoon);
         setSelectedDate(null);
         break;
-      case "Evening":
+      case PeriodOfDay.Evening:
         setSelectedPeriodOfDay(PeriodOfDay.Evening);
         setSelectedDate(null);
         break;
@@ -79,7 +85,7 @@ export default function EntryDateSelection(props: EntryDateSelectionProps) {
         label=""
         selectedOption={toggleButtonsSelectedOption}
         columns={4}
-        options={["Now", "Morning", "Afternoon", "Evening"]}
+        options={presetOptions}
         onChangeSelection={handlePressToggleButton}
       />
       <ThemedButton title="Custom" mode="ghost" onPress={toggleDatePicker} style={styles.dateSelectionButton} />

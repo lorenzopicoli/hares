@@ -44,14 +44,17 @@ export default function AddEntryScreen() {
 
   const currentDateFormatted = useMemo(() => formatEntryDateInformation(dateSelected), [dateSelected]);
   const chips = useMemo(() => textListValues.map((t) => ({ label: t, id: t })) ?? [], [textListValues]);
-  const yesOrNoOptions = ["Yes", "No"];
+  const yesOrNoOptions = [
+    { value: true, label: "Yes" },
+    { value: false, label: "No" },
+  ];
 
   const handleDateSelectionChange = useCallback((data: EntryDateInformation) => setSelectedDate(data), []);
   const handleNumberInputChange = useCallback((value: number | null) => setNumberValue(value), []);
   const handleChipPress = (data: ChipData) => {
     setTextListValues([...textListValues.filter((t) => t !== data.id)]);
   };
-  const handleYesOrNoChange = useCallback((option: string) => setYesOrNoValue(option === "Yes"), []);
+  const handleYesOrNoChange = useCallback((option: boolean) => setYesOrNoValue(option), []);
   const handleGoToSelectItems = useCallback(() => {
     router.navigate({
       pathname: "./textListSelection",

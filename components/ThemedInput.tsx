@@ -1,91 +1,84 @@
-import React, { useState } from "react";
-import { View, TextInput, Text, StyleSheet, TouchableOpacity } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
+import React from "react";
+import { View, TextInput, StyleSheet, type TextInputProps, type StyleProp, type ViewStyle } from "react-native";
 import type { ThemedColors } from "./ThemeProvider";
 import useStyles from "@/hooks/useStyles";
 import ThemedInputLabel from "./ThemedInputLabel";
+import { ThemedText } from "./ThemedText";
+import { Controller, type ControllerProps, type FieldValues, type Path } from "react-hook-form";
+import { Sizes } from "@/constants/Sizes";
 
-interface ThemedInputProps {
+interface ThemedInputProps extends TextInputProps {
   label?: string;
-  placeholder?: string;
-  value: string;
-  onChangeText: (text: string) => void;
-  secureTextEntry?: boolean;
-  keyboardType?:
-    | "default"
-    | "email-address"
-    | "numeric"
-    | "phone-pad"
-    | "number-pad"
-    | "decimal-pad"
-    | "url"
-    | "web-search";
-  autoCapitalize?: "none" | "sentences" | "words" | "characters";
-  error?: string;
-  maxLength?: number;
   disabled?: boolean;
-  style?: any;
+  containerStyle?: StyleProp<ViewStyle>;
+  error?: string;
 }
 
-const ThemedInput: React.FC<ThemedInputProps> = ({
-  label,
-  placeholder,
-  value,
-  onChangeText,
-  secureTextEntry = false,
-  keyboardType = "default",
-  autoCapitalize = "sentences",
-  error,
-  maxLength,
-  disabled = false,
-  style,
-}) => {
-  const [isFocused, setIsFocused] = useState<boolean>(false);
-  const [isPasswordVisible, setIsPasswordVisible] = useState<boolean>(false);
-  const { styles } = useStyles(createStyles);
+interface FormThemedInputProps<T extends FieldValues, K extends Path<T>> extends ThemedInputProps {
+  form: Omit<ControllerProps<T, K, T>, "render">;
+}
+
+export function FormThemedInput<T extends FieldValues, K extends Path<T>>(props: FormThemedInputProps<T, K>) {
+  const { form, ...inputProps } = props;
+
   return (
-    <View style={[styles.container, !!style && style]}>
+    <Controller
+      {...form}
+      render={({ field: { onChange, onBlur, value }, fieldState }) => {
+        return (
+          <ThemedInput
+            {...inputProps}
+            onChangeText={onChange}
+            onBlur={onBlur}
+            value={value}
+            error={fieldState.error?.message}
+          />
+        );
+      }}
+    />
+  );
+}
+
+export default function ThemedInput(props: ThemedInputProps) {
+  const { label, containerStyle, error, ...inputProps } = props;
+  const { styles } = useStyles(createStyles);
+  const [isFocused, setIsFocused] = React.useState(false);
+
+  const handleFocus: ThemedInputProps["onFocus"] = (e) => {
+    setIsFocused(true);
+    props.onFocus?.(e);
+  };
+
+  const handleBlur: ThemedInputProps["onBlur"] = (e) => {
+    setIsFocused(false);
+    props.onBlur?.(e);
+  };
+
+  return (
+    <View style={[styles.container, containerStyle]}>
       {label && <ThemedInputLabel label={label} />}
 
       <View
         style={[
           styles.inputContainer,
+          props.editable === false && styles.inputDisabled,
           isFocused && styles.inputFocused,
           error && styles.inputError,
-          disabled && styles.inputDisabled,
         ]}
       >
         <TextInput
+          {...inputProps}
+          onFocus={handleFocus}
+          onBlur={handleBlur}
           style={styles.input}
-          placeholder={placeholder}
           placeholderTextColor="#71747A"
-          value={value}
-          onChangeText={onChangeText}
-          onFocus={() => setIsFocused(true)}
-          onBlur={() => setIsFocused(false)}
-          secureTextEntry={secureTextEntry && !isPasswordVisible}
-          keyboardType={keyboardType}
-          autoCapitalize={autoCapitalize}
           selectionColor="#4C6EF5"
-          maxLength={maxLength}
-          editable={!disabled}
         />
-
-        {secureTextEntry && (
-          <TouchableOpacity
-            onPress={() => setIsPasswordVisible(!isPasswordVisible)}
-            style={styles.iconContainer}
-            disabled={disabled}
-          >
-            <Ionicons name={isPasswordVisible ? "eye-off" : "eye"} size={20} color={disabled ? "#4A4D52" : "#71747A"} />
-          </TouchableOpacity>
-        )}
       </View>
-
-      {error && <Text style={styles.errorText}>{error}</Text>}
+      {error ? <ThemedText style={styles.errorText}>{error}</ThemedText> : null}
     </View>
   );
-};
+}
 
 const createStyles = (theme: ThemedColors) =>
   StyleSheet.create({
@@ -118,14 +111,9 @@ const createStyles = (theme: ThemedColors) =>
       fontSize: 16,
       height: "100%",
     },
-    iconContainer: {
-      padding: 4,
-    },
     errorText: {
       color: theme.input.textError,
       fontSize: 12,
-      marginTop: 4,
+      marginTop: Sizes.xSmall,
     },
   });
-
-export default ThemedInput;

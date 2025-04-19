@@ -7,10 +7,10 @@ interface ThemedInputLabelProps {
   label?: string;
 }
 
-const ThemedInputLabel: React.FC<ThemedInputLabelProps> = ({ label }) => {
+export default function ThemedInputLabel({ label }: ThemedInputLabelProps) {
   const { styles } = useStyles(createStyles);
   return <Text style={styles.label}>{label}</Text>;
-};
+}
 
 const createStyles = (theme: ThemedColors) =>
   StyleSheet.create({
@@ -21,5 +21,3 @@ const createStyles = (theme: ThemedColors) =>
       fontWeight: "500",
     },
   });
-
-export default ThemedInputLabel;
