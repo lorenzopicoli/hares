@@ -30,7 +30,7 @@ export function FormThemedInput<T extends FieldValues, K extends Path<T>>(props:
             {...inputProps}
             onChangeText={onChange}
             onBlur={onBlur}
-            value={value}
+            value={value === undefined || value === null ? value : String(value)}
             error={fieldState.error?.message}
           />
         );

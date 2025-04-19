@@ -53,6 +53,7 @@ export function useTrackScreenActions(collectionId: number) {
 
 export function useTrackerActions() {
   const { showActionSheetWithOptions } = useActionSheet();
+  const router = useRouter();
   const { colors } = useColors();
   const { deleteTracker } = useDeleteTracker();
 
@@ -74,7 +75,7 @@ export function useTrackerActions() {
       showActionSheetWithOptions(actionSheetParams, async (selectedIndex?: number) => {
         switch (selectedIndex) {
           case 0:
-            console.log("Edit");
+            router.navigate({ pathname: "/tracker/addTracker", params: { trackerId } });
             break;
 
           case 1:
@@ -88,7 +89,7 @@ export function useTrackerActions() {
         }
       });
     },
-    [deleteTracker, showActionSheetWithOptions, actionSheetParams],
+    [deleteTracker, showActionSheetWithOptions, actionSheetParams, router],
   );
 
   return { handleTrackerActions };

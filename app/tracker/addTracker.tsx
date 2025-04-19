@@ -6,9 +6,11 @@ import ThemedButton from "@/components/ThemedButton";
 import { ThemedView } from "@/components/ThemedView";
 import { Sizes } from "@/constants/Sizes";
 import { TrackerType } from "@/db/schema";
-import { useRouter } from "expo-router";
-import { useCreateTracker } from "@/hooks/data/useCreateTracker";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import { FormThemedToggleButtons } from "@/components/ThemedToggleButtons";
+import { useLazyTracker } from "@/hooks/data/useTracker";
+import { useMemo } from "react";
+import { useUpsertTracker } from "@/hooks/data/useUpsertTracker";
 
 interface FormInputs {
   name: string;
@@ -22,25 +24,50 @@ interface FormInputs {
 
 export default function AddTrackerScreen() {
   const router = useRouter();
-  const { createTracker } = useCreateTracker();
-  const { control, handleSubmit, watch } = useForm<FormInputs>();
+  const { trackerId: trackerIdParam } = useLocalSearchParams<{ trackerId?: string }>();
+  const trackerId = useMemo(() => (trackerIdParam ? +(trackerIdParam ?? -1) : undefined), [trackerIdParam]);
+  const { fetchTracker } = useLazyTracker();
+  const { upsertTracker } = useUpsertTracker();
   const typeOptions = [
     { value: TrackerType.Number, label: "Number" },
     { value: TrackerType.Scale, label: "Range" },
     { value: TrackerType.TextList, label: "List" },
     { value: TrackerType.Boolean, label: "Yes or No" },
   ];
+  const { control, handleSubmit, watch } = useForm<FormInputs>({
+    defaultValues: async () => {
+      const defaultValues: FormInputs = {
+        name: "",
+        description: "",
+        type: TrackerType.Number,
+        suffix: "",
+        prefix: "",
+      };
+      if (!trackerId) {
+        return defaultValues;
+      }
+      const { tracker } = await fetchTracker(trackerId);
+      if (!tracker) {
+        return defaultValues;
+      }
+      return {
+        name: tracker.name,
+        description: tracker.description ?? "",
+        type: tracker.type,
+        suffix: tracker.suffix ?? "",
+        prefix: tracker.prefix ?? "",
+        rangeMax: tracker.rangeMax ?? undefined,
+        rangeMin: tracker.rangeMin ?? undefined,
+      };
+    },
+  });
 
   const type = watch("type");
 
   const onSubmit = async (data: FormInputs) => {
-    await createTracker(data);
+    await upsertTracker(data, trackerId);
     router.dismiss();
   };
-
-  function handleTypeChange(option: string): void {
-    throw new Error("Function not implemented.");
-  }
 
   return (
     <ThemedView>
@@ -82,7 +109,6 @@ export default function AddTrackerScreen() {
           label="Value type"
           columns={2}
           options={typeOptions}
-          onChangeSelection={handleTypeChange}
         />
         {type === TrackerType.Scale ? (
           <View style={styles.sideBySide}>
@@ -121,7 +147,11 @@ export default function AddTrackerScreen() {
       </ThemedScrollView>
 
       <View style={styles.submitButtonContainer}>
-        <ThemedButton fullWidth title="Create tracker" onPress={handleSubmit(onSubmit)} />
+        <ThemedButton
+          fullWidth
+          title={trackerId ? "Edit tracker" : "Create tracker"}
+          onPress={handleSubmit(onSubmit)}
+        />
       </View>
     </ThemedView>
   );

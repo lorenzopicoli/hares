@@ -45,7 +45,6 @@ export default function TrackScreen() {
 
   const handleTrackerLongPress = useCallback(
     (tracker: Tracker) => {
-      console.log("aha");
       handleTrackerActions(tracker.id);
     },
     [handleTrackerActions],
