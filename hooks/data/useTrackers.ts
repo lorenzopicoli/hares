@@ -6,9 +6,12 @@ import { useLiveQuery } from "drizzle-orm/expo-sqlite";
 export function useTrackers(params: { collectionId?: number; searchQuery?: string }) {
   const { collectionId, searchQuery } = params;
   const { db } = useDatabase();
-  const { data: trackers } = useLiveQuery(
+  const { data: trackers, error } = useLiveQuery(
     db
-      .select(getTableColumns(trackersTable))
+      .select({
+        ...getTableColumns(trackersTable),
+        // isInCollection: sql`MAX(${collectionsTrackersTable.collectionId}) IS NOT NULL`,
+      })
       .from(trackersTable)
       .leftJoin(collectionsTrackersTable, eq(collectionsTrackersTable.trackerId, trackersTable.id))
       .where(sql`
