@@ -1,9 +1,9 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { LogBox, StyleSheet, TouchableOpacity, View, type ListRenderItemInfo } from "react-native";
 import ThemedButton from "@/components/ThemedButton";
 import { ThemedView } from "@/components/ThemedView";
 import { Sizes } from "@/constants/Sizes";
-import type { Collection, NewCollection, NewCollectionTracker, Tracker } from "@/db/schema";
+import type { NewCollection, NewCollectionTracker, Tracker } from "@/db/schema";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { ThemedText } from "@/components/ThemedText";
 import {
@@ -12,7 +12,6 @@ import {
   useReorderableDrag,
   type ReorderableListReorderEvent,
 } from "react-native-reorderable-list";
-import { Pressable } from "react-native-gesture-handler";
 import type { ThemedColors } from "@/components/ThemeProvider";
 import useStyles from "@/hooks/useStyles";
 import { Separator } from "@/components/Separator";
@@ -22,7 +21,7 @@ import { Entypo, Feather, MaterialIcons } from "@expo/vector-icons";
 import { useCollection } from "@/hooks/data/useCollection";
 import { useTrackers, useTrackersNotInCollection } from "@/hooks/data/useTrackers";
 import { useUpsertCollection } from "@/hooks/data/useUpsertCollection";
-import { Controller, useFieldArray, useForm } from "react-hook-form";
+import { Controller, useFieldArray, useForm, type FieldArrayWithId } from "react-hook-form";
 import ThemedInputLabel from "@/components/ThemedInputLabel";
 
 LogBox.ignoreLogs(["VirtualizedLists should never be nested inside plain ScrollViews"]);
@@ -44,41 +43,21 @@ interface FormInputs {
   trackers: TrackerInCollection[];
 }
 
-interface AddCollectionInternalProps {
-  //   collectionTrackers: Tracker[];
-  //   nonCollectionTrackers: Tracker[];
-  trackers: TrackerInCollection[];
-  collection?: Collection;
-}
-
-function DraggableTrackerItem(props: TrackItemProps) {
-  const drag = useReorderableDrag();
-  return <TrackerItem onPress={props.onPress} onLongPress={drag} {...props} />;
-}
 function TrackerItem(props: TrackItemProps) {
   const { styles } = useStyles(createStyles);
-  const handleRemove = () => {
-    props.onRemove?.(props.tracker);
-  };
+  const drag = useReorderableDrag();
   const handlePress = () => {
     props.onPress?.(props.tracker);
   };
   return (
-    <TouchableOpacity onPress={handlePress} onLongPress={props.onLongPress}>
+    <TouchableOpacity onPress={handlePress} onLongPress={props.tracker.isInCollection ? drag : undefined}>
       <View style={styles.itemContainer}>
         <ThemedText>{props.tracker.tracker.name}</ThemedText>
-        {props.tracker.isInCollection ? (
-          <View style={styles.itemActions}>
-            <Pressable onPress={handleRemove}>
-              <Feather name="x" size={25} color="#fff" />
-            </Pressable>
-            <MaterialIcons name="drag-indicator" size={25} color="#fff" />
-          </View>
-        ) : (
-          <View style={styles.itemActions}>
-            <Entypo name="plus" size={24} color="#fff" />
-          </View>
-        )}
+        <View style={styles.itemActions}>
+          {props.tracker.isInCollection && <Feather name="x" size={25} color="#fff" />}
+          {props.tracker.isInCollection && <MaterialIcons name="drag-indicator" size={25} color="#fff" />}
+          {!props.tracker.isInCollection && <Entypo name="plus" size={24} color="#fff" />}
+        </View>
       </View>
     </TouchableOpacity>
   );
@@ -89,6 +68,7 @@ function AddCollectionScreenInternal(props: AddCollectionInternalProps) {
   const { upsertCollection } = useUpsertCollection();
   const { trackers, collection } = props;
   const { styles } = useStyles(createStyles);
+  const [isOutOfOrder, setIsOutOfOrder] = useState(false);
 
   const { control, handleSubmit, watch } = useForm<FormInputs>({
     defaultValues: async () => {
@@ -99,10 +79,23 @@ function AddCollectionScreenInternal(props: AddCollectionInternalProps) {
       return defaultValues;
     },
   });
-  const { fields, append, prepend, remove, move, insert } = useFieldArray({
+  const { fields, append, replace, prepend, remove, move, insert } = useFieldArray({
     control,
     name: "trackers",
   });
+
+  // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
+  useEffect(() => {
+    // Because of the draggable list library, I can't stop the user from moving a tracker
+    // that is in the collection to, say, the end of the list. When that happens I mark the
+    // list as out of order and fix it in the next render
+    if (isOutOfOrder) {
+      const inCollectionFields = fields.filter((f) => f.isInCollection);
+      const notInCollectionFields = fields.filter((f) => !f.isInCollection);
+      replace([...inCollectionFields, ...notInCollectionFields]);
+      setIsOutOfOrder(false);
+    }
+  }, [isOutOfOrder]);
 
   const onSubmit = async (data: FormInputs) => {
     const newCollection: Omit<NewCollection, "index"> = {
@@ -135,7 +128,14 @@ function AddCollectionScreenInternal(props: AddCollectionInternalProps) {
   };
 
   const handleTrackerReorder = (event: ReorderableListReorderEvent) => {
+    const firstNotInCollection = fields.findIndex((f) => !f.isInCollection);
+
     move(event.from, event.to);
+    // Tried to move a tracker in collection after a tracker not in collection
+    // marks the list as out of order so it can be fixed in the next render cycle
+    if (event.to > firstNotInCollection) {
+      setIsOutOfOrder(true);
+    }
   };
 
   const handleRemoveTracker = (tracker: TrackerInCollection, index: number) => {
@@ -143,31 +143,33 @@ function AddCollectionScreenInternal(props: AddCollectionInternalProps) {
     const newTracker = { ...tracker, isInCollection: false };
     remove(index);
     if (firstNotInCollection > -1) {
-      insert(firstNotInCollection, newTracker);
+      insert(Math.max(0, firstNotInCollection - 1), newTracker);
     } else {
       append(newTracker);
     }
   };
 
-  const renderDraggableTracker = ({ item, index }: ListRenderItemInfo<TrackerInCollection>) => {
-    const r = (tracker: TrackerInCollection) => {
+  const renderDraggableTracker = ({
+    item,
+    index,
+  }: ListRenderItemInfo<FieldArrayWithId<FormInputs, "trackers", "id">>) => {
+    const removeTracker = (tracker: TrackerInCollection) => {
       handleRemoveTracker(tracker, index);
     };
-    const a = (tracker: TrackerInCollection) => {
+    const addTracker = (tracker: TrackerInCollection) => {
       addTrackerToCollection(tracker, index);
     };
     return (
       <Controller
         control={control}
-        key={String(`${item.tracker.id}-${item.isInCollection}`)}
+        key={item.id}
         name={`trackers.${index}`}
         render={({ field: { value } }) => {
-          return <DraggableTrackerItem onPress={a} onRemove={r} tracker={value} />;
+          return <TrackerItem onPress={value.isInCollection ? removeTracker : addTracker} tracker={item} />;
         }}
       />
     );
   };
-  const trackerKeyExtractor = (tracker: TrackerInCollection, _index: number) => String(tracker.tracker.id);
 
   return (
     <ThemedView>
@@ -193,7 +195,7 @@ function AddCollectionScreenInternal(props: AddCollectionInternalProps) {
             style={styles.reorderableList}
             data={fields}
             renderItem={renderDraggableTracker}
-            keyExtractor={trackerKeyExtractor}
+            keyExtractor={(f) => f.id}
             onReorder={handleTrackerReorder}
             ItemSeparatorComponent={Separator}
           />
