@@ -1,6 +1,6 @@
 import { useDatabase } from "@/contexts/DatabaseContext";
 import { collectionsTrackersTable, trackersTable } from "@/db/schema";
-import { notExists, eq, getTableColumns, isNotNull, sql, and, isNull } from "drizzle-orm";
+import { notExists, getTableColumns, isNotNull, sql, and, isNull } from "drizzle-orm";
 import { useLiveQuery } from "drizzle-orm/expo-sqlite";
 
 export function useTrackers(params: { collectionId?: number; searchQuery?: string }) {
@@ -13,7 +13,13 @@ export function useTrackers(params: { collectionId?: number; searchQuery?: strin
         // isInCollection: sql`MAX(${collectionsTrackersTable.collectionId}) IS NOT NULL`,
       })
       .from(trackersTable)
-      .leftJoin(collectionsTrackersTable, eq(collectionsTrackersTable.trackerId, trackersTable.id))
+      .leftJoin(
+        collectionsTrackersTable,
+        sql`
+            ${collectionsTrackersTable.trackerId} = ${trackersTable.id} AND
+            ${collectionId ? sql`${collectionsTrackersTable.collectionId} = ${collectionId}` : sql`1=1`}
+        `,
+      )
       .where(sql`
         ${searchQuery === "" && collectionId ? isNotNull(collectionsTrackersTable.id) : "1 = 1"} AND
         ${trackersTable.deletedAt} IS NULL AND

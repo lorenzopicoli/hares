@@ -109,10 +109,6 @@ function AddCollectionScreenInternal(props: AddCollectionInternalProps) {
       name: data.name,
     };
 
-    console.log(
-      "trackers",
-      data.trackers.filter((t) => t.isInCollection),
-    );
     const relationship: Omit<NewCollectionTracker, "collectionId">[] = data.trackers
       .filter((t) => t.isInCollection)
       .map((t, i) => ({
@@ -130,13 +126,12 @@ function AddCollectionScreenInternal(props: AddCollectionInternalProps) {
   const addTrackerToCollection = (tracker: TrackerInCollection, index: number) => {
     const newTracker: TrackerInCollection = { ...tracker, isInCollection: true };
     const firstNotInCollection = fields.findIndex((f) => !f.isInCollection);
-    console.log("i", firstNotInCollection);
+    remove(index);
     if (firstNotInCollection > -1) {
       insert(firstNotInCollection, newTracker);
     } else {
-      prepend(newTracker);
+      append(newTracker);
     }
-    remove(index);
   };
 
   const handleTrackerReorder = (event: ReorderableListReorderEvent) => {
@@ -146,12 +141,12 @@ function AddCollectionScreenInternal(props: AddCollectionInternalProps) {
   const handleRemoveTracker = (tracker: TrackerInCollection, index: number) => {
     const firstNotInCollection = fields.findIndex((f) => !f.isInCollection);
     const newTracker = { ...tracker, isInCollection: false };
+    remove(index);
     if (firstNotInCollection > -1) {
       insert(firstNotInCollection, newTracker);
     } else {
       append(newTracker);
     }
-    remove(index);
   };
 
   const renderDraggableTracker = ({ item, index }: ListRenderItemInfo<TrackerInCollection>) => {
@@ -164,7 +159,7 @@ function AddCollectionScreenInternal(props: AddCollectionInternalProps) {
     return (
       <Controller
         control={control}
-        key={item.tracker.id}
+        key={String(`${item.tracker.id}-${item.isInCollection}`)}
         name={`trackers.${index}`}
         render={({ field: { value } }) => {
           return <DraggableTrackerItem onPress={a} onRemove={r} tracker={value} />;
@@ -225,8 +220,6 @@ export default function AddCollectionScreen() {
   if (collectionTrackers.length === 0 && nonCollectionTrackers.length === 0) {
     return <View />;
   }
-
-  console.log("re-rednder");
 
   return (
     <AddCollectionScreenInternal
