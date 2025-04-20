@@ -1,9 +1,9 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { LogBox, StyleSheet, TouchableOpacity, View, type ListRenderItemInfo } from "react-native";
 import ThemedButton from "@/components/ThemedButton";
 import { ThemedView } from "@/components/ThemedView";
 import { Sizes } from "@/constants/Sizes";
-import type { NewCollection, NewCollectionTracker, Tracker } from "@/db/schema";
+import type { NewCollectionTracker, Tracker } from "@/db/schema";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { ThemedText } from "@/components/ThemedText";
 import {
@@ -18,8 +18,7 @@ import { Separator } from "@/components/Separator";
 import { Spacing } from "@/components/Spacing";
 import { FormThemedInput } from "@/components/ThemedInput";
 import { Entypo, Feather, MaterialIcons } from "@expo/vector-icons";
-import { useCollection } from "@/hooks/data/useCollection";
-import { useTrackers, useTrackersNotInCollection } from "@/hooks/data/useTrackers";
+import { useTrackersForAddCollection } from "@/hooks/data/useTrackers";
 import { useUpsertCollection } from "@/hooks/data/useUpsertCollection";
 import { Controller, useFieldArray, useForm, type FieldArrayWithId } from "react-hook-form";
 import ThemedInputLabel from "@/components/ThemedInputLabel";
@@ -63,15 +62,19 @@ function TrackerItem(props: TrackItemProps) {
   );
 }
 
-function AddCollectionScreenInternal(props: AddCollectionInternalProps) {
+export default function AddCollectionScreen() {
   const router = useRouter();
-  const { upsertCollection } = useUpsertCollection();
-  const { trackers, collection } = props;
   const { styles } = useStyles(createStyles);
+  const { collectionId: collectionIdParam } = useLocalSearchParams<{ collectionId?: string }>();
+  const collectionId = useMemo(() => (collectionIdParam ? +collectionIdParam : undefined), [collectionIdParam]);
+
   const [isOutOfOrder, setIsOutOfOrder] = useState(false);
 
-  const { control, handleSubmit, watch } = useForm<FormInputs>({
+  const { upsertCollection } = useUpsertCollection();
+  const { fetchTrackersForAddCollection } = useTrackersForAddCollection();
+  const { control, handleSubmit } = useForm<FormInputs>({
     defaultValues: async () => {
+      const trackers = await fetchTrackersForAddCollection(collectionId);
       const defaultValues: FormInputs = {
         name: "",
         trackers,
@@ -79,7 +82,7 @@ function AddCollectionScreenInternal(props: AddCollectionInternalProps) {
       return defaultValues;
     },
   });
-  const { fields, append, replace, prepend, remove, move, insert } = useFieldArray({
+  const { fields, append, replace, remove, move, insert } = useFieldArray({
     control,
     name: "trackers",
   });
@@ -98,10 +101,6 @@ function AddCollectionScreenInternal(props: AddCollectionInternalProps) {
   }, [isOutOfOrder]);
 
   const onSubmit = async (data: FormInputs) => {
-    const newCollection: Omit<NewCollection, "index"> = {
-      name: data.name,
-    };
-
     const relationship: Omit<NewCollectionTracker, "collectionId">[] = data.trackers
       .filter((t) => t.isInCollection)
       .map((t, i) => ({
@@ -109,14 +108,14 @@ function AddCollectionScreenInternal(props: AddCollectionInternalProps) {
         trackerId: t.tracker.id,
       }));
 
-    await upsertCollection(newCollection, relationship, collection?.id).catch((e) => {
+    await upsertCollection({ name: data.name }, relationship, collectionId).catch((e) => {
       console.log("Failed to upsert collection", e);
     });
 
     router.dismiss();
   };
 
-  const addTrackerToCollection = (tracker: TrackerInCollection, index: number) => {
+  const handleAddTracker = (tracker: TrackerInCollection, index: number) => {
     const newTracker: TrackerInCollection = { ...tracker, isInCollection: true };
     const firstNotInCollection = fields.findIndex((f) => !f.isInCollection);
     remove(index);
@@ -149,15 +148,12 @@ function AddCollectionScreenInternal(props: AddCollectionInternalProps) {
     }
   };
 
-  const renderDraggableTracker = ({
-    item,
-    index,
-  }: ListRenderItemInfo<FieldArrayWithId<FormInputs, "trackers", "id">>) => {
+  const renderItem = ({ item, index }: ListRenderItemInfo<FieldArrayWithId<FormInputs, "trackers", "id">>) => {
     const removeTracker = (tracker: TrackerInCollection) => {
       handleRemoveTracker(tracker, index);
     };
     const addTracker = (tracker: TrackerInCollection) => {
-      addTrackerToCollection(tracker, index);
+      handleAddTracker(tracker, index);
     };
     return (
       <Controller
@@ -188,49 +184,26 @@ function AddCollectionScreenInternal(props: AddCollectionInternalProps) {
           label="Collection name"
           autoCapitalize="sentences"
         />
-        <>
-          <ThemedInputLabel label="Select trackers for this collection" />
 
-          <NestedReorderableList
-            style={styles.reorderableList}
-            data={fields}
-            renderItem={renderDraggableTracker}
-            keyExtractor={(f) => f.id}
-            onReorder={handleTrackerReorder}
-            ItemSeparatorComponent={Separator}
-          />
-        </>
+        <ThemedInputLabel label="Select trackers for this collection" />
+        <NestedReorderableList
+          style={styles.reorderableList}
+          data={fields}
+          renderItem={renderItem}
+          keyExtractor={(i) => i.id}
+          onReorder={handleTrackerReorder}
+          ItemSeparatorComponent={Separator}
+        />
         <Spacing size="medium" />
       </ScrollViewContainer>
       <View style={styles.submitButtonContainer}>
         <ThemedButton
           fullWidth
-          title={collection ? "Edit collection" : "Create collection"}
+          title={collectionId ? "Edit collection" : "Create collection"}
           onPress={handleSubmit(onSubmit)}
         />
       </View>
     </ThemedView>
-  );
-}
-
-export default function AddCollectionScreen() {
-  const { collectionId } = useLocalSearchParams<{ collectionId?: string }>();
-  const { collection } = useCollection(+(collectionId ?? -1));
-  const { trackers: collectionTrackers } = useTrackers({ collectionId: collectionId ? +collectionId : undefined });
-  const { trackers: nonCollectionTrackers } = useTrackersNotInCollection({ collectionId: +(collectionId ?? -1) });
-
-  if (collectionTrackers.length === 0 && nonCollectionTrackers.length === 0) {
-    return <View />;
-  }
-
-  return (
-    <AddCollectionScreenInternal
-      trackers={[
-        ...collectionTrackers.map((tracker) => ({ isInCollection: true, tracker })),
-        ...nonCollectionTrackers.map((tracker) => ({ isInCollection: false, tracker })),
-      ]}
-      collection={collection}
-    />
   );
 }
 
