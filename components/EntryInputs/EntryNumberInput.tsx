@@ -42,6 +42,7 @@ export function FormEntryNumberInput<T extends FieldValues, K extends Path<T>>(p
 
 export default function EntryNumberInput(props: EntryNumberInputProps) {
   const { error, prefix, suffix, value, onChangeText, ...inputProps } = props;
+
   const hiddenInputRef = useRef<TextInput>(null);
   const { styles } = useStyles(createStyles);
 
@@ -74,13 +75,17 @@ export default function EntryNumberInput(props: EntryNumberInputProps) {
     return formattedValue;
   };
 
+  const handlePlus = () => {
+    onChangeText?.((value ?? 0) + 1);
+  };
+
+  const handleMinus = () => {
+    onChangeText?.((value ?? 0) - 1);
+  };
+
   const focusHiddenInput = () => {
     hiddenInputRef.current?.focus();
   };
-
-  //   useEffect(() => {
-  //     props.onChangeText?.(numberValue);
-  //   }, [numberValue, props.onChangeText]);
 
   return (
     <View>
@@ -103,13 +108,13 @@ export default function EntryNumberInput(props: EntryNumberInputProps) {
           textStyle={styles.counterButtonText}
           style={styles.counterButton}
           title="—"
-          //   onPress={() => setNumberValue((numberValue ?? 0) - 1)}
+          onPress={handleMinus}
         />
         <ThemedButton
           textStyle={styles.counterButtonText}
           style={styles.counterButton}
           title="+"
-          //   onPress={() => setNumberValue((numberValue ?? 0) + 1)}
+          onPress={handlePlus}
         />
       </View>
       {error ? <ThemedText style={styles.errorText}>{error}</ThemedText> : null}

@@ -1,7 +1,7 @@
 import { Sizes } from "@/constants/Sizes";
 import { PeriodOfDay, type EntryDateInformation } from "@/db/schema";
 import useStyles from "@/hooks/useStyles";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { StyleSheet, View } from "react-native";
 import DateTimePicker, { useDefaultStyles } from "react-native-ui-datepicker";
 import type { SingleChange } from "react-native-ui-datepicker/lib/typescript/types";
@@ -10,9 +10,10 @@ import ThemedModal from "./ThemedModal";
 import type { ThemedColors } from "./ThemeProvider";
 import ThemedToggleButtons from "./ThemedToggleButtons";
 import { type FieldValues, type Path, type ControllerProps, Controller } from "react-hook-form";
+import { ThemedText } from "./ThemedText";
+import { formatEntryDateInformation } from "@/utils/entryDate";
 
 export interface EntryDateSelectionProps {
-  //   initialDate: Date;
   onSelectionChange: (data: EntryDateInformation) => void;
   value: EntryDateInformation;
   error?: string;
@@ -44,9 +45,12 @@ export function FormEntryDateSelection<T extends FieldValues, K extends Path<T>>
 }
 
 export default function EntryDateSelection(props: EntryDateSelectionProps) {
-  //   const [selectedDate, setSelectedDate] = useState<DateType | null>(props.initialDate);
-  //   const [periodOfDay, setSelectedPeriodOfDay] = useState<PeriodOfDay | null>(null);
   const { value, onSelectionChange } = props;
+
+  const datePickerDefaultStyles = useDefaultStyles();
+  const { styles } = useStyles(createStyles);
+
+  const currentDateFormatted = useMemo(() => (value ? formatEntryDateInformation(value) : "-"), [value]);
   const [showDatePicker, setShowDatePicker] = useState(false);
   const presetOptions = [
     { value: "now", label: "Now" },
@@ -55,7 +59,6 @@ export default function EntryDateSelection(props: EntryDateSelectionProps) {
     { value: PeriodOfDay.Evening, label: "Evening" },
   ];
 
-  const datePickerDefaultStyles = useDefaultStyles();
   const handleDatePickerChange: SingleChange = ({ date }) => {
     if (date) {
       onSelectionChange({ date: new Date(date?.valueOf()) });
@@ -63,7 +66,6 @@ export default function EntryDateSelection(props: EntryDateSelectionProps) {
   };
 
   const toggleDatePicker = () => {
-    // setToggleButtonsSelectedOption(null);
     if (!showDatePicker) {
       onSelectionChange({ date: new Date() });
     }
@@ -71,7 +73,6 @@ export default function EntryDateSelection(props: EntryDateSelectionProps) {
   };
 
   const handlePressToggleButton = (option: string) => {
-    // setToggleButtonsSelectedOption(option);
     switch (option) {
       case PeriodOfDay.Morning:
       case PeriodOfDay.Afternoon:
@@ -87,18 +88,12 @@ export default function EntryDateSelection(props: EntryDateSelectionProps) {
     }
   };
 
-  //   useEffect(() => {
-  //     if (periodOfDay) {
-  //       onSelectionChange({ periodOfDay });
-  //     }
-  //     if (selectedDate) {
-  //       onSelectionChange({ date: new Date(selectedDate.valueOf()) });
-  //     }
-  //   }, [selectedDate, periodOfDay, onSelectionChange]);
-
-  const { styles } = useStyles(createStyles);
   return (
     <View>
+      <ThemedText>
+        <ThemedText style={styles.bold}>Date: </ThemedText>
+        {currentDateFormatted}
+      </ThemedText>
       <ThemedToggleButtons
         buttonContainerStyle={{ height: Sizes.buttonHeight }}
         label=""
@@ -146,5 +141,8 @@ const createStyles = (theme: ThemedColors) =>
     datePickerContainer: {
       flex: 1,
       width: "100%",
+    },
+    bold: {
+      fontWeight: 700,
     },
   });

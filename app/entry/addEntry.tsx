@@ -6,7 +6,7 @@ import { Sizes } from "@/constants/Sizes";
 import { TrackerType, type EntryDateInformation, type NewTrackerEntry, type PeriodOfDay } from "@/db/schema";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { ThemedText } from "@/components/ThemedText";
-import { useCallback, useMemo } from "react";
+import { useCallback, useEffect, useMemo } from "react";
 import type { ThemedColors } from "@/components/ThemeProvider";
 import useStyles from "@/hooks/useStyles";
 import { FormThemedToggleButtons } from "@/components/ThemedToggleButtons";
@@ -16,7 +16,6 @@ import EntriesListRow from "@/components/EntriesList/EntriesListRow";
 import { FormEntryNumberInput } from "@/components/EntryInputs/EntryNumberInput";
 import { FormEntrySliderInput } from "@/components/EntryInputs/EntrySliderInput";
 import { ChipGroup } from "@/components/Chip";
-import { formatEntryDateInformation } from "@/utils/entryDate";
 import { useEntries } from "@/hooks/data/useEntries";
 import { useTracker } from "@/hooks/data/useTracker";
 import { useForm } from "react-hook-form";
@@ -46,16 +45,11 @@ export default function AddEntryScreen() {
   const entryId = useMemo(() => (entryIdParam ? +entryIdParam : undefined), [entryIdParam]);
   const trackerId = useMemo(() => +trackerIdParam, [trackerIdParam]);
 
+  const { entries: lastEntries } = useEntries({ trackerId: trackerId, limit: 10 });
   const { tracker } = useTracker(trackerId);
   const { fetchEntry } = useLazyEntry();
-  const { entries: lastEntries } = useEntries({ trackerId: trackerId, limit: 10 });
   const { upsertEntry } = useUpsertEntry();
 
-  const textListValues: string[] | undefined = useMemo(
-    () => (textListSelectionsParam ? JSON.parse(textListSelectionsParam) : undefined),
-    [textListSelectionsParam],
-  );
-  const chips = useMemo(() => textListValues?.map((t) => ({ label: t, id: t })) ?? [], [textListValues]);
   const yesOrNoOptions = [
     { value: true, label: "Yes" },
     { value: false, label: "No" },
@@ -66,12 +60,13 @@ export default function AddEntryScreen() {
       pathname: "./textListSelection",
       params: {
         trackerId: trackerId,
+        entryId,
         preSelectedItems: JSON.stringify(textListValues),
       },
     });
-  }, [router, trackerId, textListValues]);
+  }, [router, trackerId, entryId]);
 
-  const { control, watch, handleSubmit } = useForm<FormInputs>({
+  const { control, setValue, watch, handleSubmit } = useForm<FormInputs>({
     defaultValues: async () => {
       if (!entryId) {
         return { dateInformation: { now: true } };
@@ -92,33 +87,36 @@ export default function AddEntryScreen() {
       return defaultValues;
     },
   });
-
-  const dateWatch = watch("dateInformation");
-  const currentDateFormatted = useMemo(() => (dateWatch ? formatEntryDateInformation(dateWatch) : "-"), [dateWatch]);
+  const textListValues = watch("textList");
+  const chips = useMemo(() => textListValues?.map((t) => ({ label: t, id: t })) ?? [], [textListValues]);
 
   const onSubmit = async (data: FormInputs) => {
-    try {
-      const entry: NewTrackerEntry = {
-        date:
-          data.dateInformation &&
-          ("date" in data.dateInformation
-            ? data.dateInformation.date
-            : "now" in data.dateInformation
-              ? new Date()
-              : null),
-        periodOfDay:
-          data.dateInformation && "periodOfDay" in data.dateInformation ? data.dateInformation.periodOfDay : null,
-        trackerId: +trackerId,
-        numberValue: data.numberValue,
-        booleanValue: data.yesOrNo,
-      };
+    const entry: NewTrackerEntry = {
+      date:
+        data.dateInformation &&
+        ("date" in data.dateInformation
+          ? data.dateInformation.date
+          : "now" in data.dateInformation
+            ? new Date()
+            : null),
+      periodOfDay:
+        data.dateInformation && "periodOfDay" in data.dateInformation ? data.dateInformation.periodOfDay : null,
+      trackerId: +trackerId,
+      numberValue: data.numberValue,
+      booleanValue: data.yesOrNo,
+    };
 
-      await upsertEntry({ data: entry, textListValues, existingId: entryId });
-      router.dismiss();
-    } catch (e) {
-      console.log(e);
-    }
+    await upsertEntry({ data: entry, textListValues, existingId: entryId }).catch((e) => {
+      console.log("Error on upsertEntry", e);
+    });
+    router.dismiss();
   };
+
+  useEffect(() => {
+    if (textListSelectionsParam) {
+      setValue("textList", JSON.parse(textListSelectionsParam));
+    }
+  }, [textListSelectionsParam, setValue]);
 
   const renderEntryInput = () => {
     if (!tracker) return null;
@@ -188,10 +186,6 @@ export default function AddEntryScreen() {
         <ThemedView>{renderEntryInput()}</ThemedView>
 
         <Spacing size="small" />
-        <ThemedText>
-          <ThemedText style={styles.bold}>Date: </ThemedText>
-          {currentDateFormatted}
-        </ThemedText>
         <FormEntryDateSelection
           form={{
             control,
@@ -209,7 +203,7 @@ export default function AddEntryScreen() {
         ) : null}
       </ThemedScrollView>
       <View style={styles.submitButtonContainer}>
-        <ThemedButton fullWidth title="Log entry" onPress={handleSubmit(onSubmit)} />
+        <ThemedButton fullWidth title={entryId ? "Update entry" : "Log entry"} onPress={handleSubmit(onSubmit)} />
       </View>
     </ThemedView>
   );

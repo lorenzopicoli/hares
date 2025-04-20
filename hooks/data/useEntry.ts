@@ -18,7 +18,7 @@ export function useLazyEntry() {
   const { db } = useDatabase();
 
   const fetchEntry = useCallback(
-    async (entryId: number): Promise<TrackerEntry | undefined> => {
+    async (entryId: number) => {
       const entry = await db.query.entriesTable.findFirst({
         where: eq(entriesTable.id, entryId),
         with: {
