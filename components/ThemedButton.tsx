@@ -11,7 +11,7 @@ interface ThemedButtonProps {
   disabled?: boolean;
   style?: StyleProp<ViewStyle>;
   textStyle?: StyleProp<TextStyle>;
-  mode?: "accent" | "ghost";
+  mode?: "accent" | "ghost" | "danger";
 }
 
 const ThemedButton: React.FC<ThemedButtonProps> = ({
@@ -32,6 +32,7 @@ const ThemedButton: React.FC<ThemedButtonProps> = ({
         fullWidth && styles.fullWidth,
         mode === "accent" && styles.accentButton,
         mode === "ghost" && styles.ghostButton,
+        mode === "danger" && styles.dangerButton,
         disabled && styles.disabled,
         style,
       ]}
@@ -52,6 +53,9 @@ const createStyles = (theme: ThemedColors) =>
       backgroundColor: theme.toggleButton.background,
       borderColor: theme.toggleButton.border,
       borderWidth: 1,
+    },
+    dangerButton: {
+      backgroundColor: theme.danger,
     },
     button: {
       height: Sizes.buttonHeight,

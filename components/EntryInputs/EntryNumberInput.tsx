@@ -5,7 +5,7 @@ import { StyleSheet, View, TextInput, Pressable, type TextInputProps } from "rea
 import ThemedButton from "../ThemedButton";
 import type { ThemedColors } from "../ThemeProvider";
 import { type FieldValues, type Path, type ControllerProps, Controller } from "react-hook-form";
-import { ThemedText } from "../ThemedText";
+import InputErrorLabel from "../InputErrorLabel";
 
 export interface EntryNumberInputProps extends Omit<TextInputProps, "onChangeText" | "value"> {
   onChangeText?: (value: number | null) => void;
@@ -117,7 +117,7 @@ export default function EntryNumberInput(props: EntryNumberInputProps) {
           onPress={handlePlus}
         />
       </View>
-      {error ? <ThemedText style={styles.errorText}>{error}</ThemedText> : null}
+      <InputErrorLabel error={error} />
     </View>
   );
 }
@@ -148,10 +148,5 @@ const createStyles = (theme: ThemedColors) =>
       flexDirection: "row",
       justifyContent: "center",
       gap: Sizes.medium,
-    },
-    errorText: {
-      color: theme.input.textError,
-      fontSize: 12,
-      marginTop: Sizes.xSmall,
     },
   });

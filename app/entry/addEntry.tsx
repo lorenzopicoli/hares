@@ -132,6 +132,12 @@ export default function AddEntryScreen() {
             form={{
               control,
               name: "numberValue",
+              rules: {
+                required: {
+                  message: "A value is required",
+                  value: true,
+                },
+              },
             }}
           />
         );
@@ -144,6 +150,12 @@ export default function AddEntryScreen() {
             form={{
               control,
               name: "numberValue",
+              rules: {
+                required: {
+                  message: "A value is required",
+                  value: true,
+                },
+              },
             }}
           />
         );

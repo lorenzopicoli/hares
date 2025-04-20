@@ -3,9 +3,8 @@ import { View, TextInput, StyleSheet, type TextInputProps, type StyleProp, type 
 import type { ThemedColors } from "./ThemeProvider";
 import useStyles from "@/hooks/useStyles";
 import ThemedInputLabel from "./ThemedInputLabel";
-import { ThemedText } from "./ThemedText";
 import { Controller, type ControllerProps, type FieldValues, type Path } from "react-hook-form";
-import { Sizes } from "@/constants/Sizes";
+import InputErrorLabel from "./InputErrorLabel";
 
 interface ThemedInputProps extends TextInputProps {
   label?: string;
@@ -75,7 +74,8 @@ export default function ThemedInput(props: ThemedInputProps) {
           selectionColor="#4C6EF5"
         />
       </View>
-      {error ? <ThemedText style={styles.errorText}>{error}</ThemedText> : null}
+
+      <InputErrorLabel error={error} />
     </View>
   );
 }
@@ -110,10 +110,5 @@ const createStyles = (theme: ThemedColors) =>
       color: theme.input.text,
       fontSize: 16,
       height: "100%",
-    },
-    errorText: {
-      color: theme.input.textError,
-      fontSize: 12,
-      marginTop: Sizes.xSmall,
     },
   });

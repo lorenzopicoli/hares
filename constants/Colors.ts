@@ -6,6 +6,7 @@ export const Colors = {
     background: "#fff",
     secondaryBackground: "#111",
     tint: tintColorLight,
+    danger: "rgb(230, 69, 58)",
     darkTint: "#7F65A3",
     icon: "#687076",
     tabIconDefault: "#687076",
@@ -32,6 +33,7 @@ export const Colors = {
   },
   dark: {
     text: "#ECEDEE",
+    danger: "rgb(190, 30, 30)",
     background: "#151718",
     secondaryBackground: "#151718",
     tint: "#BF5FFF",
@@ -60,30 +62,3 @@ export const Colors = {
     },
   },
 };
-
-// export const NavigationThemes: { dark: Theme; light: Theme } = {
-//   dark: {
-//     dark: true,
-//     fonts: DarkTheme.fonts,
-//     colors: {
-//       primary: "rgb(10, 132, 255)",
-//       background: "blue",
-//       card: "rgb(18, 18, 18)",
-//       text: Colors.dark.text,
-//       border: "rgb(39, 39, 41)",
-//       notification: "rgb(255, 69, 58)",
-//     },
-//   },
-//   light: {
-//     dark: false,
-//     fonts: DefaultTheme.fonts,
-//     colors: {
-//       primary: "rgb(10, 132, 255)",
-//       background: Colors.light.background,
-//       card: "rgb(18, 18, 18)",
-//       text: Colors.light.text,
-//       border: "rgb(39, 39, 41)",
-//       notification: "rgb(255, 69, 58)",
-//     },
-//   },
-// };

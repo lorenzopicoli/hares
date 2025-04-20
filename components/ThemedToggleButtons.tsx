@@ -6,6 +6,7 @@ import { ThemedText } from "./ThemedText";
 import { Sizes } from "@/constants/Sizes";
 import ThemedInputLabel from "./ThemedInputLabel";
 import { Controller, type ControllerProps, type FieldValues, type Path } from "react-hook-form";
+import InputErrorLabel from "./InputErrorLabel";
 
 interface Option<V> {
   value: V;
@@ -117,7 +118,8 @@ function ThemedToggleButtons<V>(props: ThemedToggleButtonsProps<V>) {
           </Row>
         ))}
       </View>
-      {error ? <ThemedText style={styles.errorText}>{error}</ThemedText> : null}
+
+      <InputErrorLabel error={error} />
     </View>
   );
 }
@@ -151,11 +153,6 @@ const createStyles = (theme: ThemedColors) =>
     buttonSelected: {
       backgroundColor: theme.toggleButton.selected.background,
       borderColor: theme.toggleButton.selected.border,
-    },
-    errorText: {
-      color: theme.input.textError,
-      fontSize: 12,
-      marginTop: Sizes.xSmall,
     },
   });
 
