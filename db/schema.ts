@@ -85,7 +85,7 @@ export const entriesTable = sqliteTable("entries", {
   periodOfDay: text(),
   timezone: text(),
   numberValue: real(),
-  booleanValue: integer(),
+  booleanValue: integer({ mode: "boolean" }),
 });
 
 export const entriesRelations = relations(entriesTable, ({ many, one }) => ({

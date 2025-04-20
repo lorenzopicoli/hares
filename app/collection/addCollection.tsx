@@ -209,9 +209,6 @@ export default function AddCollectionScreen() {
 
 const createStyles = (theme: ThemedColors) =>
   StyleSheet.create({
-    title: {
-      marginLeft: Sizes.medium,
-    },
     scrollView: {
       marginTop: Sizes.medium,
       marginHorizontal: Sizes.medium,

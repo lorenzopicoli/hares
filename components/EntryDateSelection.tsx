@@ -1,23 +1,51 @@
 import { Sizes } from "@/constants/Sizes";
 import { PeriodOfDay, type EntryDateInformation } from "@/db/schema";
 import useStyles from "@/hooks/useStyles";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { StyleSheet, View } from "react-native";
-import DateTimePicker, { type DateType, useDefaultStyles } from "react-native-ui-datepicker";
+import DateTimePicker, { useDefaultStyles } from "react-native-ui-datepicker";
 import type { SingleChange } from "react-native-ui-datepicker/lib/typescript/types";
 import ThemedButton from "./ThemedButton";
 import ThemedModal from "./ThemedModal";
 import type { ThemedColors } from "./ThemeProvider";
 import ThemedToggleButtons from "./ThemedToggleButtons";
+import { type FieldValues, type Path, type ControllerProps, Controller } from "react-hook-form";
 
 export interface EntryDateSelectionProps {
   initialDate: Date;
   onSelectionChange: (data: EntryDateInformation) => void;
+  value: EntryDateInformation;
+  error?: string;
+}
+
+interface FormDateSelectProps<T extends FieldValues, K extends Path<T>> extends EntryDateSelectionProps {
+  form: Omit<ControllerProps<T, K, T>, "render">;
+}
+
+export function FormEntryNumberInput<T extends FieldValues, K extends Path<T>>(props: FormDateSelectProps<T, K>) {
+  const { form, ...inputProps } = props;
+
+  return (
+    <Controller
+      {...form}
+      render={({ field: { onChange, value }, fieldState }) => {
+        return (
+          <EntryDateSelection
+            {...inputProps}
+            onSelectionChange={onChange}
+            value={value}
+            error={fieldState.error?.message}
+          />
+        );
+      }}
+    />
+  );
 }
 
 export default function EntryDateSelection(props: EntryDateSelectionProps) {
-  const [selectedDate, setSelectedDate] = useState<DateType | null>(props.initialDate);
-  const [periodOfDay, setSelectedPeriodOfDay] = useState<PeriodOfDay | null>(null);
+  //   const [selectedDate, setSelectedDate] = useState<DateType | null>(props.initialDate);
+  //   const [periodOfDay, setSelectedPeriodOfDay] = useState<PeriodOfDay | null>(null);
+  const { value, initialDate, onSelectionChange } = props;
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [toggleButtonsSelectedOption, setToggleButtonsSelectedOption] = useState<string | null>("Now");
   const presetOptions = [
@@ -29,14 +57,15 @@ export default function EntryDateSelection(props: EntryDateSelectionProps) {
 
   const datePickerDefaultStyles = useDefaultStyles();
   const handleDatePickerChange: SingleChange = ({ date }) => {
-    setSelectedDate(date);
-    setSelectedPeriodOfDay(null);
+    if (date) {
+      onSelectionChange({ date: new Date(date?.valueOf()) });
+    }
   };
 
   const toggleDatePicker = () => {
     setToggleButtonsSelectedOption(null);
     if (!showDatePicker) {
-      setSelectedDate(new Date());
+      onSelectionChange({ date: new Date() });
     }
     setShowDatePicker(!showDatePicker);
   };
@@ -44,38 +73,28 @@ export default function EntryDateSelection(props: EntryDateSelectionProps) {
   const handlePressToggleButton = (option: string) => {
     setToggleButtonsSelectedOption(option);
     switch (option) {
-      case "now":
-        setSelectedDate(new Date());
-        setSelectedPeriodOfDay(null);
-        break;
       case PeriodOfDay.Morning:
-        setSelectedPeriodOfDay(PeriodOfDay.Morning);
-        setSelectedDate(null);
-        break;
       case PeriodOfDay.Afternoon:
-        setSelectedPeriodOfDay(PeriodOfDay.Afternoon);
-        setSelectedDate(null);
-        break;
       case PeriodOfDay.Evening:
-        setSelectedPeriodOfDay(PeriodOfDay.Evening);
-        setSelectedDate(null);
+        onSelectionChange({ periodOfDay: option });
         break;
-
+      case "now":
+        onSelectionChange({ date: new Date() });
+        break;
       default:
-        setSelectedDate(new Date());
-        setSelectedPeriodOfDay(null);
+        onSelectionChange({ date: new Date() });
         break;
     }
   };
 
-  useEffect(() => {
-    if (periodOfDay) {
-      props.onSelectionChange({ periodOfDay });
-    }
-    if (selectedDate) {
-      props.onSelectionChange({ date: new Date(selectedDate.valueOf()) });
-    }
-  }, [selectedDate, periodOfDay, props.onSelectionChange]);
+  //   useEffect(() => {
+  //     if (periodOfDay) {
+  //       onSelectionChange({ periodOfDay });
+  //     }
+  //     if (selectedDate) {
+  //       onSelectionChange({ date: new Date(selectedDate.valueOf()) });
+  //     }
+  //   }, [selectedDate, periodOfDay, onSelectionChange]);
 
   const { styles } = useStyles(createStyles);
   return (
@@ -102,7 +121,7 @@ export default function EntryDateSelection(props: EntryDateSelectionProps) {
             initialView="time"
             navigationPosition="right"
             timePicker
-            date={selectedDate ?? new Date()}
+            date={"date" in value ? value.date : initialDate}
             onChange={handleDatePickerChange}
             styles={{
               ...datePickerDefaultStyles,

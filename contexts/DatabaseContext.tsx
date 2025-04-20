@@ -18,7 +18,7 @@ type DatabaseContextType = {
 
 export const DatabaseContext = createContext<DatabaseContextType | null>(null);
 const dbCon = SQLite.openDatabaseSync("hares.db", { enableChangeListener: true });
-const db = drizzle(dbCon, { schema });
+const db = drizzle(dbCon, { schema, logger: false });
 
 export const DatabaseProvider = ({ children, onLoad }: PropsWithChildren & { onLoad?: () => void }) => {
   const [migrationError, setMigrationError] = useState<string>();
