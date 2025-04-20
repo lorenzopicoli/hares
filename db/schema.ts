@@ -16,7 +16,7 @@ export enum PeriodOfDay {
   Evening = "evening",
 }
 
-export type EntryDateInformation = { periodOfDay: PeriodOfDay } | { date: Date };
+export type EntryDateInformation = { periodOfDay: PeriodOfDay } | { date: Date } | { now: true };
 
 export const trackerNames: { [key in TrackerType]: string } = {
   [TrackerType.Number]: "Number",
@@ -85,7 +85,7 @@ export const entriesTable = sqliteTable("entries", {
   periodOfDay: text(),
   timezone: text(),
   numberValue: real(),
-  booleanValue: integer(),
+  booleanValue: integer({ mode: "boolean" }),
 });
 
 export const entriesRelations = relations(entriesTable, ({ many, one }) => ({

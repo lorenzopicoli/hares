@@ -34,6 +34,10 @@ export function formatEntryDateInformation(date: EntryDateInformation) {
     return format(date.date, dateFormat);
   }
 
+  if ("now" in date) {
+    return "Now";
+  }
+
   if ("periodOfDay" in date) {
     return formatPeriodOfDay(date.periodOfDay);
   }

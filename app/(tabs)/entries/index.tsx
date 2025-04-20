@@ -18,7 +18,10 @@ export default function EntriesScreen() {
   const { handleEntryActions } = useEntryActions();
 
   const renderItem = ({ item }: { item: TrackerEntry }) => {
-    return <EntriesListRow style={styles.listItem} entry={item} onPress={handleEntryActions} />;
+    const handlePress = () => {
+      handleEntryActions(item);
+    };
+    return <EntriesListRow style={styles.listItem} entry={item} onPress={handlePress} />;
   };
 
   return (

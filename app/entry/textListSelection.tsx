@@ -13,8 +13,13 @@ import { useEffect, useMemo, useState } from "react";
 import { StyleSheet, FlatList, TouchableOpacity, View } from "react-native";
 
 export default function TextListSelectionScreen() {
-  const { trackerId, preSelectedItems = "[]" } = useLocalSearchParams<{
+  const {
+    trackerId,
+    entryId,
+    preSelectedItems = "[]",
+  } = useLocalSearchParams<{
     trackerId: string;
+    entryId?: string;
     preSelectedItems?: string;
   }>();
   const { styles } = useStyles(createStyles);
@@ -45,7 +50,8 @@ export default function TextListSelectionScreen() {
               router.dismissTo({
                 pathname: "/entry/addEntry",
                 params: {
-                  trackerId: trackerId,
+                  entryId,
+                  trackerId,
                   textListSelections: JSON.stringify(Array.from(selectedItems, ([value, _label]) => value)),
                 },
               });
@@ -56,7 +62,7 @@ export default function TextListSelectionScreen() {
         </View>
       ),
     });
-  }, [navigation, router, trackerId, selectedItems]);
+  }, [navigation, router, entryId, trackerId, selectedItems]);
 
   const toggleItem = (item: string) => {
     const newMap = new Map(selectedItems);
@@ -109,15 +115,6 @@ export default function TextListSelectionScreen() {
 const createStyles = (theme: ThemedColors) =>
   StyleSheet.create({
     container: {},
-    dropdown: {
-      height: 50,
-      borderRadius: Sizes.radius.small,
-      borderBottomColor: theme.border,
-      borderBottomWidth: 0.5,
-      color: theme.text,
-      backgroundColor: theme.input.background,
-      marginBottom: Sizes.medium,
-    },
     itemInnerContainer: {
       flexDirection: "row",
       justifyContent: "space-between",
@@ -127,28 +124,5 @@ const createStyles = (theme: ThemedColors) =>
     },
     itemIcon: {
       color: theme.tint,
-    },
-    placeholderStyle: {
-      fontSize: 16,
-      color: theme.secondaryText,
-      marginLeft: Sizes.medium,
-    },
-    iconStyle: {
-      width: 25,
-      height: 25,
-      marginRight: Sizes.small,
-    },
-    dropdownContainer: {
-      backgroundColor: theme.input.background,
-      borderColor: theme.input.background,
-      borderRadius: Sizes.radius.small,
-    },
-    selectedStyle: {
-      borderRadius: 12,
-      backgroundColor: theme.background,
-    },
-    selectedTextStyle: {
-      fontSize: 14,
-      color: theme.text,
     },
   });
