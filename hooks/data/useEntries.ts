@@ -13,7 +13,7 @@ import { useMemo } from "react";
 export function useEntries(params: { searchText?: string; trackerId?: number; limit?: number }) {
   const { db } = useDatabase();
   const { searchText, trackerId, limit } = params;
-  const { data: entryIdsDb, error } = useLiveQuery(
+  const { data: entryIdsDb } = useLiveQuery(
     db
       .select({
         id: entriesTable.id,
@@ -41,7 +41,7 @@ export function useEntries(params: { searchText?: string; trackerId?: number; li
     [searchText, limit, trackerId],
   );
   const entryIds = useMemo(() => entryIdsDb.map((e) => e.id), [entryIdsDb]);
-  const { data: entries, error: error2 } = useLiveQuery(
+  const { data: entries } = useLiveQuery(
     db.query.entriesTable.findMany({
       where: inArray(entriesTable.id, entryIds),
       orderBy: desc(entriesTable.date),
@@ -52,10 +52,6 @@ export function useEntries(params: { searchText?: string; trackerId?: number; li
     }),
     [entryIds],
   );
-
-  if (error || error2) {
-    console.log(error, error2);
-  }
 
   return { entries };
 }

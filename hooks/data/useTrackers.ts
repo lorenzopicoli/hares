@@ -1,18 +1,25 @@
 import { useDatabase } from "@/contexts/DatabaseContext";
 import { collectionsTrackersTable, trackersTable } from "@/db/schema";
-import { notExists, eq, getTableColumns, isNotNull, sql, and, isNull } from "drizzle-orm";
+import { getTableColumns, isNotNull, sql, isNull } from "drizzle-orm";
 import { useLiveQuery } from "drizzle-orm/expo-sqlite";
+import { useCallback } from "react";
 
 export function useTrackers(params: { collectionId?: number; searchQuery?: string }) {
-  const { collectionId, searchQuery } = params;
+  const { collectionId, searchQuery = "" } = params;
   const { db } = useDatabase();
   const { data: trackers } = useLiveQuery(
     db
       .select(getTableColumns(trackersTable))
       .from(trackersTable)
-      .leftJoin(collectionsTrackersTable, eq(collectionsTrackersTable.trackerId, trackersTable.id))
+      .leftJoin(
+        collectionsTrackersTable,
+        sql`
+            ${collectionsTrackersTable.trackerId} = ${trackersTable.id} AND
+            ${collectionId ? sql`${collectionsTrackersTable.collectionId} = ${collectionId}` : sql`1=1`}
+        `,
+      )
       .where(sql`
-        ${searchQuery === "" && collectionId ? isNotNull(collectionsTrackersTable.id) : "1 = 1"} AND
+        ${searchQuery === "" && collectionId ? isNotNull(collectionsTrackersTable.id) : sql`1 = 1`} AND
         ${trackersTable.deletedAt} IS NULL AND
         ${trackersTable.name} LIKE ${`%${searchQuery}%`}
       `)
@@ -24,28 +31,27 @@ export function useTrackers(params: { collectionId?: number; searchQuery?: strin
   return { trackers };
 }
 
-export function useTrackersNotInCollection(params: { collectionId: number; searchQuery?: string }) {
-  const { collectionId, searchQuery } = params;
+export function useTrackersForAddCollection() {
   const { db } = useDatabase();
-  const { data: trackers } = useLiveQuery(
-    db
-      .select()
-      .from(trackersTable)
-      .where(
-        and(
-          notExists(
-            db
-              .select()
-              .from(collectionsTrackersTable)
-              .where(sql`${collectionsTrackersTable.collectionId} = ${collectionId} AND
-            ${collectionsTrackersTable.trackerId} = ${trackersTable.id}`),
-          ),
-          isNull(trackersTable.deletedAt),
-        ),
-      )
-      .orderBy(trackersTable.index),
-    [collectionId, searchQuery],
+  const fetchTrackersForAddCollection = useCallback(
+    (collectionId?: number) => {
+      return db
+        .select({
+          tracker: getTableColumns(trackersTable),
+          isInCollection: isNotNull(collectionsTrackersTable.id).mapWith(Boolean),
+        })
+        .from(trackersTable)
+        .leftJoin(
+          collectionsTrackersTable,
+          sql`
+            ${collectionsTrackersTable.trackerId} = ${trackersTable.id} AND
+            ${collectionId ? sql`${collectionsTrackersTable.collectionId} = ${collectionId}` : sql`1=0`}
+        `,
+        )
+        .orderBy(isNull(collectionsTrackersTable.id), collectionsTrackersTable.index, trackersTable.index);
+    },
+    [db],
   );
 
-  return { trackers };
+  return { fetchTrackersForAddCollection };
 }
