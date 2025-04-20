@@ -6,12 +6,12 @@ import { Sizes } from "@/constants/Sizes";
 import { TrackerType, type EntryDateInformation, type NewTrackerEntry, type PeriodOfDay } from "@/db/schema";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { ThemedText } from "@/components/ThemedText";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo } from "react";
 import type { ThemedColors } from "@/components/ThemeProvider";
 import useStyles from "@/hooks/useStyles";
 import { FormThemedToggleButtons } from "@/components/ThemedToggleButtons";
 import { Spacing } from "@/components/Spacing";
-import EntryDateSelection from "@/components/EntryDateSelection";
+import { FormEntryDateSelection } from "@/components/EntryDateSelection";
 import EntriesListRow from "@/components/EntriesList/EntriesListRow";
 import { FormEntryNumberInput } from "@/components/EntryInputs/EntryNumberInput";
 import { FormEntrySliderInput } from "@/components/EntryInputs/EntrySliderInput";
@@ -19,14 +19,13 @@ import { ChipGroup } from "@/components/Chip";
 import { formatEntryDateInformation } from "@/utils/entryDate";
 import { useEntries } from "@/hooks/data/useEntries";
 import { useTracker } from "@/hooks/data/useTracker";
-import { useCreateEntry } from "@/hooks/data/useCreateEntry";
 import { useForm } from "react-hook-form";
+import { useLazyEntry } from "@/hooks/data/useEntry";
+import { useUpsertEntry } from "@/hooks/data/useUpsertEntry";
 
 interface FormInputs {
-  date?: Date;
-  periodOfDay?: PeriodOfDay;
+  dateInformation: EntryDateInformation;
   numberValue?: number;
-  scaleValue?: number;
   yesOrNo?: boolean;
   textList?: string[];
 }
@@ -48,13 +47,10 @@ export default function AddEntryScreen() {
   const trackerId = useMemo(() => +trackerIdParam, [trackerIdParam]);
 
   const { tracker } = useTracker(trackerId);
+  const { fetchEntry } = useLazyEntry();
   const { entries: lastEntries } = useEntries({ trackerId: trackerId, limit: 10 });
-  const { createEntry } = useCreateEntry();
+  const { upsertEntry } = useUpsertEntry();
 
-  const initialDate = useMemo(() => new Date(), []);
-  const [dateSelected, setSelectedDate] = useState<EntryDateInformation>({ date: initialDate });
-
-  const currentDateFormatted = useMemo(() => formatEntryDateInformation(dateSelected), [dateSelected]);
   const textListValues: string[] | undefined = useMemo(
     () => (textListSelectionsParam ? JSON.parse(textListSelectionsParam) : undefined),
     [textListSelectionsParam],
@@ -65,7 +61,6 @@ export default function AddEntryScreen() {
     { value: false, label: "No" },
   ];
 
-  const handleDateSelectionChange = useCallback((data: EntryDateInformation) => setSelectedDate(data), []);
   const handleGoToSelectItems = useCallback(() => {
     router.navigate({
       pathname: "./textListSelection",
@@ -76,28 +71,49 @@ export default function AddEntryScreen() {
     });
   }, [router, trackerId, textListValues]);
 
-  const { control, handleSubmit } = useForm<FormInputs>({
-    // defaultValues: async () => {
-    //   const trackers = await fetchTrackersForAddCollection(collectionId);
-    //   const defaultValues: FormInputs = {
-    //     name: "",
-    //     trackers,
-    //   };
-    //   return defaultValues;
-    // },
+  const { control, watch, handleSubmit } = useForm<FormInputs>({
+    defaultValues: async () => {
+      if (!entryId) {
+        return { dateInformation: { now: true } };
+      }
+      const entry = await fetchEntry(entryId);
+
+      const defaultValues: FormInputs = {
+        dateInformation: entry?.date
+          ? { date: entry.date }
+          : entry?.periodOfDay
+            ? { periodOfDay: entry.periodOfDay as PeriodOfDay }
+            : { now: true },
+        numberValue: entry?.numberValue ?? undefined,
+        yesOrNo: entry?.booleanValue ?? undefined,
+        textList: entry?.textListValues?.map((v) => v.name),
+      };
+
+      return defaultValues;
+    },
   });
+
+  const dateWatch = watch("dateInformation");
+  const currentDateFormatted = useMemo(() => (dateWatch ? formatEntryDateInformation(dateWatch) : "-"), [dateWatch]);
 
   const onSubmit = async (data: FormInputs) => {
     try {
       const entry: NewTrackerEntry = {
-        date: data.date,
-        periodOfDay: data.periodOfDay,
+        date:
+          data.dateInformation &&
+          ("date" in data.dateInformation
+            ? data.dateInformation.date
+            : "now" in data.dateInformation
+              ? new Date()
+              : null),
+        periodOfDay:
+          data.dateInformation && "periodOfDay" in data.dateInformation ? data.dateInformation.periodOfDay : null,
         trackerId: +trackerId,
-        numberValue: data.numberValue || data.scaleValue,
+        numberValue: data.numberValue,
         booleanValue: data.yesOrNo,
       };
 
-      await createEntry(entry, textListValues);
+      await upsertEntry({ data: entry, textListValues, existingId: entryId });
       router.dismiss();
     } catch (e) {
       console.log(e);
@@ -129,7 +145,7 @@ export default function AddEntryScreen() {
             max={tracker.rangeMax ?? 100}
             form={{
               control,
-              name: "scaleValue",
+              name: "numberValue",
             }}
           />
         );
@@ -176,7 +192,12 @@ export default function AddEntryScreen() {
           <ThemedText style={styles.bold}>Date: </ThemedText>
           {currentDateFormatted}
         </ThemedText>
-        <EntryDateSelection initialDate={initialDate} onSelectionChange={handleDateSelectionChange} />
+        <FormEntryDateSelection
+          form={{
+            control,
+            name: "dateInformation",
+          }}
+        />
         <Spacing size="small" />
         {lastEntries.length > 0 ? (
           <>

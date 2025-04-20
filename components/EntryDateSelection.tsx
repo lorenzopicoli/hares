@@ -12,17 +12,18 @@ import ThemedToggleButtons from "./ThemedToggleButtons";
 import { type FieldValues, type Path, type ControllerProps, Controller } from "react-hook-form";
 
 export interface EntryDateSelectionProps {
-  initialDate: Date;
+  //   initialDate: Date;
   onSelectionChange: (data: EntryDateInformation) => void;
   value: EntryDateInformation;
   error?: string;
 }
 
-interface FormDateSelectProps<T extends FieldValues, K extends Path<T>> extends EntryDateSelectionProps {
+interface FormDateSelectProps<T extends FieldValues, K extends Path<T>>
+  extends Omit<EntryDateSelectionProps, "value" | "onSelectionChange"> {
   form: Omit<ControllerProps<T, K, T>, "render">;
 }
 
-export function FormEntryNumberInput<T extends FieldValues, K extends Path<T>>(props: FormDateSelectProps<T, K>) {
+export function FormEntryDateSelection<T extends FieldValues, K extends Path<T>>(props: FormDateSelectProps<T, K>) {
   const { form, ...inputProps } = props;
 
   return (
@@ -45,9 +46,8 @@ export function FormEntryNumberInput<T extends FieldValues, K extends Path<T>>(p
 export default function EntryDateSelection(props: EntryDateSelectionProps) {
   //   const [selectedDate, setSelectedDate] = useState<DateType | null>(props.initialDate);
   //   const [periodOfDay, setSelectedPeriodOfDay] = useState<PeriodOfDay | null>(null);
-  const { value, initialDate, onSelectionChange } = props;
+  const { value, onSelectionChange } = props;
   const [showDatePicker, setShowDatePicker] = useState(false);
-  const [toggleButtonsSelectedOption, setToggleButtonsSelectedOption] = useState<string | null>("Now");
   const presetOptions = [
     { value: "now", label: "Now" },
     { value: PeriodOfDay.Morning, label: "Morning" },
@@ -63,7 +63,7 @@ export default function EntryDateSelection(props: EntryDateSelectionProps) {
   };
 
   const toggleDatePicker = () => {
-    setToggleButtonsSelectedOption(null);
+    // setToggleButtonsSelectedOption(null);
     if (!showDatePicker) {
       onSelectionChange({ date: new Date() });
     }
@@ -71,7 +71,7 @@ export default function EntryDateSelection(props: EntryDateSelectionProps) {
   };
 
   const handlePressToggleButton = (option: string) => {
-    setToggleButtonsSelectedOption(option);
+    // setToggleButtonsSelectedOption(option);
     switch (option) {
       case PeriodOfDay.Morning:
       case PeriodOfDay.Afternoon:
@@ -79,7 +79,7 @@ export default function EntryDateSelection(props: EntryDateSelectionProps) {
         onSelectionChange({ periodOfDay: option });
         break;
       case "now":
-        onSelectionChange({ date: new Date() });
+        onSelectionChange({ now: true });
         break;
       default:
         onSelectionChange({ date: new Date() });
@@ -102,7 +102,7 @@ export default function EntryDateSelection(props: EntryDateSelectionProps) {
       <ThemedToggleButtons
         buttonContainerStyle={{ height: Sizes.buttonHeight }}
         label=""
-        selectedOption={toggleButtonsSelectedOption}
+        selectedOption={value && ("periodOfDay" in value ? value.periodOfDay : "now" in value ? "now" : null)}
         columns={4}
         options={presetOptions}
         onChangeSelection={handlePressToggleButton}
@@ -121,7 +121,7 @@ export default function EntryDateSelection(props: EntryDateSelectionProps) {
             initialView="time"
             navigationPosition="right"
             timePicker
-            date={"date" in value ? value.date : initialDate}
+            date={value && "date" in value ? value.date : null}
             onChange={handleDatePickerChange}
             styles={{
               ...datePickerDefaultStyles,

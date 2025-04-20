@@ -2,11 +2,14 @@ import { useColors } from "@/components/ThemeProvider";
 import { useActionSheet } from "@expo/react-native-action-sheet";
 import { useMemo, useCallback } from "react";
 import { useDeleteEntry } from "./data/useDeleteEntry";
+import { useRouter } from "expo-router";
+import type { TrackerEntry } from "@/db/schema";
 
 export function useEntryActions() {
   const { showActionSheetWithOptions } = useActionSheet();
   const { colors } = useColors();
   const { deleteEntry } = useDeleteEntry();
+  const router = useRouter();
 
   const actionSheetParams = useMemo(() => {
     const options = ["Edit", "Delete", "Cancel"];
@@ -22,15 +25,15 @@ export function useEntryActions() {
   }, [colors.text, colors.background]);
 
   const handleEntryActions = useCallback(
-    (entryId: number) => {
+    (entry: TrackerEntry) => {
       showActionSheetWithOptions(actionSheetParams, async (selectedIndex?: number) => {
         switch (selectedIndex) {
           case 0:
-            console.log("Edit");
+            router.navigate({ pathname: "/entry/addEntry", params: { entryId: entry.id, trackerId: entry.trackerId } });
             break;
 
           case 1:
-            await deleteEntry(entryId);
+            await deleteEntry(entry.id);
             break;
 
           case 2:
@@ -40,7 +43,7 @@ export function useEntryActions() {
         }
       });
     },
-    [deleteEntry, showActionSheetWithOptions, actionSheetParams],
+    [deleteEntry, showActionSheetWithOptions, router, actionSheetParams],
   );
 
   return { handleEntryActions };
