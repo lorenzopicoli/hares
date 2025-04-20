@@ -13,6 +13,7 @@ interface Props {
   confirmText?: string;
   dismissText?: string;
   fullWidthButton?: boolean;
+  size?: "large" | "small";
   onDismiss?: () => void;
   onConfirm?: () => void;
 }
@@ -29,11 +30,12 @@ export default function ThemedModal(props: PropsWithChildren<Props>) {
     onConfirm,
     fullWidthButton,
     children,
+    size = "large",
   } = props;
   return (
     <Modal animationType="slide" transparent={true} visible={visible} onRequestClose={onDismiss}>
       <Pressable onPress={onDismiss} style={styles.backdrop} />
-      <ThemedView style={styles.modalView}>
+      <ThemedView style={[styles.modalView, size === "small" && styles.small, size === "large" && styles.large]}>
         {children}
         <View style={styles.buttonsContainer}>
           {hideDismiss ? null : (
@@ -63,7 +65,6 @@ const createStyles = (theme: ThemedColors) =>
   StyleSheet.create({
     modalView: {
       marginTop: "50%",
-      marginBottom: "50%",
       marginHorizontal: "10%",
       padding: Sizes.medium,
       borderRadius: Sizes.radius.medium,
@@ -77,6 +78,12 @@ const createStyles = (theme: ThemedColors) =>
       shadowRadius: 4,
       elevation: 5,
     },
+    large: {
+      maxHeight: 400,
+    },
+    small: {
+      maxHeight: 250,
+    },
     backdrop: {
       position: "absolute",
       left: 0,
@@ -84,7 +91,7 @@ const createStyles = (theme: ThemedColors) =>
       height: "100%",
       width: "100%",
       backgroundColor: "black",
-      opacity: 0.5,
+      opacity: 0.8,
     },
     buttonsContainer: {
       width: "100%",

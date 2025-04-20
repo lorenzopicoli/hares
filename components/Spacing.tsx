@@ -3,7 +3,7 @@ import { StyleSheet, View } from "react-native";
 import type { ThemedColors } from "./ThemeProvider";
 import useStyles from "@/hooks/useStyles";
 
-export const Spacing = ({ size }: { size: "small" | "medium" | "large" }) => {
+export const Spacing = ({ size }: { size: "xSmall" | "small" | "medium" | "large" }) => {
   const { styles } = useStyles(createStyles);
   return <View style={[styles.spacing, styles[size]]} />;
 };
@@ -21,5 +21,8 @@ const createStyles = (theme: ThemedColors) =>
     },
     small: {
       height: 40,
+    },
+    xSmall: {
+      height: 20,
     },
   });
