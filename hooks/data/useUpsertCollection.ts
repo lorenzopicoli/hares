@@ -5,6 +5,7 @@ import { useCallback } from "react";
 
 export function useUpsertCollection() {
   const { db } = useDatabase();
+  const { reloadDb } = useDatabase();
 
   const upsertCollection = useCallback(
     async (
@@ -68,7 +69,10 @@ export function useUpsertCollection() {
           target: [collectionsTrackersTable.trackerId, collectionsTrackersTable.collectionId],
           set: { index: sql.raw('"excluded"."index"') },
         });
-
+      // Because drizzle live queries don't recognize relationship changes, reload the whole
+      // db so the track screen shows the updated trackers. Not a very nice solution
+      // Also means that the user gets redirected to the "All" collection which is not ideal
+      await reloadDb();
       return savedCollectionId;
     },
     [db],
