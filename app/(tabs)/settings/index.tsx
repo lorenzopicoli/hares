@@ -43,23 +43,27 @@ export default function SettingsScreen() {
       <ThemedText type="title">Data Management</ThemedText>
       <ThemedView style={styles.section}>
         <ThemedView style={styles.counts}>
-          <ThemedView style={styles.countsRow}>
+          <ThemedView style={styles.row}>
             <ThemedText>Collections:</ThemedText>
             <ThemedText>{collectionsCount}</ThemedText>
           </ThemedView>
-          <ThemedView style={styles.countsRow}>
+          <ThemedView style={styles.row}>
             <ThemedText>Trackers:</ThemedText>
             <ThemedText>{trackersCount}</ThemedText>
           </ThemedView>
-          <ThemedView style={styles.countsRow}>
+          <ThemedView style={styles.row}>
             <ThemedText>Entries:</ThemedText>
             <ThemedText>{entriesCount}</ThemedText>
           </ThemedView>
         </ThemedView>
-        <ThemedButton onPress={handleExportSQL} title="Export data (SQLite)" />
-        <ThemedButton onPress={exportDatabaseJSON} title="Export data (JSON)" />
-        <ThemedButton onPress={restoreDatabaseSQLite} title="Restore database (SQLite)" />
-        <ThemedButton onPress={restoreDatabaseJSON} title="Restore database (JSON)" />
+        <ThemedView style={styles.row}>
+          <ThemedButton style={styles.flex1} onPress={handleExportSQL} title="Export data (SQLite)" />
+          <ThemedButton style={styles.flex1} onPress={exportDatabaseJSON} title="Export data (JSON)" />
+        </ThemedView>
+        <ThemedView style={styles.row}>
+          <ThemedButton style={styles.flex1} onPress={restoreDatabaseSQLite} title="Reset database (SQLite)" />
+          <ThemedButton style={styles.flex1} onPress={restoreDatabaseJSON} title="Reset database (JSON)" />
+        </ThemedView>
         <ThemedButton onPress={reloadDb} title="Reload DB connection" />
         <ThemedButton mode="danger" onPress={handleDeleteData} title="Delete all data" />
       </ThemedView>
@@ -77,8 +81,12 @@ const styles = StyleSheet.create({
     flexDirection: "column",
     gap: Sizes.small,
   },
-  countsRow: {
+  flex1: {
+    flex: 1,
+  },
+  row: {
     flexDirection: "row",
     justifyContent: "space-between",
+    gap: Sizes.medium,
   },
 });
