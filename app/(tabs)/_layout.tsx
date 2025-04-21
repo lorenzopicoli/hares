@@ -31,7 +31,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="track"
         options={{
-          title: "Track",
+          headerTitle: "Track",
           tabBarIcon: ({ color }) => <IconSymbol size={28} name="plus.circle.fill" color={color} />,
         }}
       />

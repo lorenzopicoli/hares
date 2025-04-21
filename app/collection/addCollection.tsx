@@ -22,6 +22,7 @@ import { useTrackersForAddCollection } from "@/hooks/data/useTrackers";
 import { useUpsertCollection } from "@/hooks/data/useUpsertCollection";
 import { Controller, useFieldArray, useForm, type FieldArrayWithId } from "react-hook-form";
 import ThemedInputLabel from "@/components/ThemedInputLabel";
+import { useLazyCollection } from "@/hooks/data/useCollection";
 
 LogBox.ignoreLogs(["VirtualizedLists should never be nested inside plain ScrollViews"]);
 
@@ -72,10 +73,18 @@ export default function AddCollectionScreen() {
   const [isOutOfOrder, setIsOutOfOrder] = useState(false);
 
   const { upsertCollection } = useUpsertCollection();
+  const { fetchCollection } = useLazyCollection();
   const { fetchTrackersForAddCollection } = useTrackersForAddCollection();
   const { control, handleSubmit } = useForm<FormInputs>({
     defaultValues: async () => {
       const trackers = await fetchTrackersForAddCollection(collectionId);
+      if (collectionId) {
+        const collection = await fetchCollection(collectionId);
+        return {
+          name: collection?.name ?? "",
+          trackers,
+        };
+      }
       const defaultValues: FormInputs = {
         name: "",
         trackers,

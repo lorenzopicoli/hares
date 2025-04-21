@@ -22,7 +22,7 @@ SplashScreen.preventAutoHideAsync();
 function RootStack() {
   return (
     <Stack>
-      <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+      <Stack.Screen name="(tabs)" options={{ headerTitle: "Home", headerShown: false }} />
       <Stack.Screen name="collection/addCollection" options={{ headerShown: true, headerTitle: "🐰 Add Collection" }} />
       <Stack.Screen name="entry/addEntry" options={{ headerShown: true, headerTitle: "🐰 Add Entry" }} />
       <Stack.Screen name="entry/textListSelection" options={{ headerShown: true, headerTitle: "🐰 Entry items" }} />

@@ -76,7 +76,7 @@ export default function TrackScreen() {
         </View>
       ),
     });
-  }, [navigation, handleTrackScreenOptions]);
+  }, [colors.text, navigation, handleTrackScreenOptions]);
 
   return (
     <View style={styles.container}>
