@@ -37,6 +37,7 @@ export function useEntries(params: { searchText?: string; trackerId?: number; li
       .leftJoin(collectionsTable, eq(collectionsTable.id, collectionsTrackersTable.collectionId))
       // Properly limit and paginate
       .limit(limit ?? 10000000)
+      .orderBy(desc(entriesTable.date))
       .groupBy(entriesTable.id),
     [searchText, limit, trackerId],
   );
