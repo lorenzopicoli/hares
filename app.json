@@ -41,6 +41,12 @@
         {
           "launchMode": "most-recent"
         }
+      ],
+      [
+        "expo-document-picker",
+        {
+          "iCloudContainerEnvironment": "Production"
+        }
       ]
     ],
     "experiments": {
@@ -51,7 +57,7 @@
         "origin": false
       },
       "eas": {
-        "projectId": "9705f268-83c2-4488-bf20-ad499a46f88f"
+        "projectId": "5aa36569-53a8-4921-ab47-8d1c8f064e2e"
       }
     }
   }

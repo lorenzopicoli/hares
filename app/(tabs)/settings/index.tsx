@@ -9,11 +9,16 @@ import { DB_NAME } from "@/db/schema";
 import { useConfirmModal } from "@/hooks/useConfirmModal";
 import { Sizes } from "@/constants/Sizes";
 import { useCounts } from "@/hooks/data/useCounts";
+import { useBackupDatabaseSQLite, useExportDataAsJson } from "@/hooks/useExportDatabase";
+import { useRestoreDatabase } from "@/hooks/useRestoreDatabase";
 
 export default function SettingsScreen() {
-  const { db } = useDatabase();
-  const { confirm, ConfirmModal } = useConfirmModal();
+  const { db, reloadDb } = useDatabase();
+  const { exportData } = useExportDataAsJson();
+  const { backupDatabaseSQLite } = useBackupDatabaseSQLite();
+  const { restoreDatabaseSQLite } = useRestoreDatabase();
   const { collectionsCount, trackersCount, entriesCount } = useCounts();
+  const { confirm, ConfirmModal } = useConfirmModal();
 
   const handleDeleteData = async () => {
     const confirmed = await confirm({
@@ -37,9 +42,16 @@ export default function SettingsScreen() {
     } catch (err) {
       console.log("Error deleting DB, maybe doesn't exist?", err);
     }
+    await reloadDb();
   };
 
-  const handleExportData = async () => {};
+  const handleExportSQL = async () => {
+    await backupDatabaseSQLite("hares-backup");
+  };
+
+  const handleExportJSON = async () => {
+    await exportData();
+  };
 
   return (
     <ThemedScrollView>
@@ -59,7 +71,10 @@ export default function SettingsScreen() {
             <ThemedText>{entriesCount}</ThemedText>
           </ThemedView>
         </ThemedView>
-        <ThemedButton onPress={handleExportData} title="Export data" />
+        <ThemedButton onPress={handleExportSQL} title="Export data (SQLite)" />
+        <ThemedButton onPress={handleExportJSON} title="Export data (JSON)" />
+        <ThemedButton onPress={restoreDatabaseSQLite} title="Restore database (SQLite)" />
+        <ThemedButton onPress={reloadDb} title="Reload DB connection" />
         <ThemedButton mode="danger" onPress={handleDeleteData} title="Delete all data" />
       </ThemedView>
       {ConfirmModal}
