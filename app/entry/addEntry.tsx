@@ -21,12 +21,14 @@ import { useTracker } from "@/hooks/data/useTracker";
 import { useForm } from "react-hook-form";
 import { useLazyEntry } from "@/hooks/data/useEntry";
 import { useUpsertEntry } from "@/hooks/data/useUpsertEntry";
+import { FormThemedInput } from "@/components/ThemedInput";
 
 interface FormInputs {
   dateInformation: EntryDateInformation;
   numberValue?: number;
   yesOrNo?: boolean;
   textList?: string[];
+  comment?: string;
 }
 
 export default function AddEntryScreen() {
@@ -82,6 +84,7 @@ export default function AddEntryScreen() {
         numberValue: entry?.numberValue ?? undefined,
         yesOrNo: entry?.booleanValue ?? undefined,
         textList: entry?.textListValues?.map((v) => v.name),
+        comment: entry?.comment ?? undefined,
       };
 
       return defaultValues;
@@ -104,6 +107,7 @@ export default function AddEntryScreen() {
       trackerId: +trackerId,
       numberValue: data.numberValue,
       booleanValue: data.yesOrNo,
+      comment: data.comment,
     };
 
     await upsertEntry({ data: entry, textListValues, existingId: entryId }).catch((e) => {
@@ -203,6 +207,15 @@ export default function AddEntryScreen() {
             control,
             name: "dateInformation",
           }}
+        />
+        <Spacing size="xSmall" />
+        <FormThemedInput
+          form={{
+            control,
+            name: "comment",
+          }}
+          label="Comments/Notes"
+          autoCapitalize="sentences"
         />
         <Spacing size="small" />
         {lastEntries.length > 0 ? (

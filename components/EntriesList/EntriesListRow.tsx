@@ -53,6 +53,11 @@ export default function EntriesListRow(props: EntriesListRowProps) {
           <ThemedText style={styles.mainText}>
             <ThemedText style={styles.secondary}>Date: </ThemedText> {formatEntryDate(entry)}
           </ThemedText>
+          {entry.comment ? (
+            <ThemedText style={styles.mainText}>
+              <ThemedText style={styles.secondary}>Comments: </ThemedText> {entry.comment}
+            </ThemedText>
+          ) : null}
           {entry.createdAt ? (
             <ThemedText style={styles.secondary}>Logged on: {formatDate(entry.createdAt)}</ThemedText>
           ) : null}

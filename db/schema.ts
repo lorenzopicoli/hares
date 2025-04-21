@@ -79,6 +79,7 @@ export const entriesTable = sqliteTable("entries", {
   trackerId: int("tracker_id")
     .notNull()
     .references(() => trackersTable.id),
+  comment: text(),
   createdAt: integer({ mode: "timestamp" }).$defaultFn(() => new Date()),
   date: integer({ mode: "timestamp" }),
   periodOfDay: text(),
