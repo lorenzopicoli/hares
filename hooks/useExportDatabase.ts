@@ -5,9 +5,9 @@ import * as Sharing from "expo-sharing";
 import * as schema from "@/db/schema";
 import { useCallback } from "react";
 
-export const useBackupDatabaseSQLite = () => {
+export const useExportDatabase = () => {
   const { db } = useDatabase();
-  const backupDatabaseSQLite = useCallback(
+  const exportDatabaseSQLite = useCallback(
     async (backupName: string) => {
       try {
         await db.$client.execAsync("PRAGMA wal_checkpoint(FULL)");
@@ -34,12 +34,7 @@ export const useBackupDatabaseSQLite = () => {
     [db],
   );
 
-  return { backupDatabaseSQLite };
-};
-
-export const useExportDataAsJson = () => {
-  const { db } = useDatabase();
-  const exportData = useCallback(async () => {
+  const exportDatabaseJSON = useCallback(async () => {
     try {
       const allTables = [
         "trackersTable",
@@ -72,5 +67,6 @@ export const useExportDataAsJson = () => {
       Alert.alert("Export Error", "Failed to export data as JSON");
     }
   }, [db]);
-  return { exportData };
+
+  return { exportDatabaseJSON, exportDatabaseSQLite };
 };

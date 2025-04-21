@@ -1,11 +1,14 @@
 import { useDatabase } from "@/contexts/DatabaseContext";
+import * as schema from "@/db/schema";
 import { useCallback } from "react";
 import * as FileSystem from "expo-file-system";
 import * as DocumentPicker from "expo-document-picker";
 import { Alert } from "react-native";
+import { useDeleteDatabase } from "./useDeleteDatabase";
 
 export const useRestoreDatabase = () => {
   const { db, reloadDb } = useDatabase();
+  const { deleteDatabase } = useDeleteDatabase();
   const restoreDatabaseSQLite = useCallback(async () => {
     try {
       const result = await DocumentPicker.getDocumentAsync({
@@ -33,9 +36,72 @@ export const useRestoreDatabase = () => {
         to: dbPath,
         from: backupPath,
       });
-      console.log("he");
       reloadDb();
-      console.log("af");
+    } catch (err) {
+      console.error("Failed to restore", err);
+      Alert.alert("Restore Error", "Failed to restore database");
+    }
+  }, [db, reloadDb]);
+
+  const restoreDatabaseJSON = useCallback(async () => {
+    try {
+      const baseDir = FileSystem.documentDirectory;
+      const result = await DocumentPicker.getDocumentAsync({
+        type: "*/*",
+        copyToCacheDirectory: true,
+        multiple: false,
+      });
+      if (result.canceled) {
+        return;
+      }
+      const backupPath = result.assets[0].uri;
+      if (!(await FileSystem.getInfoAsync(backupPath)).exists) {
+        return;
+      }
+      await FileSystem.copyAsync({
+        to: `${baseDir}hares-json-import${new Date().toISOString()}.json`,
+        from: backupPath,
+      });
+
+      const jsonString = await FileSystem.readAsStringAsync(backupPath);
+
+      const data = JSON.parse(jsonString);
+      const tablesInOrder = [
+        "trackersTable",
+        "collectionsTable",
+        "collectionsTrackersTable",
+        "entriesTable",
+        "textListEntriesTable",
+      ];
+
+      // biome-ignore lint/suspicious/noExplicitAny: <explanation>
+      const schemas: any = schema;
+      const dateFields = ["date", "createdAt", "updatedAt", "deletedAt"];
+
+      for (const table of tablesInOrder) {
+        await db.delete(schemas[table]);
+
+        // biome-ignore lint/suspicious/noExplicitAny: <explanation>
+        const processedData = data[table].map((record: any) => {
+          const processedRecord = { ...record };
+
+          for (const field of dateFields) {
+            if (field in processedRecord && processedRecord[field] !== null) {
+              if (typeof processedRecord[field] === "string") {
+                processedRecord[field] = new Date(processedRecord[field]);
+              }
+            }
+          }
+
+          return processedRecord;
+        });
+
+        if (processedData.length > 0) {
+          await db.insert(schemas[table]).values(processedData);
+        }
+      }
+
+      reloadDb();
     } catch (err) {
       console.error("Failed to restore", err);
       Alert.alert("Restore Error", "Failed to restore database");
@@ -44,5 +110,6 @@ export const useRestoreDatabase = () => {
 
   return {
     restoreDatabaseSQLite,
+    restoreDatabaseJSON,
   };
 };
