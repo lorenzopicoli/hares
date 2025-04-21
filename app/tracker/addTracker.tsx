@@ -3,7 +3,7 @@ import { FormThemedInput } from "@/components/ThemedInput";
 import { useForm } from "react-hook-form";
 import { StyleSheet, View } from "react-native";
 import ThemedButton from "@/components/ThemedButton";
-import { ThemedView } from "@/components/ThemedView";
+import { ThemedSafeAreaView } from "@/components/ThemedView";
 import { Sizes } from "@/constants/Sizes";
 import { TrackerType } from "@/db/schema";
 import { useLocalSearchParams, useRouter } from "expo-router";
@@ -70,7 +70,7 @@ export default function AddTrackerScreen() {
   };
 
   return (
-    <ThemedView>
+    <ThemedSafeAreaView>
       <ThemedScrollView keyboardShouldPersistTaps="always">
         <FormThemedInput
           form={{
@@ -153,7 +153,7 @@ export default function AddTrackerScreen() {
           onPress={handleSubmit(onSubmit)}
         />
       </View>
-    </ThemedView>
+    </ThemedSafeAreaView>
   );
 }
 

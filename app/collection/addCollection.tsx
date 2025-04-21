@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { LogBox, StyleSheet, TouchableOpacity, View, type ListRenderItemInfo } from "react-native";
 import ThemedButton from "@/components/ThemedButton";
-import { ThemedView } from "@/components/ThemedView";
+import { ThemedSafeAreaView } from "@/components/ThemedView";
 import { Sizes } from "@/constants/Sizes";
 import type { NewCollectionTracker, Tracker } from "@/db/schema";
 import { useLocalSearchParams, useRouter } from "expo-router";
@@ -168,7 +168,7 @@ export default function AddCollectionScreen() {
   };
 
   return (
-    <ThemedView>
+    <ThemedSafeAreaView>
       <ScrollViewContainer style={styles.scrollView}>
         <FormThemedInput
           form={{
@@ -203,7 +203,7 @@ export default function AddCollectionScreen() {
           onPress={handleSubmit(onSubmit)}
         />
       </View>
-    </ThemedView>
+    </ThemedSafeAreaView>
   );
 }
 

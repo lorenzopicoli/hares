@@ -2,7 +2,7 @@ import SearchInput from "@/components/SearchInput";
 import { Separator } from "@/components/Separator";
 import ThemedButton from "@/components/ThemedButton";
 import { ThemedText } from "@/components/ThemedText";
-import { ThemedView } from "@/components/ThemedView";
+import { ThemedSafeAreaView, ThemedView } from "@/components/ThemedView";
 import type { ThemedColors } from "@/components/ThemeProvider";
 import { Sizes } from "@/constants/Sizes";
 import { useEntryTextList } from "@/hooks/data/useEntryTextList";
@@ -98,7 +98,7 @@ export default function TextListSelectionScreen() {
   };
 
   return (
-    <ThemedView>
+    <ThemedSafeAreaView>
       <SearchInput value={searchQuery} onChange={setSearchQuery} autoFocus placeholder="Search..." />
       <FlatList
         data={data}
@@ -108,7 +108,7 @@ export default function TextListSelectionScreen() {
         ItemSeparatorComponent={Separator}
       />
       <ThemedButton disabled={searchQuery === ""} title={`Add ${searchQuery}`} onPress={handleAdd} />
-    </ThemedView>
+    </ThemedSafeAreaView>
   );
 }
 

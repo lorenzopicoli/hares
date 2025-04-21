@@ -9,9 +9,11 @@ export type ThemedViewProps = ViewProps & {
 export function ThemedView({ style, lightColor, darkColor, ...otherProps }: ThemedViewProps) {
   const { colors } = useColors();
 
-  return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }}>
-      <View style={[{ backgroundColor: colors.background, flex: 1 }, style]} {...otherProps} />
-    </SafeAreaView>
-  );
+  return <View style={[{ backgroundColor: colors.background, flex: 1 }, style]} {...otherProps} />;
+}
+
+export function ThemedSafeAreaView({ style, lightColor, darkColor, ...otherProps }: ThemedViewProps) {
+  const { colors } = useColors();
+
+  return <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }} {...otherProps} />;
 }

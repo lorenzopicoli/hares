@@ -1,7 +1,7 @@
 import ThemedScrollView from "@/components/ThemedScrollView";
 import { StyleSheet, View } from "react-native";
 import ThemedButton from "@/components/ThemedButton";
-import { ThemedView } from "@/components/ThemedView";
+import { ThemedSafeAreaView, ThemedView } from "@/components/ThemedView";
 import { Sizes } from "@/constants/Sizes";
 import { TrackerType, type EntryDateInformation, type NewTrackerEntry, type PeriodOfDay } from "@/db/schema";
 import { useRouter, useLocalSearchParams } from "expo-router";
@@ -187,7 +187,7 @@ export default function AddEntryScreen() {
   };
 
   return (
-    <ThemedView>
+    <ThemedSafeAreaView>
       <ThemedScrollView>
         {tracker?.description ? (
           <ThemedText>
@@ -217,7 +217,7 @@ export default function AddEntryScreen() {
       <View style={styles.submitButtonContainer}>
         <ThemedButton fullWidth title={entryId ? "Update entry" : "Log entry"} onPress={handleSubmit(onSubmit)} />
       </View>
-    </ThemedView>
+    </ThemedSafeAreaView>
   );
 }
 
