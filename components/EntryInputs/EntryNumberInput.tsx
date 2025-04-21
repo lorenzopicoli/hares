@@ -1,7 +1,15 @@
 import { Sizes } from "@/constants/Sizes";
 import useStyles from "@/hooks/useStyles";
 import { useRef } from "react";
-import { StyleSheet, View, TextInput, Pressable, type TextInputProps } from "react-native";
+import {
+  StyleSheet,
+  View,
+  TextInput,
+  Pressable,
+  type TextInputProps,
+  type StyleProp,
+  type ViewStyle,
+} from "react-native";
 import ThemedButton from "../ThemedButton";
 import type { ThemedColors } from "../ThemeProvider";
 import { type FieldValues, type Path, type ControllerProps, Controller } from "react-hook-form";
@@ -13,6 +21,8 @@ export interface EntryNumberInputProps extends Omit<TextInputProps, "onChangeTex
   error?: string;
   prefix?: string | null;
   suffix?: string | null;
+  showCounterButtons?: boolean;
+  containerStyle?: StyleProp<ViewStyle>;
 }
 
 interface FormEntryNumberInputProps<T extends FieldValues, K extends Path<T>> extends EntryNumberInputProps {
@@ -41,7 +51,16 @@ export function FormEntryNumberInput<T extends FieldValues, K extends Path<T>>(p
 }
 
 export default function EntryNumberInput(props: EntryNumberInputProps) {
-  const { error, prefix, suffix, value, onChangeText, ...inputProps } = props;
+  const {
+    error,
+    prefix,
+    suffix,
+    value,
+    containerStyle,
+    showCounterButtons = true,
+    onChangeText,
+    ...inputProps
+  } = props;
 
   const hiddenInputRef = useRef<TextInput>(null);
   const { styles } = useStyles(createStyles);
@@ -88,7 +107,7 @@ export default function EntryNumberInput(props: EntryNumberInputProps) {
   };
 
   return (
-    <View>
+    <View style={containerStyle}>
       {/* Visible input (display only) */}
       <Pressable onPressIn={focusHiddenInput}>
         <TextInput style={styles.numberInput} value={formatDisplayValue()} editable={false} />
@@ -103,20 +122,22 @@ export default function EntryNumberInput(props: EntryNumberInputProps) {
         keyboardType="numeric"
       />
 
-      <View style={styles.numberCounterButtonsContainer}>
-        <ThemedButton
-          textStyle={styles.counterButtonText}
-          style={styles.counterButton}
-          title="—"
-          onPress={handleMinus}
-        />
-        <ThemedButton
-          textStyle={styles.counterButtonText}
-          style={styles.counterButton}
-          title="+"
-          onPress={handlePlus}
-        />
-      </View>
+      {showCounterButtons ? (
+        <View style={styles.numberCounterButtonsContainer}>
+          <ThemedButton
+            textStyle={styles.counterButtonText}
+            style={styles.counterButton}
+            title="—"
+            onPress={handleMinus}
+          />
+          <ThemedButton
+            textStyle={styles.counterButtonText}
+            style={styles.counterButton}
+            title="+"
+            onPress={handlePlus}
+          />
+        </View>
+      ) : null}
       <InputErrorLabel error={error} />
     </View>
   );

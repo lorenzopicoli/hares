@@ -6,12 +6,15 @@ import { ThemedText } from "../ThemedText";
 import { Sizes } from "@/constants/Sizes";
 import { ThemedView } from "../ThemedView";
 import { type FieldValues, type Path, type ControllerProps, Controller } from "react-hook-form";
+import EntryNumberInput from "./EntryNumberInput";
 
 export interface EntrySliderInputProps {
   onChange?: (value: number | null) => void;
   value?: number | null;
   min: number;
   max: number;
+  prefix?: string | null;
+  suffix?: string | null;
   error?: string;
 }
 
@@ -41,7 +44,14 @@ export default function EntrySliderInput(props: EntrySliderInputProps) {
 
   return (
     <ThemedView style={styles.container}>
-      <ThemedText style={styles.currentValue}>{props.value ?? "-"}</ThemedText>
+      <EntryNumberInput
+        containerStyle={styles.numberInput}
+        showCounterButtons={false}
+        value={props.value}
+        prefix={props.prefix}
+        suffix={props.suffix}
+        onChangeText={props.onChange}
+      />
       <ThemedView style={styles.sliderContainer}>
         <ThemedText>{props.min}</ThemedText>
         <Slider
@@ -79,5 +89,8 @@ const createStyles = (theme: ThemedColors) =>
     },
     container: {
       alignItems: "center",
+    },
+    numberInput: {
+      flexShrink: 1,
     },
   });
