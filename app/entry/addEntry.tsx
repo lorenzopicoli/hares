@@ -176,8 +176,8 @@ export default function AddEntryScreen() {
       case TrackerType.TextList:
         return (
           <View style={styles.textListControls}>
-            <ThemedButton title="Select items" mode="ghost" onPress={handleGoToSelectItems} />
-            <ChipGroup chips={chips} />
+            <ThemedButton title="Select items" mode="toggle" onPress={handleGoToSelectItems} />
+            {chips.length > 0 ? <ChipGroup chips={chips} /> : null}
           </View>
         );
 
@@ -197,7 +197,7 @@ export default function AddEntryScreen() {
         ) : null}
         <ThemedView>{renderEntryInput()}</ThemedView>
 
-        <Spacing size="small" />
+        <Spacing size="xSmall" />
         <FormEntryDateSelection
           form={{
             control,
