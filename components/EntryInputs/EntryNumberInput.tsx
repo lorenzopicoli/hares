@@ -21,6 +21,8 @@ export interface EntryNumberInputProps extends Omit<TextInputProps, "onChangeTex
   error?: string;
   prefix?: string | null;
   suffix?: string | null;
+  minValue?: number;
+  maxValue?: number;
   showCounterButtons?: boolean;
   containerStyle?: StyleProp<ViewStyle>;
 }
@@ -58,6 +60,8 @@ export default function EntryNumberInput(props: EntryNumberInputProps) {
     value,
     containerStyle,
     showCounterButtons = true,
+    minValue,
+    maxValue,
     onChangeText,
     ...inputProps
   } = props;
@@ -67,7 +71,11 @@ export default function EntryNumberInput(props: EntryNumberInputProps) {
 
   const handleTextChange = (text: string) => {
     if (!text) {
-      onChangeText?.(null);
+      if (minValue !== undefined) {
+        onChangeText?.(minValue);
+      } else {
+        onChangeText?.(null);
+      }
       return;
     }
 
@@ -76,7 +84,13 @@ export default function EntryNumberInput(props: EntryNumberInputProps) {
 
     const parsedNumber = Number.parseFloat(numericText);
     if (!Number.isNaN(parsedNumber)) {
-      onChangeText?.(parsedNumber);
+      if (minValue !== undefined && parsedNumber < minValue) {
+        onChangeText?.(minValue);
+      } else if (maxValue !== undefined && parsedNumber > maxValue) {
+        onChangeText?.(maxValue);
+      } else {
+        onChangeText?.(parsedNumber);
+      }
     }
   };
 
@@ -102,8 +116,13 @@ export default function EntryNumberInput(props: EntryNumberInputProps) {
     onChangeText?.((value ?? 0) - 1);
   };
 
+  // Need to blur before focus: https://github.com/facebook/react-native/issues/33532
   const focusHiddenInput = () => {
-    hiddenInputRef.current?.focus();
+    hiddenInputRef.current?.blur();
+
+    setTimeout(() => {
+      hiddenInputRef.current?.focus();
+    }, 100);
   };
 
   return (
@@ -116,6 +135,7 @@ export default function EntryNumberInput(props: EntryNumberInputProps) {
       {/* Hidden input (actual input) */}
       <TextInput
         {...inputProps}
+        value={String(value)}
         ref={hiddenInputRef}
         style={styles.hiddenNumberInput}
         onChangeText={handleTextChange}

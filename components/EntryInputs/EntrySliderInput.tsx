@@ -1,12 +1,12 @@
 import useStyles from "@/hooks/useStyles";
 import { StyleSheet } from "react-native";
 import { useColors, type ThemedColors } from "../ThemeProvider";
-import Slider from "@react-native-community/slider";
 import { ThemedText } from "../ThemedText";
 import { Sizes } from "@/constants/Sizes";
 import { ThemedView } from "../ThemedView";
 import { type FieldValues, type Path, type ControllerProps, Controller } from "react-hook-form";
 import EntryNumberInput from "./EntryNumberInput";
+import Slider from "@react-native-community/slider";
 
 export interface EntrySliderInputProps {
   onChange?: (value: number | null) => void;
@@ -50,6 +50,8 @@ export default function EntrySliderInput(props: EntrySliderInputProps) {
         value={props.value}
         prefix={props.prefix}
         suffix={props.suffix}
+        minValue={props.min}
+        maxValue={props.max}
         onChangeText={props.onChange}
       />
       <ThemedView style={styles.sliderContainer}>
@@ -62,6 +64,7 @@ export default function EntrySliderInput(props: EntrySliderInputProps) {
           minimumTrackTintColor={colors.tint}
           thumbTintColor={colors.tint}
           maximumTrackTintColor={colors.text}
+          value={props.value ?? undefined}
           onValueChange={props.onChange}
           hitSlop={{ top: 40, bottom: 40, left: 40, right: 40 }}
         />
