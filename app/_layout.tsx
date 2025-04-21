@@ -65,7 +65,7 @@ function ThemedLayout() {
           <DatabaseProvider onLoad={handleDbLoaded}>
             <SafeAreaView style={{ flex: 0, backgroundColor: NavBarColors[theme].colors.background }} />
             <RootStack />
-            <StatusBar style="auto" />
+            <StatusBar style={theme === "light" ? "dark" : "light"} />
           </DatabaseProvider>
         </Suspense>
       </ThemeProvider>

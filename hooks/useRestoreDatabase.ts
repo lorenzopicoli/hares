@@ -87,7 +87,7 @@ export const useRestoreDatabase = () => {
 
           for (const field of dateFields) {
             if (field in processedRecord && processedRecord[field] !== null) {
-              if (typeof processedRecord[field] === "string") {
+              if (typeof processedRecord[field] === "string" || typeof processedRecord[field] === "number") {
                 processedRecord[field] = new Date(processedRecord[field]);
               }
             }

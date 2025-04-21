@@ -96,7 +96,6 @@ const createStyles = (theme: ThemedColors) =>
     },
     inputFocused: {
       borderColor: theme.input.focusedBorder,
-      backgroundColor: "#25262B",
     },
     inputError: {
       borderColor: theme.input.borderError,

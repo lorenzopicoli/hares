@@ -43,7 +43,7 @@ export default function SettingsScreen() {
 
   return (
     <ThemedScrollView>
-      <ThemedText type="title">Visual</ThemedText>
+      <ThemedText type="title">Theme</ThemedText>
       <ThemedToggleButtons
         columns={2}
         selectedOption={theme}

@@ -51,7 +51,7 @@ export default function EntrySliderInput(props: EntrySliderInputProps) {
           maximumValue={props.max}
           minimumTrackTintColor={colors.tint}
           thumbTintColor={colors.tint}
-          maximumTrackTintColor="#FFFFFF"
+          maximumTrackTintColor={colors.text}
           onValueChange={props.onChange}
           hitSlop={{ top: 40, bottom: 40, left: 40, right: 40 }}
         />

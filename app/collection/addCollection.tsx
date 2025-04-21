@@ -12,7 +12,7 @@ import {
   useReorderableDrag,
   type ReorderableListReorderEvent,
 } from "react-native-reorderable-list";
-import type { ThemedColors } from "@/components/ThemeProvider";
+import { useColors, type ThemedColors } from "@/components/ThemeProvider";
 import useStyles from "@/hooks/useStyles";
 import { Separator } from "@/components/Separator";
 import { Spacing } from "@/components/Spacing";
@@ -44,6 +44,7 @@ interface FormInputs {
 
 function TrackerItem(props: TrackItemProps) {
   const { styles } = useStyles(createStyles);
+  const { colors } = useColors();
   const drag = useReorderableDrag();
   const handlePress = () => {
     props.onPress?.(props.tracker);
@@ -53,9 +54,9 @@ function TrackerItem(props: TrackItemProps) {
       <View style={styles.itemContainer}>
         <ThemedText>{props.tracker.tracker.name}</ThemedText>
         <View style={styles.itemActions}>
-          {props.tracker.isInCollection && <Feather name="x" size={25} color="#fff" />}
-          {props.tracker.isInCollection && <MaterialIcons name="drag-indicator" size={25} color="#fff" />}
-          {!props.tracker.isInCollection && <Entypo name="plus" size={24} color="#fff" />}
+          {props.tracker.isInCollection && <Feather name="x" size={25} color={colors.text} />}
+          {props.tracker.isInCollection && <MaterialIcons name="drag-indicator" size={25} color={colors.text} />}
+          {!props.tracker.isInCollection && <Entypo name="plus" size={24} color={colors.text} />}
         </View>
       </View>
     </TouchableOpacity>

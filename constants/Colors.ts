@@ -43,14 +43,27 @@ export const Colors = {
       },
     },
     button: {
-      primary: tintColorLight,
-      secondary: colors.pistachio,
-      success: successColor,
+      primary: {
+        background: tintColorLight,
+        text: "#ECEDEE",
+      },
+      secondary: {
+        background: colors.pistachio,
+        text: "#ECEDEE",
+      },
+      success: {
+        backgrond: successColor,
+        text: "#ECEDEE",
+      },
       ghost: {
+        text: "#1e1e24",
         background: "transparent",
         border: colors.spaceCadet,
       },
-      danger: errorColor,
+      danger: {
+        text: "#ECEDEE",
+        background: errorColor,
+      },
     },
   },
   dark: {
@@ -74,14 +87,27 @@ export const Colors = {
       textError: "#ff6b6b",
     },
     button: {
-      primary: tintColorDark,
-      secondary: "#a2d266",
-      success: "#2a7d37",
+      primary: {
+        background: tintColorDark,
+        text: "#ECEDEE",
+      },
+      secondary: {
+        background: "#a2d266",
+        text: "#ECEDEE",
+      },
+      success: {
+        backgrond: "#2a7d37",
+        text: "#ECEDEE",
+      },
       ghost: {
+        text: "#ECEDEE",
         background: "transparent",
         border: "#3a3e52",
       },
-      danger: "#c33036",
+      danger: {
+        text: "#ECEDEE",
+        background: "#c33036",
+      },
     },
     toggleButton: {
       background: "#323549",

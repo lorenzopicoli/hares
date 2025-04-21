@@ -51,7 +51,7 @@ export default function EntriesScreen() {
 const createStyles = (theme: ThemedColors) =>
   StyleSheet.create({
     listContainer: {
-      paddingVertical: Sizes.medium,
+      paddingVertical: Sizes.small,
     },
     listItem: {
       padding: Sizes.medium,

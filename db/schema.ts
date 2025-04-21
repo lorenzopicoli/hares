@@ -42,7 +42,6 @@ export const trackersTable = sqliteTable("trackers", {
   description: text(),
   rangeMin: int(),
   rangeMax: int(),
-  textGroupId: text(),
   index: int().notNull(),
   deletedAt: integer({ mode: "timestamp" }),
 });

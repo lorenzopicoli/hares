@@ -102,7 +102,7 @@ export default function EntryDateSelection(props: EntryDateSelectionProps) {
         options={presetOptions}
         onChangeSelection={handlePressToggleButton}
       />
-      <ThemedButton title="Custom" mode="ghost" onPress={toggleDatePicker} style={styles.dateSelectionButton} />
+      <ThemedButton title="Custom" mode="toggle" onPress={toggleDatePicker} style={styles.dateSelectionButton} />
       <ThemedModal
         visible={showDatePicker}
         hideDismiss

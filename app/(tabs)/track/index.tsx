@@ -23,6 +23,7 @@ export default function TrackScreen() {
   const navigation = useNavigation();
   const [tabIndex, setTabIndex] = useState(0);
   const [searchQuery, setSearchQuery] = useState("");
+  const { colors } = useColors();
 
   const { collectionsWithAll: collections } = useCollections();
   const { handleTrackScreenOptions } = useTrackScreenActions(collections[tabIndex].id);
@@ -70,7 +71,7 @@ export default function TrackScreen() {
         <View>
           {/* On press in because of: https://github.com/expo/expo/issues/29489 */}
           <TouchableOpacity onPressIn={handleTrackScreenOptions}>
-            <Entypo name="dots-three-vertical" size={25} color="white" />
+            <Entypo name="dots-three-vertical" size={25} color={colors.text} />
           </TouchableOpacity>
         </View>
       ),
