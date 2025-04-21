@@ -3,7 +3,7 @@ import { StyleSheet, TouchableOpacity, View } from "react-native";
 import { type NavigationState, type Route, type SceneRendererProps, TabBar, TabView } from "react-native-tab-view";
 import type { Tracker } from "@/db/schema";
 import TrackerGridView from "@/components/TrackerGridView";
-import type { ThemedColors } from "@/components/ThemeProvider";
+import { useColors, type ThemedColors } from "@/components/ThemeProvider";
 import useStyles from "@/hooks/useStyles";
 import { useNavigation, useRouter } from "expo-router";
 import SearchInput from "@/components/SearchInput";
@@ -95,7 +95,17 @@ export default function TrackScreen() {
 
 function TrackerTabBar(props: SceneRendererProps & { navigationState: NavigationState<TabRoute> }) {
   const { styles } = useStyles(createStyles);
-  return <TabBar {...props} style={styles.tabBar} indicatorStyle={styles.indicator} scrollEnabled />;
+  const { colors } = useColors();
+  return (
+    <TabBar
+      {...props}
+      activeColor={colors.tint}
+      inactiveColor={colors.text}
+      style={styles.tabBar}
+      indicatorStyle={styles.indicator}
+      scrollEnabled
+    />
+  );
 }
 
 const createStyles = (theme: ThemedColors) =>

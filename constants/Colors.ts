@@ -1,64 +1,130 @@
-const tintColorLight = "#8A2BE2"; // Bright purple for light mode
-const tintColorDark = "#BF5FFF"; // Lighter neon purple for dark mode
+import { DarkTheme, DefaultTheme } from "@react-navigation/native";
+
+const colors = {
+  frenchViolet: "#8614cc",
+  pistachio: "#92c156",
+  spaceCadet: "#292d43",
+  auburn: "#aa1d22",
+  dartmouthGreen: "#21612b",
+};
+
+const tintColorLight = colors.frenchViolet;
+const tintColorDark = "#a43be2";
+const errorColor = colors.auburn;
+const successColor = colors.dartmouthGreen;
+
 export const Colors = {
   light: {
-    text: "#11181C",
-    background: "#fff",
-    secondaryBackground: "#111",
+    text: "#1e1e24",
+    background: "#ffffff",
+    secondaryBackground: colors.spaceCadet,
     tint: tintColorLight,
-    danger: "rgb(230, 69, 58)",
-    darkTint: "#7F65A3",
+    darkTint: "#6b10a3",
     icon: "#687076",
     tabIconDefault: "#687076",
     tabIconSelected: tintColorLight,
-    secondaryText: "#687076", // Added secondary text color
-    border: "#2A2D2E",
+    secondaryText: "#687076",
+    border: "#e0e0e5",
     input: {
       background: "#F8F9FA",
       border: "#E6E8EB",
-      focusedBorder: "#8A2BE2", // Matching tint color
-      borderError: "#E53E3E",
+      focusedBorder: colors.frenchViolet,
+      borderError: errorColor,
       backgroundDisabled: "#F1F3F5",
-      text: "#11181C",
-      textError: "#E53E3E",
+      text: "#1e1e24",
+      textError: errorColor,
     },
     toggleButton: {
-      background: "#F8F9FA", // Light background matching input background
-      border: "#E6E8EB", // Light border matching input border
+      background: "#F8F9FA",
+      border: "#E6E8EB",
       selected: {
-        background: "#F2E8FA", // Light purple background
-        border: "#8A2BE2", // Matching tint color
+        background: "#f2e6fa",
+        border: colors.frenchViolet,
       },
+    },
+    button: {
+      primary: tintColorLight,
+      secondary: colors.pistachio,
+      success: successColor,
+      ghost: {
+        background: "transparent",
+        border: colors.spaceCadet,
+      },
+      danger: errorColor,
     },
   },
   dark: {
     text: "#ECEDEE",
-    danger: "rgb(190, 30, 30)",
-    background: "#151718",
-    secondaryBackground: "#151718",
-    tint: "#BF5FFF",
-    darkTint: "#7F65A3",
+    background: colors.spaceCadet,
+    secondaryBackground: "#1e223a",
+    tint: tintColorDark,
+    darkTint: "#7213ab",
     icon: "#9BA1A6",
     tabIconDefault: "#9BA1A6",
-    tabIconSelected: "#BF5FFF",
+    tabIconSelected: tintColorDark,
     secondaryText: "#9BA1A6",
-    border: "#2A2D2E",
+    border: "#3a3e52",
     input: {
-      background: "#1E2021",
-      border: "#2A2D2E",
-      focusedBorder: "#BF5FFF",
-      borderError: "#E53E3E",
-      backgroundDisabled: "#1A1B1C",
+      background: "#323549",
+      border: "#3a3e52",
+      focusedBorder: tintColorDark,
+      borderError: "#c33036",
+      backgroundDisabled: "#252a3d",
       text: "#ECEDEE",
-      textError: "#FF6B6B",
+      textError: "#ff6b6b",
+    },
+    button: {
+      primary: tintColorDark,
+      secondary: "#a2d266",
+      success: "#2a7d37",
+      ghost: {
+        background: "transparent",
+        border: "#3a3e52",
+      },
+      danger: "#c33036",
     },
     toggleButton: {
-      background: "#1E2021",
-      border: "#2A2D2E",
+      background: "#323549",
+      border: "#3a3e52",
       selected: {
-        background: "#2D1E33",
-        border: "#BF5FFF",
+        background: "#471d6e",
+        border: tintColorDark,
       },
+    },
+  },
+
+  semantic: {
+    warning: "#d4ab00",
+    info: "#0072c6",
+    success: colors.dartmouthGreen,
+    error: colors.auburn,
+    accent: colors.pistachio,
+  },
+};
+
+export const NavBarColors = {
+  light: {
+    ...DefaultTheme,
+    dark: false,
+    colors: {
+      primary: colors.frenchViolet,
+      background: "#ffffff",
+      card: "#f8f8f8",
+      text: "#1e1e24",
+      border: "#e0e0e5",
+      notification: colors.auburn,
+    },
+  },
+  dark: {
+    ...DarkTheme,
+    dark: true,
+    colors: {
+      primary: tintColorDark,
+      background: "#1e223a",
+      card: "#1e223a",
+      text: "#ECEDEE",
+      border: "#3a3e52",
+      notification: "#c33036",
     },
   },
 };

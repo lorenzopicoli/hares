@@ -3,7 +3,6 @@ import { StyleSheet } from "react-native";
 import Animated, { useAnimatedRef } from "react-native-reanimated";
 
 import { ThemedView } from "@/components/ThemedView";
-import { useBottomTabOverflow } from "@/hooks/useBottomTabOverflow";
 import { Sizes } from "@/constants/Sizes";
 
 export default function ThemedScrollView({
@@ -11,16 +10,9 @@ export default function ThemedScrollView({
   ...props
 }: PropsWithChildren<Omit<ComponentPropsWithoutRef<Animated.ScrollView>, "children">>) {
   const scrollRef = useAnimatedRef<Animated.ScrollView>();
-  const bottom = useBottomTabOverflow();
   return (
     <ThemedView style={styles.container}>
-      <Animated.ScrollView
-        ref={scrollRef}
-        scrollEventThrottle={16}
-        scrollIndicatorInsets={{ bottom }}
-        contentContainerStyle={{ paddingBottom: bottom }}
-        {...props}
-      >
+      <Animated.ScrollView ref={scrollRef} scrollEventThrottle={16} {...props}>
         <ThemedView style={styles.content}>{children}</ThemedView>
       </Animated.ScrollView>
     </ThemedView>

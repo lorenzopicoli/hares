@@ -1,5 +1,4 @@
 import { Tabs } from "expo-router";
-import { Platform } from "react-native";
 
 import { IconSymbol } from "@/components/ui/IconSymbol";
 import { useColors } from "@/components/ThemeProvider";
@@ -16,12 +15,10 @@ export default function TabLayout() {
         tabBarButton: HapticPressable,
         tabBarInactiveBackgroundColor: colors.background,
         tabBarActiveBackgroundColor: colors.background,
-        tabBarStyle: Platform.select({
-          ios: {
-            backgroundColor: colors.background,
-          },
-          default: {},
-        }),
+        tabBarLabelStyle: {
+          color: colors.text,
+        },
+        tabBarStyle: { backgroundColor: colors.background },
       }}
     >
       <Tabs.Screen

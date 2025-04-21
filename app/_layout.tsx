@@ -1,7 +1,6 @@
-import { DarkTheme, DefaultTheme, ThemeProvider } from "@react-navigation/native";
+import { ThemeProvider } from "@react-navigation/native";
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
-import { StatusBar } from "expo-status-bar";
 import React, { Suspense, useCallback, useEffect } from "react";
 import * as NavigationBar from "expo-navigation-bar";
 import * as SystemUI from "expo-system-ui";
@@ -9,14 +8,15 @@ import { ThemeProvider as MyThemeProvider } from "@/components/ThemeProvider";
 import "react-native-reanimated";
 
 import { useColorScheme } from "@/hooks/useColorScheme";
-import { Platform } from "react-native";
-import { Colors } from "@/constants/Colors";
+import { Platform, SafeAreaView } from "react-native";
+import { Colors, NavBarColors } from "@/constants/Colors";
 import { ActionSheetProvider } from "@expo/react-native-action-sheet";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { useFonts } from "expo-font";
 import { DatabaseProvider } from "@/contexts/DatabaseContext";
 import LoadingDatabase from "@/components/LoadingDatabase";
 import { enableScreens } from "react-native-screens";
+import { StatusBar } from "expo-status-bar";
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
@@ -56,9 +56,12 @@ export default function RootLayout() {
     <GestureHandlerRootView style={{ flex: 1 }}>
       <MyThemeProvider>
         <ActionSheetProvider>
-          <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
+          <ThemeProvider value={NavBarColors[colorScheme ?? "dark"]}>
             <Suspense fallback={<LoadingDatabase />}>
               <DatabaseProvider onLoad={handleDbLoaded}>
+                <SafeAreaView
+                  style={{ flex: 0, backgroundColor: NavBarColors[colorScheme ?? "dark"].colors.background }}
+                />
                 <RootStack />
                 <StatusBar style="auto" />
               </DatabaseProvider>

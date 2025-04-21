@@ -50,12 +50,12 @@ const createStyles = (theme: ThemedColors) =>
       backgroundColor: theme.tint,
     },
     ghostButton: {
-      backgroundColor: theme.toggleButton.background,
-      borderColor: theme.toggleButton.border,
+      backgroundColor: theme.button.ghost.background,
+      borderColor: theme.button.ghost.border,
       borderWidth: 1,
     },
     dangerButton: {
-      backgroundColor: theme.danger,
+      backgroundColor: theme.button.danger,
     },
     button: {
       height: Sizes.buttonHeight,
