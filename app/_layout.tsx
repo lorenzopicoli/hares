@@ -4,15 +4,13 @@ import * as SplashScreen from "expo-splash-screen";
 import React, { Suspense, useCallback, useEffect } from "react";
 import * as NavigationBar from "expo-navigation-bar";
 import * as SystemUI from "expo-system-ui";
-import { ThemeProvider as MyThemeProvider } from "@/components/ThemeProvider";
+import { ThemeProvider as MyThemeProvider, useColors } from "@/components/ThemeProvider";
 import "react-native-reanimated";
 
-import { useColorScheme } from "@/hooks/useColorScheme";
 import { Platform, SafeAreaView } from "react-native";
 import { Colors, NavBarColors } from "@/constants/Colors";
 import { ActionSheetProvider } from "@expo/react-native-action-sheet";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
-import { useFonts } from "expo-font";
 import { DatabaseProvider } from "@/contexts/DatabaseContext";
 import LoadingDatabase from "@/components/LoadingDatabase";
 import { enableScreens } from "react-native-screens";
@@ -35,11 +33,19 @@ function RootStack() {
 }
 
 export default function RootLayout() {
-  const colorScheme = useColorScheme();
-  const [loaded] = useFonts({
-    SpaceMono: require("../assets/fonts/SpaceMono-Regular.ttf"),
-  });
   enableScreens(true);
+
+  return (
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <MyThemeProvider>
+        <ThemedLayout />
+      </MyThemeProvider>
+    </GestureHandlerRootView>
+  );
+}
+
+function ThemedLayout() {
+  const { theme } = useColors();
 
   const handleDbLoaded = useCallback(() => {
     SplashScreen.hideAsync();
@@ -47,28 +53,22 @@ export default function RootLayout() {
 
   useEffect(() => {
     if (Platform.OS === "android") {
-      NavigationBar.setBackgroundColorAsync(Colors[colorScheme ?? "dark"].background);
+      NavigationBar.setBackgroundColorAsync(Colors[theme].background);
     }
-    SystemUI.setBackgroundColorAsync(Colors[colorScheme ?? "dark"].background);
-  }, [colorScheme]);
+    SystemUI.setBackgroundColorAsync(Colors[theme].background);
+  }, [theme]);
 
   return (
-    <GestureHandlerRootView style={{ flex: 1 }}>
-      <MyThemeProvider>
-        <ActionSheetProvider>
-          <ThemeProvider value={NavBarColors[colorScheme ?? "dark"]}>
-            <Suspense fallback={<LoadingDatabase />}>
-              <DatabaseProvider onLoad={handleDbLoaded}>
-                <SafeAreaView
-                  style={{ flex: 0, backgroundColor: NavBarColors[colorScheme ?? "dark"].colors.background }}
-                />
-                <RootStack />
-                <StatusBar style="auto" />
-              </DatabaseProvider>
-            </Suspense>
-          </ThemeProvider>
-        </ActionSheetProvider>
-      </MyThemeProvider>
-    </GestureHandlerRootView>
+    <ActionSheetProvider>
+      <ThemeProvider value={NavBarColors[theme]}>
+        <Suspense fallback={<LoadingDatabase />}>
+          <DatabaseProvider onLoad={handleDbLoaded}>
+            <SafeAreaView style={{ flex: 0, backgroundColor: NavBarColors[theme].colors.background }} />
+            <RootStack />
+            <StatusBar style="auto" />
+          </DatabaseProvider>
+        </Suspense>
+      </ThemeProvider>
+    </ActionSheetProvider>
   );
 }
