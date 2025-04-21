@@ -1,47 +1,65 @@
 import { Colors } from "@/constants/Colors";
 import { useColorScheme } from "@/hooks/useColorScheme";
-import { createContext, useContext, useEffect, useState, type PropsWithChildren } from "react";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { createContext, useCallback, useContext, useEffect, useState, type PropsWithChildren } from "react";
 
 export type ThemedColors = typeof Colors.dark & typeof Colors.light;
 
 type ThemeContextType = {
   colors: ThemedColors;
-  applyColors: (colors: ThemedColors) => void;
+  theme: "light" | "dark";
+  changeTheme: (theme: "light" | "dark") => void;
 };
 
 const ThemeContext = createContext<ThemeContextType | null>(null);
 
 const ThemeProvider = ({ children }: PropsWithChildren) => {
   const colorScheme = useColorScheme();
-  const [colors, setColors] = useState(colorScheme === "dark" ? Colors.dark : Colors.light);
+  const [theme, setTheme] = useState<"light" | "dark">("dark");
+  const [colors, setColors] = useState(Colors[theme]);
 
-  const applyColors = (colorTheme: ThemedColors) => {
-    setColors(colorTheme);
-  };
+  const readTheme = useCallback(async () => {
+    const result = await AsyncStorage.getItem("theme");
 
-  return <ThemeContext.Provider value={{ applyColors, colors }}>{children}</ThemeContext.Provider>;
+    const newTheme = result ? (result as "light" | "dark") : colorScheme === "light" ? "light" : "dark";
+    setTheme(newTheme);
+    setColors(Colors[newTheme]);
+  }, [colorScheme]);
+
+  const changeTheme = useCallback(
+    async (theme: "dark" | "light") => {
+      console.log("Set theme", theme);
+      await AsyncStorage.setItem("theme", theme);
+      await readTheme();
+    },
+    [readTheme],
+  );
+
+  // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
+  useEffect(() => {
+    readTheme();
+  }, []);
+
+  return <ThemeContext.Provider value={{ colors, theme, changeTheme }}>{children}</ThemeContext.Provider>;
 };
 
 interface ColorType {
   colors: ThemedColors;
-  applyColors: (colors: ThemedColors) => void;
+  setTheme: (theme: "light" | "dark") => void;
+  theme: "light" | "dark";
 }
 
 const useColors = (): ColorType => {
   const store = useContext(ThemeContext);
-  const colorScheme = useColorScheme();
 
   if (!store) {
     throw new Error("useColors must be defined.");
   }
 
-  useEffect(() => {
-    store.applyColors(colorScheme === "dark" ? Colors.dark : Colors.light);
-  }, [store.applyColors, colorScheme]);
-
   return {
-    applyColors: store.applyColors,
     colors: store.colors,
+    setTheme: store.changeTheme,
+    theme: store.theme,
   };
 };
 

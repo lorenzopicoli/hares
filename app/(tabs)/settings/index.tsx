@@ -10,6 +10,8 @@ import { useCounts } from "@/hooks/data/useCounts";
 import { useRestoreDatabase } from "@/hooks/useRestoreDatabase";
 import { useExportDatabase } from "@/hooks/useExportDatabase";
 import { useDeleteDatabase } from "@/hooks/useDeleteDatabase";
+import ThemedToggleButtons from "@/components/ThemedToggleButtons";
+import { useColors } from "@/components/ThemeProvider";
 
 export default function SettingsScreen() {
   const { reloadDb } = useDatabase();
@@ -18,6 +20,7 @@ export default function SettingsScreen() {
   const { collectionsCount, trackersCount, entriesCount } = useCounts();
   const { confirm, ConfirmModal } = useConfirmModal();
   const { deleteDatabase } = useDeleteDatabase();
+  const { theme, setTheme } = useColors();
 
   const handleDeleteData = async () => {
     const confirmed = await confirm({
@@ -40,6 +43,16 @@ export default function SettingsScreen() {
 
   return (
     <ThemedScrollView>
+      <ThemedText type="title">Visual</ThemedText>
+      <ThemedToggleButtons
+        columns={2}
+        selectedOption={theme}
+        options={[
+          { label: "Light", value: "light" },
+          { label: "Dark", value: "dark" },
+        ]}
+        onChangeSelection={setTheme}
+      />
       <ThemedText type="title">Data Management</ThemedText>
       <ThemedView style={styles.section}>
         <ThemedView style={styles.counts}>
