@@ -7,7 +7,7 @@ import useStyles from "@/hooks/useStyles";
 import { useMemo } from "react";
 import { isDefined } from "@/utils/isDefined";
 import { Sizes } from "@/constants/Sizes";
-import { formatEntryDate } from "@/utils/entryDate";
+import { formatDate, formatEntryDate } from "@/utils/entryDate";
 
 export interface EntriesListRowProps {
   entry: TrackerEntry;
@@ -54,7 +54,7 @@ export default function EntriesListRow(props: EntriesListRowProps) {
             <ThemedText style={styles.secondary}>Date: </ThemedText> {formatEntryDate(entry)}
           </ThemedText>
           {entry.createdAt ? (
-            <ThemedText style={styles.secondary}>Logged on: {formatEntryDate(entry)}</ThemedText>
+            <ThemedText style={styles.secondary}>Logged on: {formatDate(entry.createdAt)}</ThemedText>
           ) : null}
         </View>
       </View>

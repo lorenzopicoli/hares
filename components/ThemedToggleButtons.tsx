@@ -19,8 +19,9 @@ interface ThemedToggleButtonsProps<V> {
   label?: string;
   buttonContainerStyle?: StyleProp<ViewStyle>;
   selectedOption?: V | null;
-  onChangeSelection?: (option: V) => void;
+  onChangeSelection?: (option: V | null) => void;
   error?: string;
+  allowUnselect?: boolean;
 }
 
 interface FormThemedToggleButtonsProps<T extends FieldValues, K extends Path<T>, V>
@@ -58,6 +59,7 @@ function ThemedToggleButtons<V>(props: ThemedToggleButtonsProps<V>) {
     onChangeSelection,
     buttonContainerStyle,
     selectedOption: controlledSelectedOption,
+    allowUnselect = false,
     error,
   } = props;
   const { styles } = useStyles(createStyles);
@@ -70,7 +72,8 @@ function ThemedToggleButtons<V>(props: ThemedToggleButtonsProps<V>) {
     return internalSelectedOption;
   }, [internalSelectedOption, controlledSelectedOption, isControlled]);
 
-  const handleSelectOption = (option: V) => () => {
+  const handleSelectOption = (optionParam: V) => () => {
+    const option = optionParam === selectedOption && allowUnselect ? null : optionParam;
     if (!isControlled) {
       setInternalSelectedOption(option);
     }

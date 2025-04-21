@@ -1,9 +1,13 @@
 import { type EntryDateInformation, PeriodOfDay, type TrackerEntry } from "@/db/schema";
 import { format } from "date-fns";
 
-const dateFormat = "dd/MM/yyyy - H:mm";
+const dateTimeFormat = "dd/MM/yyyy - H:mm";
+const dateFormat = "dd/MM/yyyy";
 
-export function formatPeriodOfDay(periodOfDay: PeriodOfDay | string) {
+export function formatPeriodOfDay(periodOfDay?: PeriodOfDay | string) {
+  if (!periodOfDay) {
+    return "";
+  }
   switch (periodOfDay) {
     case PeriodOfDay.Afternoon:
       return "Afternoon";
@@ -18,8 +22,12 @@ export function formatPeriodOfDay(periodOfDay: PeriodOfDay | string) {
 }
 
 export function formatEntryDate(entry: TrackerEntry) {
+  if (entry.date && entry.periodOfDay) {
+    return `${format(entry.date, dateFormat)} ${formatPeriodOfDay(entry.periodOfDay)}`;
+  }
+
   if (entry.date) {
-    return format(entry.date, dateFormat);
+    return format(entry.date, dateTimeFormat);
   }
 
   if (entry.periodOfDay) {
@@ -30,17 +38,28 @@ export function formatEntryDate(entry: TrackerEntry) {
 }
 
 export function formatEntryDateInformation(date: EntryDateInformation) {
-  if ("date" in date) {
-    return format(date.date, dateFormat);
-  }
-
-  if ("now" in date) {
+  if (date.now) {
     return "Now";
   }
 
-  if ("periodOfDay" in date) {
+  if (date.date && date.periodOfDay) {
+    return `${format(date.date, dateFormat)} ${formatPeriodOfDay(date.periodOfDay)}`;
+  }
+
+  if (date.date) {
+    return format(date.date, dateTimeFormat);
+  }
+
+  if (date.periodOfDay) {
     return formatPeriodOfDay(date.periodOfDay);
   }
 
   return "Unknown";
+}
+
+export function formatDate(date?: Date) {
+  if (!date) {
+    return "";
+  }
+  return format(date, dateTimeFormat);
 }

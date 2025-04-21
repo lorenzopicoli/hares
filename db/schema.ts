@@ -16,7 +16,7 @@ export enum PeriodOfDay {
   Evening = "evening",
 }
 
-export type EntryDateInformation = { periodOfDay: PeriodOfDay } | { date: Date } | { now: true };
+export type EntryDateInformation = { periodOfDay?: PeriodOfDay; date?: Date; now?: true };
 
 export const trackerNames: { [key in TrackerType]: string } = {
   [TrackerType.Number]: "Number",

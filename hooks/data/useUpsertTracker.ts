@@ -1,6 +1,6 @@
 import { useDatabase } from "@/contexts/DatabaseContext";
 import { trackersTable, type NewTracker } from "@/db/schema";
-import { eq } from "drizzle-orm";
+import { desc, eq } from "drizzle-orm";
 import { useCallback } from "react";
 
 export function useUpsertTracker() {
@@ -15,7 +15,7 @@ export function useUpsertTracker() {
               index: trackersTable.index,
             })
             .from(trackersTable)
-            .orderBy(trackersTable.index)
+            .orderBy(desc(trackersTable.index))
             .limit(1);
 
       const tracker: NewTracker = {

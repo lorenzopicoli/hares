@@ -43,13 +43,14 @@ export const useExportDatabase = () => {
         "entriesTable",
         "textListEntriesTable",
       ];
-      const data: unknown = {};
+      // biome-ignore lint/suspicious/noExplicitAny: <explanation>
+      const data: any = {};
       // biome-ignore lint/suspicious/noExplicitAny: <explanation>
       const schemas: any = schema;
 
       for (const table of allTables) {
         const tableData = await db.select().from(schemas[table]);
-        schemas[table] = tableData;
+        data[table] = tableData;
       }
 
       const jsonString = JSON.stringify(data, null, 2);

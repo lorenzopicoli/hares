@@ -1,6 +1,6 @@
 import { useDatabase } from "@/contexts/DatabaseContext";
 import { collectionsTable, collectionsTrackersTable, type NewCollection, type NewCollectionTracker } from "@/db/schema";
-import { eq, sql } from "drizzle-orm";
+import { eq, sql, desc } from "drizzle-orm";
 import { useCallback } from "react";
 
 export function useUpsertCollection() {
@@ -17,7 +17,7 @@ export function useUpsertCollection() {
           index: collectionsTable.index,
         })
         .from(collectionsTable)
-        .orderBy(collectionsTable.index)
+        .orderBy(desc(collectionsTable.index))
         .limit(1);
 
       const newCollection = { ...newCollectionParam, index: (nextIndex?.[0]?.index ?? 0) + 1 };

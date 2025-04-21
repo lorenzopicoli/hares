@@ -1,15 +1,21 @@
 import { useDatabase } from "@/contexts/DatabaseContext";
 import { entriesTable, textListEntriesTable, type NewTextListEntry, type NewTrackerEntry } from "@/db/schema";
 import { eq } from "drizzle-orm";
+import { useCalendars } from "expo-localization";
 import { useCallback } from "react";
 
 export function useUpsertEntry() {
   const { db } = useDatabase();
+  const [calendar] = useCalendars();
 
   const upsertEntry = useCallback(
     async (params: { data: NewTrackerEntry; textListValues?: string[]; existingId?: number }) => {
-      const { data, textListValues, existingId } = params;
+      const { data: dataParam, textListValues, existingId } = params;
 
+      const data: NewTrackerEntry = {
+        ...dataParam,
+        timezone: calendar.timeZone,
+      };
       const { savedEntryId } = existingId
         ? await db
             .update(entriesTable)
@@ -48,7 +54,7 @@ export function useUpsertEntry() {
 
       return savedEntryId;
     },
-    [db],
+    [db, calendar],
   );
 
   return { upsertEntry };
