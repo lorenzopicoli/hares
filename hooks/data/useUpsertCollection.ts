@@ -12,20 +12,26 @@ export function useUpsertCollection() {
       trackers: Omit<NewCollectionTracker, "collectionId">[],
       existingId?: number,
     ) => {
-      const nextIndex = await db
-        .select({
-          index: collectionsTable.index,
-        })
-        .from(collectionsTable)
-        .orderBy(desc(collectionsTable.index))
-        .limit(1);
+      const [nextIndex] = existingId
+        ? []
+        : await db
+            .select({
+              index: collectionsTable.index,
+            })
+            .from(collectionsTable)
+            .orderBy(desc(collectionsTable.index))
+            .limit(1);
 
-      const newCollection = { ...newCollectionParam, index: (nextIndex?.[0]?.index ?? 0) + 1 };
+      const newCollection = { ...newCollectionParam, index: (nextIndex?.index ?? 0) + 1 };
 
       const { savedCollectionId } = existingId
         ? await db
             .update(collectionsTable)
-            .set(newCollection)
+            .set({
+              ...newCollection,
+              // do not set index to not change it on edit
+              index: undefined,
+            })
             .where(eq(collectionsTable.id, existingId))
             .then(() => ({
               savedCollectionId: existingId,
