@@ -41,6 +41,12 @@ export default function SettingsScreen() {
     await exportDatabaseSQLite("hares-backup");
   };
 
+  const handleSetTheme = (option: "light" | "dark" | null) => {
+    if (option) {
+      setTheme(option);
+    }
+  };
+
   return (
     <ThemedScrollView>
       <ThemedText type="title">Theme</ThemedText>
@@ -51,7 +57,7 @@ export default function SettingsScreen() {
           { label: "Light", value: "light" },
           { label: "Dark", value: "dark" },
         ]}
-        onChangeSelection={setTheme}
+        onChangeSelection={handleSetTheme}
       />
       <ThemedText type="title">Data Management</ThemedText>
       <ThemedView style={styles.section}>
