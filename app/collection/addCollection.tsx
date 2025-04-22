@@ -23,6 +23,7 @@ import { useUpsertCollection } from "@/hooks/data/useUpsertCollection";
 import { Controller, useFieldArray, useForm, type FieldArrayWithId } from "react-hook-form";
 import ThemedInputLabel from "@/components/ThemedInputLabel";
 import { useLazyCollection } from "@/hooks/data/useCollection";
+import SearchInput from "@/components/SearchInput";
 
 LogBox.ignoreLogs(["VirtualizedLists should never be nested inside plain ScrollViews"]);
 
@@ -30,7 +31,7 @@ interface TrackItemProps {
   tracker: TrackerInCollection;
   onPress?: (tracker: TrackerInCollection) => void;
   onRemove?: (tracker: TrackerInCollection) => void;
-  onLongPress?: () => void;
+  hideDrag?: boolean;
 }
 
 interface TrackerInCollection {
@@ -51,7 +52,10 @@ function TrackerItem(props: TrackItemProps) {
     props.onPress?.(props.tracker);
   };
   return (
-    <TouchableOpacity onPress={handlePress} onLongPress={props.tracker.isInCollection ? drag : undefined}>
+    <TouchableOpacity
+      onPress={handlePress}
+      onLongPress={props.tracker.isInCollection && !props.hideDrag ? drag : undefined}
+    >
       <View style={styles.itemContainer}>
         <ThemedText>{props.tracker.tracker.name}</ThemedText>
         <View style={styles.itemActions}>
@@ -71,6 +75,7 @@ export default function AddCollectionScreen() {
   const collectionId = useMemo(() => (collectionIdParam ? +collectionIdParam : undefined), [collectionIdParam]);
 
   const [isOutOfOrder, setIsOutOfOrder] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
 
   const { upsertCollection } = useUpsertCollection();
   const { fetchCollection } = useLazyCollection();
@@ -125,9 +130,11 @@ export default function AddCollectionScreen() {
     router.dismiss();
   };
 
-  const handleAddTracker = (tracker: TrackerInCollection, index: number) => {
+  const handleAddTracker = (tracker: TrackerInCollection, fieldId: string) => {
     const newTracker: TrackerInCollection = { ...tracker, isInCollection: true };
     const firstNotInCollection = fields.findIndex((f) => !f.isInCollection);
+    const index = fields.findIndex((f) => f.id === fieldId);
+
     remove(index);
     if (firstNotInCollection > -1) {
       insert(firstNotInCollection, newTracker);
@@ -147,9 +154,11 @@ export default function AddCollectionScreen() {
     }
   };
 
-  const handleRemoveTracker = (tracker: TrackerInCollection, index: number) => {
+  const handleRemoveTracker = (tracker: TrackerInCollection, fieldId: string) => {
     const firstNotInCollection = fields.findIndex((f) => !f.isInCollection);
     const newTracker = { ...tracker, isInCollection: false };
+    const index = fields.findIndex((f) => f.id === fieldId);
+
     remove(index);
     if (firstNotInCollection > -1) {
       insert(Math.max(0, firstNotInCollection - 1), newTracker);
@@ -159,23 +168,31 @@ export default function AddCollectionScreen() {
   };
 
   const renderItem = ({ item, index }: ListRenderItemInfo<FieldArrayWithId<FormInputs, "trackers", "id">>) => {
-    const removeTracker = (tracker: TrackerInCollection) => {
-      handleRemoveTracker(tracker, index);
+    const handlePress = (tracker: TrackerInCollection) => {
+      if (tracker.isInCollection) {
+        handleRemoveTracker(tracker, item.id);
+      } else {
+        handleAddTracker(tracker, item.id);
+      }
     };
-    const addTracker = (tracker: TrackerInCollection) => {
-      handleAddTracker(tracker, index);
-    };
+
     return (
       <Controller
         control={control}
         key={item.id}
         name={`trackers.${index}`}
-        render={({ field: { value } }) => {
-          return <TrackerItem onPress={value.isInCollection ? removeTracker : addTracker} tracker={item} />;
+        render={({ field: { value: _value } }) => {
+          return <TrackerItem hideDrag={searchQuery !== ""} onPress={handlePress} tracker={item} />;
         }}
       />
     );
   };
+
+  // Very much not efficient, but it's awkward to fetch the data from the DB with search while also keeping track of the fields
+  // state for react hook form. Might consider just dropping react hook form for this
+  const filteredTrackers = useMemo(() => {
+    return fields.filter((f) => f.tracker.name.toLowerCase().includes(searchQuery.toLowerCase()));
+  }, [fields, searchQuery]);
 
   return (
     <ThemedSafeAreaView>
@@ -196,11 +213,13 @@ export default function AddCollectionScreen() {
         />
 
         <ThemedInputLabel label="Select trackers for this collection" />
+
+        <SearchInput value={searchQuery} placeholder="Search..." onChange={setSearchQuery} />
         <NestedReorderableList
           style={styles.reorderableList}
-          data={fields}
+          data={filteredTrackers}
           renderItem={renderItem}
-          keyExtractor={(i) => i.id}
+          keyExtractor={(i) => String(i.tracker.id)}
           onReorder={handleTrackerReorder}
           ItemSeparatorComponent={Separator}
         />
