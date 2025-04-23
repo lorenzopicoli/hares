@@ -69,7 +69,7 @@ export default function EntrySliderInput(props: EntrySliderInputProps) {
           onSlidingStart={() => setIsSliding(true)}
           onSlidingComplete={() => setIsSliding(false)}
           onValueChange={props.onChange}
-          hitSlop={{ top: 60, bottom: 60, left: 60, right: 60 }}
+          hitSlop={{ top: 0, bottom: 60, left: 60, right: 60 }}
         />
         <ThemedText>{props.max}</ThemedText>
       </ThemedView>
@@ -98,6 +98,7 @@ const createStyles = (theme: ThemedColors) =>
       alignItems: "center",
     },
     numberInput: {
+      width: "100%",
       flexShrink: 1,
     },
   });

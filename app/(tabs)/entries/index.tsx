@@ -1,4 +1,4 @@
-import { FlatList, StyleSheet, View } from "react-native";
+import { FlatList, Platform, StyleSheet, View } from "react-native";
 import SearchInput from "@/components/SearchInput";
 import { Separator } from "@/components/Separator";
 import { ThemedView } from "@/components/ThemedView";
@@ -39,7 +39,7 @@ export default function EntriesScreen() {
         <FlatList
           data={entries}
           renderItem={renderItem}
-          keyboardShouldPersistTaps="always"
+          keyboardShouldPersistTaps={Platform.OS === "android" ? "always" : undefined}
           keyExtractor={(item) => item.id.toString()}
           ItemSeparatorComponent={Separator}
         />

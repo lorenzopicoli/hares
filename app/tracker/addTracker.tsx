@@ -1,7 +1,7 @@
 import ThemedScrollView from "@/components/ThemedScrollView";
 import { FormThemedInput } from "@/components/ThemedInput";
 import { useForm } from "react-hook-form";
-import { StyleSheet, View } from "react-native";
+import { Platform, StyleSheet, View } from "react-native";
 import ThemedButton from "@/components/ThemedButton";
 import { ThemedSafeAreaView } from "@/components/ThemedView";
 import { Sizes } from "@/constants/Sizes";
@@ -71,7 +71,7 @@ export default function AddTrackerScreen() {
 
   return (
     <ThemedSafeAreaView>
-      <ThemedScrollView keyboardShouldPersistTaps="always">
+      <ThemedScrollView keyboardShouldPersistTaps={Platform.OS === "android" ? "always" : undefined}>
         <FormThemedInput
           form={{
             control,
