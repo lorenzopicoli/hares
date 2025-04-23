@@ -21,8 +21,6 @@ export interface EntryNumberInputProps extends Omit<TextInputProps, "onChangeTex
   error?: string;
   prefix?: string | null;
   suffix?: string | null;
-  minValue?: number;
-  maxValue?: number;
   showCounterButtons?: boolean;
   containerStyle?: StyleProp<ViewStyle>;
 }
@@ -60,8 +58,6 @@ export default function EntryNumberInput(props: EntryNumberInputProps) {
     value,
     containerStyle,
     showCounterButtons = true,
-    minValue,
-    maxValue,
     onChangeText,
     ...inputProps
   } = props;
@@ -71,11 +67,7 @@ export default function EntryNumberInput(props: EntryNumberInputProps) {
 
   const handleTextChange = (text: string) => {
     if (!text) {
-      if (minValue !== undefined) {
-        onChangeText?.(minValue);
-      } else {
-        onChangeText?.(null);
-      }
+      onChangeText?.(null);
       return;
     }
 
@@ -83,14 +75,9 @@ export default function EntryNumberInput(props: EntryNumberInputProps) {
     const numericText = text.replace(/[^0-9.-]/g, "");
 
     const parsedNumber = Number.parseFloat(numericText);
+
     if (!Number.isNaN(parsedNumber)) {
-      if (minValue !== undefined && parsedNumber < minValue) {
-        onChangeText?.(minValue);
-      } else if (maxValue !== undefined && parsedNumber > maxValue) {
-        onChangeText?.(maxValue);
-      } else {
-        onChangeText?.(parsedNumber);
-      }
+      onChangeText?.(parsedNumber);
     }
   };
 
@@ -135,7 +122,6 @@ export default function EntryNumberInput(props: EntryNumberInputProps) {
       {/* Hidden input (actual input) */}
       <TextInput
         {...inputProps}
-        value={String(value)}
         ref={hiddenInputRef}
         style={styles.hiddenNumberInput}
         onChangeText={handleTextChange}

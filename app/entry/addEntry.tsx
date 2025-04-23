@@ -159,6 +159,14 @@ export default function AddEntryScreen() {
                   message: "A value is required",
                   value: true,
                 },
+                validate: (value) =>
+                  value === undefined
+                    ? "A value is required"
+                    : value < (tracker.rangeMin ?? 0)
+                      ? "Value is too low"
+                      : value > (tracker.rangeMax ?? 100)
+                        ? "Value is too high"
+                        : true,
               },
             }}
           />
