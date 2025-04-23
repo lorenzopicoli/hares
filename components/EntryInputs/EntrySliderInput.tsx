@@ -42,6 +42,7 @@ export function FormEntrySliderInput<T extends FieldValues, K extends Path<T>>(p
 export default function EntrySliderInput(props: EntrySliderInputProps) {
   const { styles } = useStyles(createStyles);
   const { colors } = useColors();
+  // https://github.com/callstack/react-native-slider/issues/699
   const [isSliding, setIsSliding] = useState(false);
 
   return (
