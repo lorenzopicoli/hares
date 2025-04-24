@@ -1,19 +1,12 @@
 import { Sizes } from "@/constants/Sizes";
 import useStyles from "@/hooks/useStyles";
-import { useRef } from "react";
-import {
-  StyleSheet,
-  View,
-  TextInput,
-  Pressable,
-  type TextInputProps,
-  type StyleProp,
-  type ViewStyle,
-} from "react-native";
+import { useRef, useState } from "react";
+import { StyleSheet, View, TextInput, type TextInputProps, type StyleProp, type ViewStyle } from "react-native";
 import ThemedButton from "../ThemedButton";
 import type { ThemedColors } from "../ThemeProvider";
 import { type FieldValues, type Path, type ControllerProps, Controller } from "react-hook-form";
 import InputErrorLabel from "../InputErrorLabel";
+import { Pressable } from "react-native-gesture-handler";
 
 export interface EntryNumberInputProps extends Omit<TextInputProps, "onChangeText" | "value"> {
   onChangeText?: (value: number | null) => void;
@@ -21,8 +14,6 @@ export interface EntryNumberInputProps extends Omit<TextInputProps, "onChangeTex
   error?: string;
   prefix?: string | null;
   suffix?: string | null;
-  minValue?: number;
-  maxValue?: number;
   showCounterButtons?: boolean;
   containerStyle?: StyleProp<ViewStyle>;
 }
@@ -60,22 +51,17 @@ export default function EntryNumberInput(props: EntryNumberInputProps) {
     value,
     containerStyle,
     showCounterButtons = true,
-    minValue,
-    maxValue,
     onChangeText,
     ...inputProps
   } = props;
 
   const hiddenInputRef = useRef<TextInput>(null);
   const { styles } = useStyles(createStyles);
+  const [isFocused, setIsFocused] = useState(false);
 
   const handleTextChange = (text: string) => {
     if (!text) {
-      if (minValue !== undefined) {
-        onChangeText?.(minValue);
-      } else {
-        onChangeText?.(null);
-      }
+      onChangeText?.(null);
       return;
     }
 
@@ -83,19 +69,14 @@ export default function EntryNumberInput(props: EntryNumberInputProps) {
     const numericText = text.replace(/[^0-9.-]/g, "");
 
     const parsedNumber = Number.parseFloat(numericText);
+
     if (!Number.isNaN(parsedNumber)) {
-      if (minValue !== undefined && parsedNumber < minValue) {
-        onChangeText?.(minValue);
-      } else if (maxValue !== undefined && parsedNumber > maxValue) {
-        onChangeText?.(maxValue);
-      } else {
-        onChangeText?.(parsedNumber);
-      }
+      onChangeText?.(parsedNumber);
     }
   };
 
   const formatDisplayValue = () => {
-    if (value === null || value === undefined) return "_";
+    if (value === null || value === undefined) return "—";
 
     let formattedValue = String(value);
     if (prefix) {
@@ -125,18 +106,29 @@ export default function EntryNumberInput(props: EntryNumberInputProps) {
     }, 100);
   };
 
+  const handleFocus: EntryNumberInputProps["onFocus"] = (e) => {
+    setIsFocused(true);
+    props.onFocus?.(e);
+  };
+
+  const handleBlur: EntryNumberInputProps["onBlur"] = (e) => {
+    setIsFocused(false);
+    props.onBlur?.(e);
+  };
+
   return (
     <View style={containerStyle}>
       {/* Visible input (display only) */}
-      <Pressable onPressIn={focusHiddenInput}>
+      <Pressable style={[styles.numberInputContainer, isFocused && styles.inputFocused]} onPressIn={focusHiddenInput}>
         <TextInput style={styles.numberInput} value={formatDisplayValue()} editable={false} />
       </Pressable>
 
       {/* Hidden input (actual input) */}
       <TextInput
         {...inputProps}
-        value={String(value)}
         ref={hiddenInputRef}
+        onFocus={handleFocus}
+        onBlur={handleBlur}
         style={styles.hiddenNumberInput}
         onChangeText={handleTextChange}
         keyboardType="numeric"
@@ -171,6 +163,17 @@ const createStyles = (theme: ThemedColors) =>
     counterButtonText: {
       fontSize: 20,
     },
+    numberInputContainer: {
+      flex: 1,
+      height: "100%",
+      width: "100%",
+      borderRadius: Sizes.radius.small,
+      borderWidth: 1,
+      borderColor: theme.border,
+    },
+    inputFocused: {
+      borderColor: theme.input.focusedBorder,
+    },
     numberInput: {
       flex: 1,
       color: theme.input.text,
@@ -189,5 +192,6 @@ const createStyles = (theme: ThemedColors) =>
       flexDirection: "row",
       justifyContent: "center",
       gap: Sizes.medium,
+      marginTop: Sizes.small,
     },
   });

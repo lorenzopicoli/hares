@@ -1,7 +1,7 @@
 import type { Tracker } from "@/db/schema";
 import { useTrackers } from "@/hooks/data/useTrackers";
 import React from "react";
-import { FlatList, StyleSheet, Text, View } from "react-native";
+import { FlatList, Platform, StyleSheet, Text, View } from "react-native";
 import { HapticPressable } from "./HapticPressable";
 import { Sizes } from "@/constants/Sizes";
 import useStyles from "@/hooks/useStyles";
@@ -39,7 +39,7 @@ function TrackerGridView(props: Props) {
       <FlatList
         data={trackers}
         renderItem={renderItem}
-        keyboardShouldPersistTaps="always"
+        keyboardShouldPersistTaps={Platform.OS === "android" ? "always" : undefined}
         keyExtractor={(item) => item.id.toString()}
         numColumns={2}
       />

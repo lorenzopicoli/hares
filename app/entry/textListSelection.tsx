@@ -10,7 +10,7 @@ import useStyles from "@/hooks/useStyles";
 import { Ionicons } from "@expo/vector-icons";
 import { useLocalSearchParams, useNavigation, useRouter } from "expo-router";
 import { useEffect, useMemo, useState } from "react";
-import { StyleSheet, FlatList, TouchableOpacity, View } from "react-native";
+import { StyleSheet, FlatList, TouchableOpacity, View, Platform } from "react-native";
 
 export default function TextListSelectionScreen() {
   const {
@@ -103,7 +103,7 @@ export default function TextListSelectionScreen() {
       <FlatList
         data={data}
         renderItem={renderItem}
-        keyboardShouldPersistTaps="always"
+        keyboardShouldPersistTaps={Platform.OS === "android" ? "always" : undefined}
         keyExtractor={(item) => item}
         ItemSeparatorComponent={Separator}
       />

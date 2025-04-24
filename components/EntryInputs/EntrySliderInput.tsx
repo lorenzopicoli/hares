@@ -7,6 +7,8 @@ import { ThemedView } from "../ThemedView";
 import { type FieldValues, type Path, type ControllerProps, Controller } from "react-hook-form";
 import EntryNumberInput from "./EntryNumberInput";
 import Slider from "@react-native-community/slider";
+import { useState } from "react";
+import InputErrorLabel from "../InputErrorLabel";
 
 export interface EntrySliderInputProps {
   onChange?: (value: number | null) => void;
@@ -37,10 +39,11 @@ export function FormEntrySliderInput<T extends FieldValues, K extends Path<T>>(p
 
 // TODO: the slider component I use here is so hard to press, should build a custom version since
 // the lib is not customizable
-// TODO: should probably allow for manual value entering
 export default function EntrySliderInput(props: EntrySliderInputProps) {
   const { styles } = useStyles(createStyles);
   const { colors } = useColors();
+  // https://github.com/callstack/react-native-slider/issues/699
+  const [isSliding, setIsSliding] = useState(false);
 
   return (
     <ThemedView style={styles.container}>
@@ -50,8 +53,6 @@ export default function EntrySliderInput(props: EntrySliderInputProps) {
         value={props.value}
         prefix={props.prefix}
         suffix={props.suffix}
-        minValue={props.min}
-        maxValue={props.max}
         onChangeText={props.onChange}
       />
       <ThemedView style={styles.sliderContainer}>
@@ -64,12 +65,15 @@ export default function EntrySliderInput(props: EntrySliderInputProps) {
           minimumTrackTintColor={colors.tint}
           thumbTintColor={colors.tint}
           maximumTrackTintColor={colors.text}
-          value={props.value ?? undefined}
+          value={isSliding ? undefined : (props.value ?? undefined)}
+          onSlidingStart={() => setIsSliding(true)}
+          onSlidingComplete={() => setIsSliding(false)}
           onValueChange={props.onChange}
-          hitSlop={{ top: 40, bottom: 40, left: 40, right: 40 }}
+          hitSlop={{ top: 0, bottom: 60, left: 60, right: 60 }}
         />
         <ThemedText>{props.max}</ThemedText>
       </ThemedView>
+      {props.error ? <InputErrorLabel error={props.error} /> : null}
     </ThemedView>
   );
 }
@@ -94,6 +98,7 @@ const createStyles = (theme: ThemedColors) =>
       alignItems: "center",
     },
     numberInput: {
+      width: "100%",
       flexShrink: 1,
     },
   });
