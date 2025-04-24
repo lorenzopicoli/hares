@@ -1,14 +1,23 @@
 import { SkiaChart, SkiaRenderer } from "@wuba/react-native-echarts";
 import * as echarts from "echarts/core";
-import { useRef, useEffect, useState } from "react";
+import { useRef, useEffect, useState, forwardRef, useImperativeHandle } from "react";
 import { BarChart, PieChart } from "echarts/charts";
-import { TitleComponent, TooltipComponent, GridComponent, LegendComponent } from "echarts/components";
+import { TitleComponent, TooltipComponent, GridComponent, LegendComponent, ToolboxComponent } from "echarts/components";
 import { ThemedView } from "../ThemedView";
-import { useWindowDimensions, type LayoutChangeEvent } from "react-native";
+import type { LayoutChangeEvent } from "react-native";
 import { Colors } from "@/constants/Colors";
 
 // Register extensions
-echarts.use([TitleComponent, TooltipComponent, GridComponent, SkiaRenderer, PieChart, LegendComponent, BarChart]);
+echarts.use([
+  TitleComponent,
+  TooltipComponent,
+  ToolboxComponent,
+  GridComponent,
+  SkiaRenderer,
+  PieChart,
+  LegendComponent,
+  BarChart,
+]);
 
 echarts.registerTheme("haresDark", {
   color: [
@@ -62,6 +71,10 @@ echarts.registerTheme("haresDark", {
     itemStyle: {
       barBorderWidth: 0,
       barBorderColor: "#ccc",
+    },
+
+    label: {
+      color: Colors.dark.text,
     },
   },
   pie: {
@@ -318,6 +331,10 @@ echarts.registerTheme("haresDark", {
     textStyle: {
       color: Colors.dark.text,
     },
+    pageIconColor: Colors.dark.text,
+    pageTextStyle: {
+      color: Colors.dark.text,
+    },
   },
   tooltip: {
     axisPointer: {
@@ -391,20 +408,21 @@ echarts.registerTheme("haresDark", {
   },
 });
 
-export function Chart({ option }: { option: echarts.EChartsCoreOption }) {
+export type ChartRef = {
+  getEchartsInstance: () => echarts.ECharts | undefined;
+};
+
+export const Chart = forwardRef<ChartRef, { option: echarts.EChartsCoreOption }>(({ option }, ref) => {
   const skiaRef = useRef(null);
   // biome-ignore lint/suspicious/noExplicitAny: <explanation>
   const chartRef = useRef<any>(null);
   const [chartWidth, setChartWidth] = useState<number>(0);
   const [chartHeight, setChartHeight] = useState<number>(0);
-  const { height: windowHeight, width: windowWidth } = useWindowDimensions();
 
-  //   useEffect(() => {
-  //     Dimensions.addEventListener("change", handleDimensionsChange);
-  //     return () => {
-  //       Dimensions.removeEventListener("change", handleDimensionsChange);
-  //     };
-  //   }, []);
+  // Expose the chart instance through the ref
+  useImperativeHandle(ref, () => ({
+    getEchartsInstance: () => chartRef.current,
+  }));
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
   useEffect(() => {
@@ -421,7 +439,6 @@ export function Chart({ option }: { option: echarts.EChartsCoreOption }) {
     return () => chart?.dispose();
   }, [option]);
 
-  // watching for size changes, redraw the chart.
   useEffect(() => {
     chartRef.current?.resize({
       width: chartWidth,
@@ -429,23 +446,15 @@ export function Chart({ option }: { option: echarts.EChartsCoreOption }) {
     });
   }, [chartWidth, chartHeight]);
 
-  // Get the width and height of the container
   const handleLayout = (e: LayoutChangeEvent) => {
     const { width, height } = e.nativeEvent.layout;
     setChartWidth(width);
     setChartHeight(height);
   };
 
-  // Screen orientation change event
-  //   const handleDimensionsChange = (e) => {
-  //     const { width, height } = e.screen;
-  //     setChartWidth(width);
-  //     setChartHeight(height);
-  //   };
-
   return (
     <ThemedView onLayout={handleLayout}>
-      <SkiaChart ref={skiaRef} />
+      <SkiaChart useRNGH={false} ref={skiaRef} />
     </ThemedView>
   );
-}
+});
