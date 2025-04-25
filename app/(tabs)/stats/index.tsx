@@ -4,22 +4,22 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import ThemedButton from "@/components/ThemedButton";
 import { useMemo, useRef, useState } from "react";
 import { useTracker } from "@/hooks/data/useTracker";
-import { StyleSheet } from "react-native";
 import { ThemedView } from "@/components/ThemedView";
 import { TrackerType } from "@/db/schema";
 import TextListBarChart from "@/components/charts/TextListBarChart";
 import { useEntries } from "@/hooks/data/useEntries";
 import EntriesListRow from "@/components/EntriesList/EntriesListRow";
-import type { ThemedColors } from "@/components/ThemeProvider";
-import { Sizes } from "@/constants/Sizes";
 import useStyles from "@/hooks/useStyles";
 import EntryCountLineChart from "@/components/charts/EntryCountLineChart";
-import type { DateGroupingPeriod } from "@/hooks/data/stats/useEntryCountStats";
+import { DateGroupingPeriod } from "@/hooks/data/stats/useEntryCountStats";
 import { ThemedText } from "@/components/ThemedText";
 import { Spacing } from "@/components/Spacing";
 import ThemedInput from "@/components/ThemedInput";
 import { XStack, YStack } from "@/components/Stacks";
-import Picker from "@/components/Picker";
+import ThemedToggleButtons from "@/components/ThemedToggleButtons";
+import type { ThemedColors } from "@/components/ThemeProvider";
+import { StyleSheet } from "react-native";
+import { Sizes } from "@/constants/Sizes";
 
 export default function StatsScreen() {
   const { trackerId: trackerIdParam } = useLocalSearchParams<{
@@ -31,7 +31,7 @@ export default function StatsScreen() {
   const trackerId = useMemo(() => (trackerIdParam ? +trackerIdParam : undefined), [trackerIdParam]);
   const { tracker } = useTracker(trackerId ?? -1);
   const [limit, setLimit] = useState(10);
-  const [groupPeriod, setGroupPeriod] = useState<DateGroupingPeriod>("daily");
+  const [groupPeriod, setGroupPeriod] = useState<DateGroupingPeriod>(DateGroupingPeriod.daily);
   const [includeOther, setIncludeOther] = useState(false);
   const chartRef = useRef<ChartRef>(null);
   const { entries } = useEntries({ trackerId, limit: 5 });
@@ -57,15 +57,17 @@ export default function StatsScreen() {
           <ThemedInput containerStyle={{ flex: 1 }} keyboardType="numeric" label="Limit" />
           <ThemedInput containerStyle={{ flex: 1 }} keyboardType="numeric" label="Limit" />
         </XStack>
-        <Picker
-          label="Pick a grouping"
-          placeholder={"Select a grouping"}
-          onValueChange={(value) => console.log(value)}
-          items={[
-            { label: "Football", value: "football" },
-            { label: "Baseball", value: "baseball" },
-            { label: "Hockey", value: "hockey" },
+        <ThemedToggleButtons
+          label="Group by"
+          selectedOption={groupPeriod}
+          onChangeSelection={(i) => setGroupPeriod(i ?? DateGroupingPeriod.daily)}
+          options={[
+            { label: "Daily", value: DateGroupingPeriod.daily },
+            { label: "Weekly", value: DateGroupingPeriod.weekly },
+            { label: "Monthly", value: DateGroupingPeriod.monthly },
+            { label: "Yearly", value: DateGroupingPeriod.yearly },
           ]}
+          columns={4}
         />
       </YStack>
       <Spacing size="xSmall" />

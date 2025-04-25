@@ -8,7 +8,12 @@ export const formatDate = (dateColumn: SQLiteColumn, format = "%Y-%m-%d") => {
   return sql`strftime('${sql.raw(format)}', ${dateColumn}, 'unixepoch')`;
 };
 
-export type DateGroupingPeriod = "daily" | "weekly" | "monthly" | "yearly";
+export enum DateGroupingPeriod {
+  daily = "daily",
+  weekly = "weekly",
+  monthly = "monthly",
+  yearly = "yearly",
+}
 
 const formatDateByPeriod = (dateColumn: SQLiteColumn, groupPeriod: DateGroupingPeriod) => {
   switch (groupPeriod) {
@@ -21,6 +26,7 @@ const formatDateByPeriod = (dateColumn: SQLiteColumn, groupPeriod: DateGroupingP
     case "yearly":
       return formatDate(dateColumn, "%Y");
   }
+  return formatDate(dateColumn, "%Y-%m-%d");
 };
 export function useEntryCountStats(params: {
   trackerId: number;
