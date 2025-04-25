@@ -3,19 +3,30 @@ import SearchInput from "@/components/SearchInput";
 import { Separator } from "@/components/Separator";
 import { ThemedView } from "@/components/ThemedView";
 import type { TrackerEntry } from "@/db/schema";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { ThemedColors } from "@/components/ThemeProvider";
 import EntriesListRow from "@/components/EntriesList/EntriesListRow";
 import useStyles from "@/hooks/useStyles";
 import { Sizes } from "@/constants/Sizes";
 import { useEntries } from "@/hooks/data/useEntries";
 import { useEntryActions } from "@/hooks/useEntryActions";
+import { useLocalSearchParams, useRouter } from "expo-router";
 
 export default function EntriesScreen() {
   const { styles } = useStyles(createStyles);
-  const [searchText, setSearchText] = useState<string>("");
+  const router = useRouter();
+  const { searchText: searchTextParam } = useLocalSearchParams<{
+    searchText?: string;
+  }>();
+  const [searchText, setSearchText] = useState<string>(searchTextParam ?? "");
   const { entries } = useEntries({ searchText });
   const { handleEntryActions } = useEntryActions();
+
+  useEffect(() => {
+    if (searchTextParam) {
+      setSearchText(searchTextParam);
+    }
+  }, [searchTextParam]);
 
   const renderItem = ({ item }: { item: TrackerEntry }) => {
     const handlePress = () => {
@@ -31,6 +42,7 @@ export default function EntriesScreen() {
           value={searchText}
           onChange={(text) => {
             setSearchText(text);
+            router.setParams({ searchText: "" });
           }}
           placeholder="Search..."
         />

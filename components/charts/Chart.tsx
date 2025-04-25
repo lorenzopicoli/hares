@@ -1,7 +1,7 @@
 import { SkiaChart, SkiaRenderer } from "@wuba/react-native-echarts";
 import * as echarts from "echarts/core";
 import { useRef, useEffect, useState, forwardRef, useImperativeHandle } from "react";
-import { BarChart, PieChart } from "echarts/charts";
+import { BarChart, LineChart, PieChart } from "echarts/charts";
 import { TitleComponent, TooltipComponent, GridComponent, LegendComponent, ToolboxComponent } from "echarts/components";
 import { ThemedView } from "../ThemedView";
 import type { LayoutChangeEvent } from "react-native";
@@ -16,6 +16,7 @@ echarts.use([
   SkiaRenderer,
   PieChart,
   LegendComponent,
+  LineChart,
   BarChart,
 ]);
 
@@ -453,7 +454,7 @@ export const Chart = forwardRef<ChartRef, { option: echarts.EChartsCoreOption }>
   };
 
   return (
-    <ThemedView onLayout={handleLayout}>
+    <ThemedView style={{ marginLeft: -40, marginRight: -40 }} onLayout={handleLayout}>
       <SkiaChart useRNGH={false} ref={skiaRef} />
     </ThemedView>
   );

@@ -13,10 +13,11 @@ export interface EntriesListRowProps {
   entry: TrackerEntry;
   onPress?: (entryId: number) => void;
   style?: StyleProp<ViewStyle>;
+  hideTrackerName?: boolean;
 }
 
 export default function EntriesListRow(props: EntriesListRowProps) {
-  const { entry, style } = props;
+  const { entry, style, hideTrackerName } = props;
   const { styles } = useStyles(createStyles);
 
   const value = useMemo(() => {
@@ -44,7 +45,7 @@ export default function EntriesListRow(props: EntriesListRowProps) {
   return (
     <TouchableOpacity disabled={!props.onPress} onPress={handlePress}>
       <View style={[styles.container, style]}>
-        {entry.tracker?.name ? <ThemedText type="subtitle">{entry.tracker.name}</ThemedText> : null}
+        {entry.tracker?.name && !hideTrackerName ? <ThemedText type="subtitle">{entry.tracker.name}</ThemedText> : null}
 
         <View style={styles.innerContainer}>
           <ThemedText style={styles.mainText}>

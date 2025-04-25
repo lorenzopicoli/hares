@@ -4,12 +4,12 @@ import { count, sql, desc, and } from "drizzle-orm";
 import { useLiveQuery } from "drizzle-orm/expo-sqlite";
 import { useMemo } from "react";
 
-export function useTextListTrackerStats(params: {
+export function useTopTextListStats(params: {
   trackerId: number;
   limit: number;
-  showOthers: boolean;
+  includeOthers: boolean;
 }) {
-  const { trackerId, limit, showOthers } = params;
+  const { trackerId, limit, includeOthers } = params;
   const { db } = useDatabase();
   const { data: topNames } = useLiveQuery(
     db
@@ -41,8 +41,8 @@ export function useTextListTrackerStats(params: {
   );
 
   const textListUsageCount = useMemo(
-    () => (showOthers ? [{ name: "Others", value: othersCount[0]?.value }, ...topNames] : topNames),
-    [topNames, othersCount, showOthers],
+    () => (includeOthers ? [{ name: "Others", value: othersCount[0]?.value }, ...topNames] : topNames),
+    [topNames, othersCount, includeOthers],
   );
 
   return { textListUsageCount };
