@@ -22,7 +22,7 @@ export default function SelectStatTrackerScreen() {
       router.dismissTo({ pathname: "/(tabs)/stats", params: { trackerId: item.id } });
     };
     return (
-      <TouchableOpacity onPress={handleSelectTracker}>
+      <TouchableOpacity style={styles.listItem} onPress={handleSelectTracker}>
         <ThemedText>{item.name}</ThemedText>
       </TouchableOpacity>
     );

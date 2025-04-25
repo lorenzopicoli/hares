@@ -15,6 +15,11 @@ import { Sizes } from "@/constants/Sizes";
 import useStyles from "@/hooks/useStyles";
 import EntryCountLineChart from "@/components/charts/EntryCountLineChart";
 import type { DateGroupingPeriod } from "@/hooks/data/stats/useEntryCountStats";
+import { ThemedText } from "@/components/ThemedText";
+import { Spacing } from "@/components/Spacing";
+import ThemedInput from "@/components/ThemedInput";
+import { XStack, YStack } from "@/components/Stacks";
+import Picker from "@/components/Picker";
 
 export default function StatsScreen() {
   const { trackerId: trackerIdParam } = useLocalSearchParams<{
@@ -29,7 +34,7 @@ export default function StatsScreen() {
   const [groupPeriod, setGroupPeriod] = useState<DateGroupingPeriod>("daily");
   const [includeOther, setIncludeOther] = useState(false);
   const chartRef = useRef<ChartRef>(null);
-  const { entries } = useEntries({ trackerId, limit: 15 });
+  const { entries } = useEntries({ trackerId, limit: 5 });
 
   const handleSelectTracker = () => {
     router.navigate({ pathname: "/stats/selectStatTracker" });
@@ -41,30 +46,51 @@ export default function StatsScreen() {
 
   return (
     <ThemedScrollView>
-      <ThemedButton
-        title={tracker ? `Selected tracker ${tracker.name}` : "Select a tracker"}
-        onPress={handleSelectTracker}
-      />
-      {tracker?.type === TrackerType.TextList ? (
+      <ThemedText type="subtitle">Filters</ThemedText>
+      <YStack>
+        <ThemedButton
+          title={tracker ? `Selected tracker ${tracker.name}` : "Select a tracker"}
+          mode="toggle"
+          onPress={handleSelectTracker}
+        />
+        <XStack>
+          <ThemedInput containerStyle={{ flex: 1 }} keyboardType="numeric" label="Limit" />
+          <ThemedInput containerStyle={{ flex: 1 }} keyboardType="numeric" label="Limit" />
+        </XStack>
+        <Picker
+          label="Pick a grouping"
+          placeholder={"Select a grouping"}
+          onValueChange={(value) => console.log(value)}
+          items={[
+            { label: "Football", value: "football" },
+            { label: "Baseball", value: "baseball" },
+            { label: "Hockey", value: "hockey" },
+          ]}
+        />
+      </YStack>
+      <Spacing size="xSmall" />
+      {tracker ? (
         <>
+          {tracker.type === TrackerType.TextList ? (
+            <>
+              <ThemedView style={{ height: 500 }}>
+                <TextListBarChart limit={limit} tracker={tracker} includeOthers={includeOther} />
+              </ThemedView>
+            </>
+          ) : null}
+
           <ThemedView style={{ height: 500 }}>
-            <TextListBarChart limit={limit} tracker={tracker} includeOthers={includeOther} />
+            <EntryCountLineChart tracker={tracker} groupPeriod={groupPeriod} />
           </ThemedView>
+
+          <ThemedView>
+            {entries.map((entry) => (
+              <EntriesListRow key={entry.id} entry={entry} hideTrackerName style={styles.listItem} />
+            ))}
+          </ThemedView>
+          {tracker ? <ThemedButton title="See all entries" onPress={handleSeeAllEntries} /> : null}
         </>
       ) : null}
-
-      {tracker ? (
-        <ThemedView style={{ height: 500 }}>
-          <EntryCountLineChart tracker={tracker} groupPeriod={groupPeriod} />
-        </ThemedView>
-      ) : null}
-
-      <ThemedView>
-        {entries.map((entry) => (
-          <EntriesListRow key={entry.id} entry={entry} hideTrackerName style={styles.listItem} />
-        ))}
-      </ThemedView>
-      {tracker ? <ThemedButton title="See all entries" onPress={handleSeeAllEntries} /> : null}
     </ThemedScrollView>
   );
 }
