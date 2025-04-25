@@ -8,9 +8,9 @@ import { Sizes } from "@/constants/Sizes";
 import { useEntryTextList } from "@/hooks/data/useEntryTextList";
 import useStyles from "@/hooks/useStyles";
 import { Ionicons } from "@expo/vector-icons";
-import { useLocalSearchParams, useNavigation, useRouter } from "expo-router";
-import { useEffect, useMemo, useState } from "react";
-import { StyleSheet, FlatList, TouchableOpacity, View, Platform } from "react-native";
+import { useLocalSearchParams, useRouter } from "expo-router";
+import { useMemo, useState } from "react";
+import { StyleSheet, FlatList, TouchableOpacity, Platform } from "react-native";
 
 export default function TextListSelectionScreen() {
   const {
@@ -24,7 +24,6 @@ export default function TextListSelectionScreen() {
   }>();
   const { styles } = useStyles(createStyles);
   const router = useRouter();
-  const navigation = useNavigation();
 
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [selectedItems, setSelectedItems] = useState<Map<string, boolean>>(
@@ -40,29 +39,16 @@ export default function TextListSelectionScreen() {
     [selectedItems, textListEntries],
   );
 
-  useEffect(() => {
-    navigation.setOptions({
-      headerRight: () => (
-        <View>
-          {/* On press in because of: https://github.com/expo/expo/issues/29489 */}
-          <TouchableOpacity
-            onPressIn={() => {
-              router.dismissTo({
-                pathname: "/entry/addEntry",
-                params: {
-                  entryId,
-                  trackerId,
-                  textListSelections: JSON.stringify(Array.from(selectedItems, ([value, _label]) => value)),
-                },
-              });
-            }}
-          >
-            <ThemedText>Done</ThemedText>
-          </TouchableOpacity>
-        </View>
-      ),
+  const handleDone = () => {
+    router.dismissTo({
+      pathname: "/entry/addEntry",
+      params: {
+        entryId,
+        trackerId,
+        textListSelections: JSON.stringify(Array.from(selectedItems, ([value, _label]) => value)),
+      },
     });
-  }, [navigation, router, entryId, trackerId, selectedItems]);
+  };
 
   const toggleItem = (item: string) => {
     const newMap = new Map(selectedItems);
@@ -79,6 +65,8 @@ export default function TextListSelectionScreen() {
   const handleAdd = () => {
     if (searchQuery) {
       toggleItem(searchQuery);
+    } else {
+      handleDone();
     }
   };
 
@@ -107,7 +95,7 @@ export default function TextListSelectionScreen() {
         keyExtractor={(item) => item}
         ItemSeparatorComponent={Separator}
       />
-      <ThemedButton disabled={searchQuery === ""} title={`Add ${searchQuery}`} onPress={handleAdd} />
+      <ThemedButton title={searchQuery ? `Add ${searchQuery}` : "Done"} onPress={handleAdd} />
     </ThemedSafeAreaView>
   );
 }
