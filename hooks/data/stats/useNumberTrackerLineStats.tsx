@@ -1,26 +1,28 @@
 import { useDatabase } from "@/contexts/DatabaseContext";
 import { entriesTable } from "@/db/schema";
 import { type DateGroupingPeriod, formatSqlDateByGroupingPeriod } from "@/utils/dateGroupPeriod";
-import { count, sql } from "drizzle-orm";
+import { sqlFromGroupFunction, type GroupFunction } from "@/utils/groupFunctions";
+import { sql } from "drizzle-orm";
 import { useLiveQuery } from "drizzle-orm/expo-sqlite";
 
-export function useEntryCountStats(params: {
+export function useNumberTrackerLineStats(params: {
   trackerId: number;
   groupPeriod: DateGroupingPeriod;
+  groupFun: GroupFunction;
 }) {
-  const { trackerId, groupPeriod } = params;
+  const { trackerId, groupPeriod, groupFun } = params;
   const { db } = useDatabase();
   const { data: entryCountStats } = useLiveQuery(
     db
       .select({
         date: formatSqlDateByGroupingPeriod(entriesTable.date, groupPeriod),
-        value: count(entriesTable.id),
+        value: sqlFromGroupFunction(groupFun, entriesTable.numberValue),
       })
       .from(entriesTable)
       .where(sql`${entriesTable.trackerId} = ${trackerId}`)
       .groupBy(formatSqlDateByGroupingPeriod(entriesTable.date, groupPeriod))
       .orderBy(formatSqlDateByGroupingPeriod(entriesTable.date, groupPeriod)),
-    [trackerId, groupPeriod],
+    [trackerId, groupPeriod, groupFun],
   );
 
   return { entryCountStats };

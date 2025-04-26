@@ -10,8 +10,7 @@ import TextListBarChart from "@/components/charts/TextListBarChart";
 import { useEntries } from "@/hooks/data/useEntries";
 import EntriesListRow from "@/components/EntriesList/EntriesListRow";
 import useStyles from "@/hooks/useStyles";
-import EntryCountLineChart from "@/components/charts/EntryCountLineChart";
-import { DateGroupingPeriod } from "@/hooks/data/stats/useEntryCountStats";
+import { EntryCountLineChart, NumberTrackersLineChart } from "@/components/charts/LineCharts";
 import { ThemedText } from "@/components/ThemedText";
 import { Spacing } from "@/components/Spacing";
 import ThemedInput from "@/components/ThemedInput";
@@ -20,6 +19,8 @@ import ThemedToggleButtons from "@/components/ThemedToggleButtons";
 import type { ThemedColors } from "@/components/ThemeProvider";
 import { StyleSheet } from "react-native";
 import { Sizes } from "@/constants/Sizes";
+import { DateGroupingPeriod } from "@/utils/dateGroupPeriod";
+import { GroupFunction } from "@/utils/groupFunctions";
 
 export default function StatsScreen() {
   const { trackerId: trackerIdParam } = useLocalSearchParams<{
@@ -32,6 +33,7 @@ export default function StatsScreen() {
   const { tracker } = useTracker(trackerId ?? -1);
   const [limit, setLimit] = useState(10);
   const [groupPeriod, setGroupPeriod] = useState<DateGroupingPeriod>(DateGroupingPeriod.daily);
+  const [groupFun, setGroupFun] = useState<GroupFunction>(GroupFunction.avg);
   const [includeOther, setIncludeOther] = useState(false);
   const chartRef = useRef<ChartRef>(null);
   const { entries } = useEntries({ trackerId, limit: 5 });
@@ -54,8 +56,23 @@ export default function StatsScreen() {
           onPress={handleSelectTracker}
         />
         <XStack>
-          <ThemedInput containerStyle={{ flex: 1 }} keyboardType="numeric" label="Limit" />
-          <ThemedInput containerStyle={{ flex: 1 }} keyboardType="numeric" label="Limit" />
+          <ThemedInput
+            containerStyle={{ flex: 1 }}
+            keyboardType="numeric"
+            label="Limit"
+            onChangeText={(t) => setLimit(+t || 0)}
+          />
+
+          <ThemedView>
+            <ThemedToggleButtons
+              label="Remaining text"
+              onChangeSelection={(o) => setIncludeOther(!!o)}
+              options={[{ label: "Include", value: true }]}
+              columns={1}
+              allowUnselect
+              buttonContainerStyle={{ height: 48 }}
+            />
+          </ThemedView>
         </XStack>
         <ThemedToggleButtons
           label="Group by"
@@ -69,10 +86,26 @@ export default function StatsScreen() {
           ]}
           columns={4}
         />
+        <ThemedToggleButtons
+          label="Group function"
+          selectedOption={groupFun}
+          onChangeSelection={(i) => setGroupFun((i as "avg" | "sum") ?? "avg")}
+          options={[
+            { label: "Average", value: GroupFunction.avg },
+            { label: "Sum", value: GroupFunction.sum },
+            { label: "Max", value: GroupFunction.max },
+            { label: "Min", value: GroupFunction.min },
+          ]}
+          columns={4}
+        />
       </YStack>
       <Spacing size="xSmall" />
       {tracker ? (
         <>
+          <ThemedView style={{ height: 500 }}>
+            <EntryCountLineChart tracker={tracker} groupPeriod={groupPeriod} />
+          </ThemedView>
+
           {tracker.type === TrackerType.TextList ? (
             <>
               <ThemedView style={{ height: 500 }}>
@@ -81,9 +114,13 @@ export default function StatsScreen() {
             </>
           ) : null}
 
-          <ThemedView style={{ height: 500 }}>
-            <EntryCountLineChart tracker={tracker} groupPeriod={groupPeriod} />
-          </ThemedView>
+          {tracker.type === TrackerType.Number || tracker.type === TrackerType.Scale ? (
+            <>
+              <ThemedView style={{ height: 500 }}>
+                <NumberTrackersLineChart tracker={tracker} groupPeriod={groupPeriod} groupFun={groupFun} />
+              </ThemedView>
+            </>
+          ) : null}
 
           <ThemedView>
             {entries.map((entry) => (
