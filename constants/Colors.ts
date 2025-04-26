@@ -1,6 +1,6 @@
 import { DarkTheme, DefaultTheme } from "@react-navigation/native";
 
-const colors = {
+export const colors = {
   frenchViolet: "#8614cc",
   pistachio: "#92c156",
   spaceCadet: "#292d43",

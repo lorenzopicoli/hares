@@ -12,7 +12,7 @@ export function useNumberTrackerLineStats(params: {
 }) {
   const { trackerId, groupPeriod, groupFun } = params;
   const { db } = useDatabase();
-  const { data: entryCountStats } = useLiveQuery(
+  const { data: entriesNumberValueStats } = useLiveQuery(
     db
       .select({
         date: formatSqlDateByGroupingPeriod(entriesTable.date, groupPeriod),
@@ -25,5 +25,5 @@ export function useNumberTrackerLineStats(params: {
     [trackerId, groupPeriod, groupFun],
   );
 
-  return { entryCountStats };
+  return { entriesNumberValueStats };
 }

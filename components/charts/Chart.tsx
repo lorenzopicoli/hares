@@ -1,8 +1,16 @@
 import { SkiaChart, SkiaRenderer } from "@wuba/react-native-echarts";
 import * as echarts from "echarts/core";
 import { useRef, useEffect, useState, forwardRef, useImperativeHandle } from "react";
-import { BarChart, LineChart, PieChart } from "echarts/charts";
-import { TitleComponent, TooltipComponent, GridComponent, LegendComponent, ToolboxComponent } from "echarts/components";
+import { BarChart, HeatmapChart, LineChart, PieChart } from "echarts/charts";
+import {
+  TitleComponent,
+  TooltipComponent,
+  GridComponent,
+  LegendComponent,
+  ToolboxComponent,
+  VisualMapComponent,
+  CalendarComponent,
+} from "echarts/components";
 import { ThemedView } from "../ThemedView";
 import type { LayoutChangeEvent } from "react-native";
 import { Colors } from "@/constants/Colors";
@@ -14,6 +22,9 @@ echarts.use([
   ToolboxComponent,
   GridComponent,
   SkiaRenderer,
+  VisualMapComponent,
+  HeatmapChart,
+  CalendarComponent,
   PieChart,
   LegendComponent,
   LineChart,
@@ -67,6 +78,32 @@ echarts.registerTheme("haresDark", {
     symbolSize: 4,
     symbol: "circle",
     smooth: false,
+  },
+  calendar: {
+    itemStyle: {
+      borderWidth: 4,
+      borderColor: Colors.dark.background,
+      //   opacity: 0.7,
+      color: "transparent",
+      //   borderJoin: "round",
+      //   borderRadius: 2,
+    },
+    splitLine: {
+      show: false,
+      lineStyle: {
+        width: 2,
+        color: Colors.dark.tint,
+      },
+    },
+    yearLabel: {
+      color: Colors.dark.text,
+    },
+    dayLabel: {
+      color: Colors.dark.text,
+    },
+    monthLabel: {
+      color: Colors.dark.text,
+    },
   },
   bar: {
     itemStyle: {
@@ -385,7 +422,18 @@ echarts.registerTheme("haresDark", {
     },
   },
   visualMap: {
-    color: ["#bf444c", "#d88273", "#f6efa6"],
+    textStyle: {
+      color: Colors.dark.text,
+    },
+    inRange: {
+      color: ["#471d6e", "#8614cc", "#a43be2", "#92c156"],
+      //   colors: [colors.spaceCadet, colors.frenchViolet, colors.pistachio],
+      symbolSize: [30, 100],
+    },
+    outOfRange: {
+      color: [Colors.dark.border],
+      symbolSize: [30, 100],
+    },
   },
   dataZoom: {
     backgroundColor: "rgba(47,69,84,0)",
@@ -435,6 +483,7 @@ export const Chart = forwardRef<ChartRef, { option: echarts.EChartsCoreOption }>
         height: chartHeight,
       });
       chart.setOption(option);
+
       chartRef.current = chart;
     }
     return () => chart?.dispose();

@@ -1,8 +1,7 @@
 import ThemedScrollView from "@/components/ThemedScrollView";
-import type { ChartRef } from "@/components/charts/Chart";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import ThemedButton from "@/components/ThemedButton";
-import { useMemo, useRef, useState } from "react";
+import { useMemo, useState } from "react";
 import { useTracker } from "@/hooks/data/useTracker";
 import { ThemedView } from "@/components/ThemedView";
 import { TrackerType } from "@/db/schema";
@@ -16,11 +15,12 @@ import { Spacing } from "@/components/Spacing";
 import ThemedInput from "@/components/ThemedInput";
 import { XStack, YStack } from "@/components/Stacks";
 import ThemedToggleButtons from "@/components/ThemedToggleButtons";
-import type { ThemedColors } from "@/components/ThemeProvider";
-import { StyleSheet } from "react-native";
-import { Sizes } from "@/constants/Sizes";
 import { DateGroupingPeriod } from "@/utils/dateGroupPeriod";
 import { GroupFunction } from "@/utils/groupFunctions";
+import { StyleSheet } from "react-native";
+import type { ThemedColors } from "@/components/ThemeProvider";
+import { Sizes } from "@/constants/Sizes";
+import { CalendarHeatmapChart } from "@/components/charts/CalendarHeatmapChart";
 
 export default function StatsScreen() {
   const { trackerId: trackerIdParam } = useLocalSearchParams<{
@@ -35,7 +35,6 @@ export default function StatsScreen() {
   const [groupPeriod, setGroupPeriod] = useState<DateGroupingPeriod>(DateGroupingPeriod.daily);
   const [groupFun, setGroupFun] = useState<GroupFunction>(GroupFunction.avg);
   const [includeOther, setIncludeOther] = useState(false);
-  const chartRef = useRef<ChartRef>(null);
   const { entries } = useEntries({ trackerId, limit: 5 });
 
   const handleSelectTracker = () => {
@@ -89,7 +88,7 @@ export default function StatsScreen() {
         <ThemedToggleButtons
           label="Group function"
           selectedOption={groupFun}
-          onChangeSelection={(i) => setGroupFun((i as "avg" | "sum") ?? "avg")}
+          onChangeSelection={(i) => setGroupFun(i ?? GroupFunction.avg)}
           options={[
             { label: "Average", value: GroupFunction.avg },
             { label: "Sum", value: GroupFunction.sum },
@@ -102,6 +101,13 @@ export default function StatsScreen() {
       <Spacing size="xSmall" />
       {tracker ? (
         <>
+          {tracker.type === TrackerType.Number || tracker.type === TrackerType.Scale ? (
+            <>
+              <ThemedView style={{ height: 500 }}>
+                <CalendarHeatmapChart tracker={tracker} groupPeriod={groupPeriod} groupFun={groupFun} />
+              </ThemedView>
+            </>
+          ) : null}
           <ThemedView style={{ height: 500 }}>
             <EntryCountLineChart tracker={tracker} groupPeriod={groupPeriod} />
           </ThemedView>

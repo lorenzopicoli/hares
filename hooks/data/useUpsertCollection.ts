@@ -75,7 +75,7 @@ export function useUpsertCollection() {
       await reloadDb();
       return savedCollectionId;
     },
-    [db],
+    [db, reloadDb],
   );
 
   return { upsertCollection };

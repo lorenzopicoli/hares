@@ -5,6 +5,7 @@ import { useMemo } from "react";
 import { Chart } from "./Chart";
 import type { DateGroupingPeriod } from "@/utils/dateGroupPeriod";
 import { useNumberTrackerLineStats } from "@/hooks/data/stats/useNumberTrackerLineStats";
+import type { GroupFunction } from "@/utils/groupFunctions";
 
 export function EntryCountLineChart(props: {
   tracker: Tracker;
@@ -45,12 +46,12 @@ export function EntryCountLineChart(props: {
 export function NumberTrackersLineChart(props: {
   tracker: Tracker;
   groupPeriod: DateGroupingPeriod;
-  groupFun: "avg" | "sum";
+  groupFun: GroupFunction;
 }) {
   const { tracker, groupPeriod, groupFun } = props;
   //   const chartRef = useRef<ChartRef>(null);
 
-  const { entryCountStats } = useNumberTrackerLineStats({ trackerId: tracker.id, groupPeriod, groupFun });
+  const { entriesNumberValueStats } = useNumberTrackerLineStats({ trackerId: tracker.id, groupPeriod, groupFun });
   const option: EChartsCoreOption = useMemo(
     () => ({
       title: {
@@ -62,18 +63,18 @@ export function NumberTrackersLineChart(props: {
         trigger: "axis",
       },
       xAxis: {
-        data: entryCountStats.map((t) => t.date),
+        data: entriesNumberValueStats.map((t) => t.date),
       },
       yAxis: {},
       series: [
         {
-          data: entryCountStats.map((t) => t.value),
+          data: entriesNumberValueStats.map((t) => t.value),
           type: "line",
-          name: "No. of entries",
+          name: "Value",
         },
       ],
     }),
-    [entryCountStats, tracker.name, groupPeriod, groupFun],
+    [entriesNumberValueStats, tracker.name, groupPeriod, groupFun],
   );
 
   return <Chart option={option} />;
