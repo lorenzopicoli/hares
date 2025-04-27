@@ -2,7 +2,7 @@ import React from "react";
 import { StyleSheet, View } from "react-native";
 import type { ThemedColors } from "./ThemeProvider";
 import useStyles from "@/hooks/useStyles";
-import type { ViewStyle } from "react-native";
+import type { StyleProp, ViewStyle } from "react-native";
 import { Sizes } from "@/constants/Sizes";
 
 type StackProps = {
@@ -10,7 +10,7 @@ type StackProps = {
   gap?: number;
   alignItems?: "flex-start" | "flex-end" | "center" | "stretch" | "baseline";
   justifyContent?: "flex-start" | "flex-end" | "center" | "space-between" | "space-around" | "space-evenly";
-  style?: ViewStyle;
+  style?: StyleProp<ViewStyle>;
 };
 
 export function YStack({

@@ -1,0 +1,95 @@
+import { useCallback, type ReactNode } from "react";
+import {
+  StyleSheet,
+  SectionList as RNSectionList,
+  type SectionListProps as RNSectionListProps,
+  type SectionListData,
+  type SectionListRenderItem,
+  View,
+} from "react-native";
+import { Separator } from "./Separator";
+import { XStack } from "./Stacks";
+import type { ThemedColors } from "./ThemeProvider";
+import { Sizes } from "@/constants/Sizes";
+import useStyles from "@/hooks/useStyles";
+
+export interface ISection {
+  data: IRow[];
+  right?: JSX.Element;
+  title?: JSX.Element;
+}
+
+export interface IRow {
+  key: string | number;
+  render: ReactNode;
+}
+
+interface SectionListProps extends RNSectionListProps<IRow, ISection> {
+  sections: ISection[];
+}
+
+export default function SectionList(props: SectionListProps) {
+  const { styles } = useStyles(createStyles);
+
+  const renderItem: SectionListRenderItem<IRow, ISection> = useCallback(
+    (props) => {
+      const isFirstElement = props.index === 0;
+      const isLastElement = props.index === props.section.data.length - 1;
+
+      return (
+        <View
+          style={[styles.itemContainer, isFirstElement && styles.roundedTop, isLastElement && styles.roundedBottom]}
+        >
+          {props.item.render}
+        </View>
+      );
+    },
+    [styles],
+  );
+
+  const renderSectionHeader: (info: {
+    section: SectionListData<IRow, ISection>;
+  }) => React.ReactElement | null = ({ section: { title, right } }) => {
+    return (
+      <XStack style={styles.sectionHeader}>
+        {title}
+        {right}
+      </XStack>
+    );
+  };
+
+  return (
+    <RNSectionList
+      showsVerticalScrollIndicator={false}
+      bounces={false}
+      onEndReachedThreshold={0.5}
+      ItemSeparatorComponent={Separator}
+      {...props}
+      keyExtractor={(it) => String(it.key)}
+      sections={props.sections}
+      renderItem={renderItem}
+      renderSectionHeader={renderSectionHeader}
+    />
+  );
+}
+
+const createStyles = (theme: ThemedColors) =>
+  StyleSheet.create({
+    itemContainer: {
+      backgroundColor: theme.secondaryBackground,
+      height: Sizes.list.medium,
+    },
+    roundedTop: {
+      borderTopLeftRadius: Sizes.radius.medium,
+      borderTopRightRadius: Sizes.radius.medium,
+    },
+    roundedBottom: {
+      borderBottomLeftRadius: Sizes.radius.medium,
+      borderBottomRightRadius: Sizes.radius.medium,
+    },
+    sectionHeader: {
+      paddingLeft: Sizes.small,
+      paddingBottom: Sizes.medium,
+      paddingTop: Sizes.xLarge,
+    },
+  });

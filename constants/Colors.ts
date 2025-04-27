@@ -68,8 +68,8 @@ export const Colors = {
   },
   dark: {
     text: "#ECEDEE",
-    background: colors.spaceCadet,
-    secondaryBackground: "#1e223a",
+    secondaryBackground: colors.spaceCadet,
+    background: "#1e223a",
     tint: tintColorDark,
     darkTint: "#7213ab",
     icon: "#9BA1A6",
