@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { StyleSheet, TouchableOpacity, View } from "react-native";
 import { type NavigationState, type Route, type SceneRendererProps, TabBar, TabView } from "react-native-tab-view";
 import type { Tracker } from "@/db/schema";
@@ -10,7 +10,9 @@ import SearchInput from "@/components/SearchInput";
 import { Sizes } from "@/constants/Sizes";
 import { Entypo } from "@expo/vector-icons";
 import { useCollections } from "@/hooks/data/useCollections";
-import { useTrackerActions, useTrackScreenActions } from "@/hooks/useTrackerActions";
+import { useTrackerActions } from "@/hooks/useTrackerActions";
+import type { BottomSheetModal } from "@gorhom/bottom-sheet";
+import { TrackScreenBottomSheet } from "@/components/BottomSheets/TrackScreenBottomSheet";
 
 type TabRoute = Route & {
   key: string;
@@ -26,7 +28,12 @@ export default function TrackScreen() {
   const { colors } = useColors();
 
   const { collectionsWithAll: collections } = useCollections();
-  const { handleTrackScreenOptions } = useTrackScreenActions(collections[tabIndex].id);
+
+  const screenBottomSheetRef = useRef<BottomSheetModal>(null);
+
+  const showScreenBottomSheet = useCallback(() => {
+    screenBottomSheetRef.current?.present();
+  }, []);
   const { handleTrackerActions } = useTrackerActions();
   const tabs = useMemo(
     () =>
@@ -70,13 +77,13 @@ export default function TrackScreen() {
       headerRight: () => (
         <View>
           {/* On press in because of: https://github.com/expo/expo/issues/29489 */}
-          <TouchableOpacity onPressIn={handleTrackScreenOptions}>
+          <TouchableOpacity onPressIn={showScreenBottomSheet}>
             <Entypo name="dots-three-vertical" size={25} color={colors.text} />
           </TouchableOpacity>
         </View>
       ),
     });
-  }, [colors.text, navigation, handleTrackScreenOptions]);
+  }, [colors.text, navigation, showScreenBottomSheet]);
 
   return (
     <View style={styles.container}>
@@ -90,6 +97,8 @@ export default function TrackScreen() {
         onIndexChange={setTabIndex}
         renderTabBar={TrackerTabBar}
       />
+
+      <TrackScreenBottomSheet collectionId={tabIndex !== 0 ? tabIndex : undefined} ref={screenBottomSheetRef} />
     </View>
   );
 }

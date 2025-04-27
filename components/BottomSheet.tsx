@@ -1,6 +1,6 @@
 import { BackHandler, StyleSheet, type NativeEventSubscription } from "react-native";
 import type { ThemedColors } from "@/components/ThemeProvider";
-import { forwardRef, useCallback, useRef, type ReactNode } from "react";
+import { forwardRef, useCallback, useImperativeHandle, useRef, type ReactNode } from "react";
 import {
   BottomSheetBackdrop,
   BottomSheetModal,
@@ -21,6 +21,10 @@ export interface BottomSheetProps extends BottomSheetModalProps {
 export const BottomSheet = forwardRef<BottomSheetModal, BottomSheetProps>((props, ref) => {
   const { snapPoints, children, showHandle } = props;
   const { styles } = useStyles(createStyles);
+  const bottomSheetRef = useRef<BottomSheetModal>(null);
+  const { handleSheetPositionChange } = useBottomSheetBackHandler(bottomSheetRef);
+
+  useImperativeHandle(ref, () => bottomSheetRef.current as BottomSheetModal);
 
   const renderBackdrop = useCallback(
     (props: BottomSheetBackdropProps) => <BottomSheetBackdrop {...props} appearsOnIndex={1} />,
@@ -40,7 +44,8 @@ export const BottomSheet = forwardRef<BottomSheetModal, BottomSheetProps>((props
         style={styles.bottomSheetContainer}
         index={1}
         snapPoints={snapPoints}
-        ref={ref}
+        onChange={handleSheetPositionChange}
+        ref={bottomSheetRef}
       >
         <BottomSheetView style={styles.bottomSheetContainer}>
           <ThemedView>{children}</ThemedView>
@@ -92,29 +97,3 @@ export const useBottomSheetBackHandler = (bottomSheetRef: React.RefObject<Bottom
   );
   return { handleSheetPositionChange };
 };
-// export interface BottomSheetOptions {
-//   height: string;
-//   showHandle?: boolean;
-// }
-
-// export function useBottomSheet(options: BottomSheetOptions) {
-//   const bottomSheetRef = useRef<BottomSheetModal>(null);
-
-//   const show = useCallback(() => {
-//     bottomSheetRef.current?.present();
-//   }, [bottomSheetRef.current]);
-
-//   const BottomSheetComponent = useCallback(
-//     ({ children }: { children: ReactNode }) => (
-//       <BottomSheet ref={bottomSheetRef} height={options.height || "50%"} showHandle={options.showHandle}>
-//         {children}
-//       </BottomSheet>
-//     ),
-//     [options.height, options.showHandle],
-//   );
-
-//   return {
-//     show,
-//     BottomSheetComponent,
-//   };
-// }
