@@ -15,6 +15,7 @@ import { DatabaseProvider } from "@/contexts/DatabaseContext";
 import LoadingDatabase from "@/components/LoadingDatabase";
 import { enableScreens } from "react-native-screens";
 import { StatusBar } from "expo-status-bar";
+import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
@@ -64,9 +65,11 @@ function ThemedLayout() {
       <ThemeProvider value={NavBarColors[theme]}>
         <Suspense fallback={<LoadingDatabase />}>
           <DatabaseProvider onLoad={handleDbLoaded}>
-            <SafeAreaView style={{ flex: 0, backgroundColor: NavBarColors[theme].colors.background }} />
-            <RootStack />
-            <StatusBar style={theme === "light" ? "dark" : "light"} />
+            <BottomSheetModalProvider>
+              <SafeAreaView style={{ flex: 0, backgroundColor: NavBarColors[theme].colors.background }} />
+              <RootStack />
+              <StatusBar style={theme === "light" ? "dark" : "light"} />
+            </BottomSheetModalProvider>
           </DatabaseProvider>
         </Suspense>
       </ThemeProvider>

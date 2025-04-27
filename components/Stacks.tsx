@@ -16,7 +16,7 @@ type StackProps = {
 export function YStack({
   children,
   gap = Sizes.medium,
-  alignItems = "stretch",
+  alignItems = "flex-start",
   justifyContent = "flex-start",
   style,
 }: StackProps) {

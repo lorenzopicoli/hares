@@ -18,6 +18,7 @@ export default function TabLayout() {
         tabBarLabelStyle: {
           color: colors.text,
         },
+
         tabBarStyle: { backgroundColor: colors.background },
       }}
     >

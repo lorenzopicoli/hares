@@ -33,7 +33,7 @@ export default function ThemedModal(props: PropsWithChildren<Props>) {
     size = "large",
   } = props;
   return (
-    <Modal animationType="slide" transparent={true} visible={visible} onRequestClose={onDismiss}>
+    <Modal animationType="fade" transparent={true} visible={visible} onRequestClose={onDismiss}>
       <Pressable onPress={onDismiss} style={styles.backdrop} />
       <ThemedView style={[styles.modalView, size === "small" && styles.small, size === "large" && styles.large]}>
         {children}

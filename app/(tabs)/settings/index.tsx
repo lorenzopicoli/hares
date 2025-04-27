@@ -4,24 +4,59 @@ import { useDatabase } from "@/contexts/DatabaseContext";
 import { useConfirmModal } from "@/hooks/useConfirmModal";
 import { Sizes } from "@/constants/Sizes";
 import { useCounts } from "@/hooks/data/useCounts";
-import { useRestoreDatabase } from "@/hooks/useRestoreDatabase";
-import { useExportDatabase } from "@/hooks/useExportDatabase";
 import { useDeleteDatabase } from "@/hooks/useDeleteDatabase";
-import { useColors } from "@/components/ThemeProvider";
+import { useColors, type ThemedColors } from "@/components/ThemeProvider";
 import SectionList, { type ISection } from "@/components/SectionList";
 import ActionableListItem from "@/components/ActionableListItem";
 import TextListItem from "@/components/TextListItem";
-import { useCallback } from "react";
+import { useCallback, useRef } from "react";
+import useStyles from "@/hooks/useStyles";
+import { BottomSheet, useBottomSheetBackHandler } from "@/components/BottomSheet";
+import type { BottomSheetModal } from "@gorhom/bottom-sheet";
+import ExportDatabaseBottomSheetView, {
+  EXPORT_DATABASE_BOTTOM_SHEET_HEIGHT,
+} from "@/components/BottomSheets/ExportDatabaseBottomSheet";
+import ImportDatabaseBottomSheet, {
+  IMPORT_DATABASE_BOTTOM_SHEET_HEIGHT,
+} from "@/components/BottomSheets/ImportDatabaseBottomSheet";
 
 export default function SettingsScreen() {
   const { reloadDb } = useDatabase();
-  const { exportDatabaseJSON, exportDatabaseSQLite } = useExportDatabase();
-  const { restoreDatabaseSQLite, restoreDatabaseJSON } = useRestoreDatabase();
   const { collectionsCount, trackersCount, entriesCount } = useCounts();
   const { confirm, ConfirmModal } = useConfirmModal();
   const { deleteDatabase } = useDeleteDatabase();
-  const { colors, theme, setTheme } = useColors();
+  const { theme, setTheme } = useColors();
   const toggleTheme = useCallback(() => setTheme(theme === "dark" ? "light" : "dark"), [setTheme, theme]);
+  const { styles } = useStyles(createStyles);
+
+  const exportDbSheetRef = useRef<BottomSheetModal>(null);
+  const importDbSheetRef = useRef<BottomSheetModal>(null);
+  const { handleSheetPositionChange: exportSheetChange } = useBottomSheetBackHandler(exportDbSheetRef);
+  const { handleSheetPositionChange: importSheetChange } = useBottomSheetBackHandler(importDbSheetRef);
+
+  const showExportDbSheet = () => {
+    exportDbSheetRef.current?.present();
+  };
+
+  const showImportDbSheet = () => {
+    importDbSheetRef.current?.present();
+  };
+
+  const handleDeleteData = async () => {
+    const confirmed = await confirm({
+      confirmText: "I'm sure",
+      dismissText: "Cancel",
+      title: "Are you sure?",
+      description: "Deleting your data is not reversible and it'll be gone forever.\nYou should restart the app after.",
+    });
+
+    if (!confirmed) {
+      return;
+    }
+
+    await deleteDatabase();
+  };
+
   const settingsData: ISection[] = [
     {
       data: [
@@ -46,17 +81,18 @@ export default function SettingsScreen() {
         },
         {
           key: "export-data",
-          render: <ActionableListItem title="Export Data" onPress={exportDatabaseJSON} />,
+          render: <ActionableListItem title="Export Data" onPress={showExportDbSheet} />,
         },
         {
           key: "import-data",
-          render: <ActionableListItem title="Import Data" onPress={restoreDatabaseJSON} />,
+          render: <ActionableListItem title="Import Data" onPress={showImportDbSheet} />,
         },
         {
           key: "delete-data",
           render: (
             <ActionableListItem
-              title={<ThemedText style={{ color: colors.button.danger.background }}>Delete All Data</ThemedText>}
+              title={<ThemedText style={styles.dangerText}>Delete All Data</ThemedText>}
+              onPress={handleDeleteData}
             />
           ),
         },
@@ -81,41 +117,34 @@ export default function SettingsScreen() {
     },
   ];
 
-  const handleDeleteData = async () => {
-    const confirmed = await confirm({
-      confirmText: "I'm sure",
-      dismissText: "Cancel",
-      title: "Are you sure?",
-      description: "Deleting your data is not reversible and it'll be gone forever.\nYou should restart the app after.",
-    });
-
-    if (!confirmed) {
-      return;
-    }
-
-    await deleteDatabase();
-  };
-
-  const handleExportSQL = async () => {
-    await exportDatabaseSQLite("hares-backup");
-  };
-
-  const handleSetTheme = (option: "light" | "dark" | null) => {
-    if (option) {
-      setTheme(option);
-    }
-  };
-
   return (
     <>
       {ConfirmModal}
       <SectionList style={styles.list} sections={settingsData} />
+      <BottomSheet
+        snapPoints={[EXPORT_DATABASE_BOTTOM_SHEET_HEIGHT]}
+        ref={exportDbSheetRef}
+        onChange={exportSheetChange}
+      >
+        <ExportDatabaseBottomSheetView />
+      </BottomSheet>
+      <BottomSheet
+        snapPoints={[IMPORT_DATABASE_BOTTOM_SHEET_HEIGHT]}
+        ref={importDbSheetRef}
+        onChange={importSheetChange}
+      >
+        <ImportDatabaseBottomSheet />
+      </BottomSheet>
     </>
   );
 }
 
-const styles = StyleSheet.create({
-  list: {
-    paddingHorizontal: Sizes.medium,
-  },
-});
+const createStyles = (theme: ThemedColors) =>
+  StyleSheet.create({
+    list: {
+      paddingHorizontal: Sizes.medium,
+    },
+    dangerText: {
+      color: theme.button.danger.background,
+    },
+  });
