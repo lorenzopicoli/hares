@@ -48,7 +48,7 @@ export default function StatsScreen() {
   return (
     <ThemedScrollView>
       <ThemedText type="subtitle">Filters</ThemedText>
-      <YStack>
+      <YStack alignItems="stretch">
         <ThemedButton
           title={tracker ? `Selected tracker ${tracker.name}` : "Select a tracker"}
           mode="toggle"
