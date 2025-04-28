@@ -4,7 +4,7 @@ import { Separator } from "@/components/Separator";
 import { ThemedView } from "@/components/ThemedView";
 import type { TrackerEntry } from "@/db/schema";
 import { useEffect, useRef, useState } from "react";
-import type { ThemedColors } from "@/components/ThemeProvider";
+import { useColors, type ThemedColors } from "@/components/ThemeProvider";
 import EntriesListRow from "@/components/EntriesList/EntriesListRow";
 import useStyles from "@/hooks/useStyles";
 import { Sizes } from "@/constants/Sizes";
@@ -23,6 +23,7 @@ export default function EntriesScreen() {
   }>();
   const [searchText, setSearchText] = useState<string>(searchTextParam ?? "");
   const { entries } = useEntries({ searchText });
+  const { colors } = useColors();
   const entryOptionsBottomSheetRef = useRef<EntryOptionsBottomSheetRef>(null);
 
   useEffect(() => {

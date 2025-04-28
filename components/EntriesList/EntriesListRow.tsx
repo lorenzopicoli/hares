@@ -1,5 +1,4 @@
 import { StyleSheet, TouchableOpacity, View, type StyleProp, type ViewStyle } from "react-native";
-import { Separator } from "../Separator";
 import { ThemedText } from "../ThemedText";
 import type { ThemedColors } from "../ThemeProvider";
 import type { TrackerEntry } from "@/db/schema";
@@ -64,7 +63,6 @@ export default function EntriesListRow(props: EntriesListRowProps) {
           ) : null}
         </View>
       </View>
-      <Separator />
     </TouchableOpacity>
   );
 }

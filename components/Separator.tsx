@@ -4,7 +4,7 @@ import type { ThemedColors } from "./ThemeProvider";
 import useStyles from "@/hooks/useStyles";
 import { Sizes } from "@/constants/Sizes";
 
-export const Separator = (props: { containerBackgroundColor?: string }) => {
+export const Separator = (props: { overrideHorizontalMargin?: number; containerBackgroundColor?: string }) => {
   const { styles } = useStyles(createStyles);
   return (
     <View
@@ -15,7 +15,16 @@ export const Separator = (props: { containerBackgroundColor?: string }) => {
           : styles.container.backgroundColor,
       }}
     >
-      <View style={styles.separator} />
+      <View
+        style={{
+          ...styles.separator,
+
+          marginHorizontal:
+            props.overrideHorizontalMargin !== undefined
+              ? props.overrideHorizontalMargin
+              : styles.separator.marginHorizontal,
+        }}
+      />
     </View>
   );
 };
@@ -24,7 +33,7 @@ const createStyles = (theme: ThemedColors) =>
   StyleSheet.create({
     container: {
       width: "100%",
-      backgroundColor: theme.secondaryBackground,
+      backgroundColor: theme.background,
     },
     separator: {
       borderBottomColor: theme.border,

@@ -22,6 +22,8 @@ import { useForm } from "react-hook-form";
 import { useLazyEntry } from "@/hooks/data/useEntry";
 import { useUpsertEntry } from "@/hooks/data/useUpsertEntry";
 import { FormThemedInput } from "@/components/ThemedInput";
+import { Separator } from "@/components/Separator";
+import { YStack } from "@/components/Stacks";
 
 interface FormInputs {
   dateInformation: EntryDateInformation;
@@ -230,7 +232,10 @@ export default function AddEntryScreen() {
           <>
             <ThemedText type="title">Previous entries</ThemedText>
             {lastEntries.map((entry) => (
-              <EntriesListRow key={entry.id} entry={entry} />
+              <YStack key={entry.id}>
+                <EntriesListRow entry={entry} />
+                <Separator overrideHorizontalMargin={0} />
+              </YStack>
             ))}
           </>
         ) : null}

@@ -9,7 +9,7 @@ import {
 } from "react-native";
 import { Separator } from "./Separator";
 import { XStack } from "./Stacks";
-import type { ThemedColors } from "./ThemeProvider";
+import { useColors, type ThemedColors } from "./ThemeProvider";
 import { Sizes } from "@/constants/Sizes";
 import useStyles from "@/hooks/useStyles";
 
@@ -30,6 +30,7 @@ interface SectionListProps extends RNSectionListProps<IRow, ISection> {
 
 export default function SectionList(props: SectionListProps) {
   const { styles } = useStyles(createStyles);
+  const { colors } = useColors();
 
   const renderItem: SectionListRenderItem<IRow, ISection> = useCallback(
     (props) => {
@@ -63,7 +64,7 @@ export default function SectionList(props: SectionListProps) {
       showsVerticalScrollIndicator={false}
       bounces={false}
       onEndReachedThreshold={0.5}
-      ItemSeparatorComponent={Separator}
+      ItemSeparatorComponent={() => <Separator containerBackgroundColor={colors.secondaryBackground} />}
       {...props}
       keyExtractor={(it) => String(it.key)}
       sections={props.sections}
