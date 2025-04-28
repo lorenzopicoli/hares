@@ -35,7 +35,7 @@ export const BottomSheet = forwardRef<BottomSheetModal, BottomSheetProps>((props
     <>
       <BottomSheetModal
         {...props}
-        detached={true}
+        // detached={true}
         enableDismissOnClose
         backdropComponent={renderBackdrop}
         handleIndicatorStyle={styles.bottomSheetIndicatorStyle}
@@ -65,7 +65,7 @@ const createStyles = (theme: ThemedColors) =>
       borderTopRightRadius: 10,
       borderTopLeftRadius: 10,
       backgroundColor: theme.background,
-      marginHorizontal: 7,
+      //   marginHorizontal: 7,
       flex: 1,
     },
     bottomSheetIndicatorStyle: {

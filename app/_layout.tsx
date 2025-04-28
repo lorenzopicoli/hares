@@ -9,7 +9,6 @@ import "react-native-reanimated";
 
 import { Platform, SafeAreaView } from "react-native";
 import { Colors, NavBarColors } from "@/constants/Colors";
-import { ActionSheetProvider } from "@expo/react-native-action-sheet";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { DatabaseProvider } from "@/contexts/DatabaseContext";
 import LoadingDatabase from "@/components/LoadingDatabase";
@@ -61,18 +60,16 @@ function ThemedLayout() {
   }, [theme]);
 
   return (
-    <ActionSheetProvider>
-      <ThemeProvider value={NavBarColors[theme]}>
-        <Suspense fallback={<LoadingDatabase />}>
-          <DatabaseProvider onLoad={handleDbLoaded}>
-            <BottomSheetModalProvider>
-              <SafeAreaView style={{ flex: 0, backgroundColor: NavBarColors[theme].colors.background }} />
-              <RootStack />
-              <StatusBar style={theme === "light" ? "dark" : "light"} />
-            </BottomSheetModalProvider>
-          </DatabaseProvider>
-        </Suspense>
-      </ThemeProvider>
-    </ActionSheetProvider>
+    <ThemeProvider value={NavBarColors[theme]}>
+      <Suspense fallback={<LoadingDatabase />}>
+        <DatabaseProvider onLoad={handleDbLoaded}>
+          <BottomSheetModalProvider>
+            <SafeAreaView style={{ flex: 0, backgroundColor: NavBarColors[theme].colors.background }} />
+            <RootStack />
+            <StatusBar style={theme === "light" ? "dark" : "light"} />
+          </BottomSheetModalProvider>
+        </DatabaseProvider>
+      </Suspense>
+    </ThemeProvider>
   );
 }
