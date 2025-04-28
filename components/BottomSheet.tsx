@@ -2,21 +2,39 @@ import { BackHandler, StyleSheet, type NativeEventSubscription } from "react-nat
 import type { ThemedColors } from "@/components/ThemeProvider";
 import { forwardRef, useCallback, useImperativeHandle, useRef, type ReactNode } from "react";
 import {
-  BottomSheetBackdrop,
   BottomSheetModal,
   BottomSheetView,
+  useBottomSheetModal,
   type BottomSheetBackdropProps,
   type BottomSheetModalProps,
 } from "@gorhom/bottom-sheet";
 import { ThemedView } from "@/components/ThemedView";
 import useStyles from "@/hooks/useStyles";
 import type { SharedValue } from "react-native-reanimated";
+import Animated, { useAnimatedStyle, interpolate } from "react-native-reanimated";
+import { TouchableWithoutFeedback } from "react-native-gesture-handler";
 
 export interface BottomSheetProps extends BottomSheetModalProps {
   snapPoints: (string | number)[] | SharedValue<(string | number)[]>;
   showHandle?: boolean;
   children: ReactNode;
 }
+
+const Backdrop = ({ animatedIndex, style }: BottomSheetBackdropProps) => {
+  const animatedStyle = useAnimatedStyle(() => ({
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    opacity: interpolate(animatedIndex.value, [-1, 0], [0, 1]),
+  }));
+  const { dismiss } = useBottomSheetModal();
+
+  const handleDismiss = useCallback(() => dismiss(), [dismiss]);
+
+  return (
+    <Animated.View style={[style, animatedStyle]}>
+      <TouchableWithoutFeedback style={{ height: "100%", width: "100%" }} onPress={handleDismiss} />
+    </Animated.View>
+  );
+};
 
 export const BottomSheet = forwardRef<BottomSheetModal, BottomSheetProps>((props, ref) => {
   const { snapPoints, children, showHandle } = props;
@@ -26,18 +44,13 @@ export const BottomSheet = forwardRef<BottomSheetModal, BottomSheetProps>((props
 
   useImperativeHandle(ref, () => bottomSheetRef.current as BottomSheetModal);
 
-  const renderBackdrop = useCallback(
-    (props: BottomSheetBackdropProps) => <BottomSheetBackdrop {...props} appearsOnIndex={1} />,
-    [],
-  );
-
   return (
     <>
       <BottomSheetModal
         {...props}
         // detached={true}
         enableDismissOnClose
-        backdropComponent={renderBackdrop}
+        backdropComponent={Backdrop}
         handleIndicatorStyle={styles.bottomSheetIndicatorStyle}
         handleComponent={showHandle ? undefined : () => null}
         backgroundStyle={styles.bottomSheetBackgroundContainer}
