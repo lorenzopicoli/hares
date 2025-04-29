@@ -4,11 +4,9 @@ import { useCallback } from "react";
 import * as FileSystem from "expo-file-system";
 import * as DocumentPicker from "expo-document-picker";
 import { Alert } from "react-native";
-import { useDeleteDatabase } from "./useDeleteDatabase";
 
 export const useRestoreDatabase = () => {
   const { db, reloadDb } = useDatabase();
-  const { deleteDatabase } = useDeleteDatabase();
   const restoreDatabaseSQLite = useCallback(async () => {
     try {
       const result = await DocumentPicker.getDocumentAsync({

@@ -196,7 +196,7 @@ export default function AddCollectionScreen() {
 
   return (
     <ThemedSafeAreaView>
-      <ScrollViewContainer style={styles.scrollView}>
+      <ScrollViewContainer showsVerticalScrollIndicator={false} style={styles.scrollView}>
         <FormThemedInput
           form={{
             control,
@@ -221,7 +221,7 @@ export default function AddCollectionScreen() {
           renderItem={renderItem}
           keyExtractor={(i) => String(i.tracker.id)}
           onReorder={handleTrackerReorder}
-          ItemSeparatorComponent={Separator}
+          ItemSeparatorComponent={() => <Separator overrideHorizontalMargin={0} />}
         />
         <Spacing size="medium" />
       </ScrollViewContainer>
@@ -246,7 +246,7 @@ const createStyles = (theme: ThemedColors) =>
       display: "flex",
       flexDirection: "row",
       height: Sizes.list.large,
-      paddingHorizontal: Sizes.large,
+      paddingHorizontal: Sizes.small,
       alignItems: "center",
       justifyContent: "space-between",
       overflow: "visible",

@@ -1,26 +1,46 @@
-import { StyleSheet } from "react-native";
+import { StyleSheet, Switch } from "react-native";
 import { ThemedText } from "@/components/ThemedText";
-import { ThemedView } from "@/components/ThemedView";
-import ThemedScrollView from "@/components/ThemedScrollView";
-import ThemedButton from "@/components/ThemedButton";
 import { useDatabase } from "@/contexts/DatabaseContext";
 import { useConfirmModal } from "@/hooks/useConfirmModal";
 import { Sizes } from "@/constants/Sizes";
 import { useCounts } from "@/hooks/data/useCounts";
-import { useRestoreDatabase } from "@/hooks/useRestoreDatabase";
-import { useExportDatabase } from "@/hooks/useExportDatabase";
 import { useDeleteDatabase } from "@/hooks/useDeleteDatabase";
-import ThemedToggleButtons from "@/components/ThemedToggleButtons";
-import { useColors } from "@/components/ThemeProvider";
+import { useColors, type ThemedColors } from "@/components/ThemeProvider";
+import SectionList, { type ISection } from "@/components/SectionList";
+import ActionableListItem from "@/components/ActionableListItem";
+import TextListItem from "@/components/TextListItem";
+import { useCallback, useRef } from "react";
+import useStyles from "@/hooks/useStyles";
+import { BottomSheet, useBottomSheetBackHandler } from "@/components/BottomSheet";
+import type { BottomSheetModal } from "@gorhom/bottom-sheet";
+import ExportDatabaseBottomSheetView, {
+  EXPORT_DATABASE_BOTTOM_SHEET_HEIGHT,
+} from "@/components/BottomSheets/ExportDatabaseBottomSheet";
+import ImportDatabaseBottomSheet, {
+  IMPORT_DATABASE_BOTTOM_SHEET_HEIGHT,
+} from "@/components/BottomSheets/ImportDatabaseBottomSheet";
 
 export default function SettingsScreen() {
   const { reloadDb } = useDatabase();
-  const { exportDatabaseJSON, exportDatabaseSQLite } = useExportDatabase();
-  const { restoreDatabaseSQLite, restoreDatabaseJSON } = useRestoreDatabase();
   const { collectionsCount, trackersCount, entriesCount } = useCounts();
   const { confirm, ConfirmModal } = useConfirmModal();
   const { deleteDatabase } = useDeleteDatabase();
   const { theme, setTheme } = useColors();
+  const toggleTheme = useCallback(() => setTheme(theme === "dark" ? "light" : "dark"), [setTheme, theme]);
+  const { styles } = useStyles(createStyles);
+
+  const exportDbSheetRef = useRef<BottomSheetModal>(null);
+  const importDbSheetRef = useRef<BottomSheetModal>(null);
+  const { handleSheetPositionChange: exportSheetChange } = useBottomSheetBackHandler(exportDbSheetRef);
+  const { handleSheetPositionChange: importSheetChange } = useBottomSheetBackHandler(importDbSheetRef);
+
+  const showExportDbSheet = () => {
+    exportDbSheetRef.current?.present();
+  };
+
+  const showImportDbSheet = () => {
+    importDbSheetRef.current?.present();
+  };
 
   const handleDeleteData = async () => {
     const confirmed = await confirm({
@@ -37,75 +57,94 @@ export default function SettingsScreen() {
     await deleteDatabase();
   };
 
-  const handleExportSQL = async () => {
-    await exportDatabaseSQLite("hares-backup");
-  };
-
-  const handleSetTheme = (option: "light" | "dark" | null) => {
-    if (option) {
-      setTheme(option);
-    }
-  };
+  const settingsData: ISection[] = [
+    {
+      data: [
+        {
+          key: "theme",
+          render: (
+            <ActionableListItem
+              title="Dark mode"
+              onPress={toggleTheme}
+              right={<Switch onChange={toggleTheme} value={theme === "dark"} />}
+            />
+          ),
+        },
+      ],
+    },
+    {
+      title: <ThemedText type="title">Data Management</ThemedText>,
+      data: [
+        {
+          key: "reload-db",
+          render: <ActionableListItem title="Reload database" onPress={reloadDb} />,
+        },
+        {
+          key: "export-data",
+          render: <ActionableListItem title="Export Data" onPress={showExportDbSheet} />,
+        },
+        {
+          key: "import-data",
+          render: <ActionableListItem title="Import Data" onPress={showImportDbSheet} />,
+        },
+        {
+          key: "delete-data",
+          render: (
+            <ActionableListItem
+              title={<ThemedText style={styles.dangerText}>Delete All Data</ThemedText>}
+              onPress={handleDeleteData}
+            />
+          ),
+        },
+      ],
+    },
+    {
+      title: <ThemedText type="title">Usage</ThemedText>,
+      data: [
+        {
+          key: "collection",
+          render: <TextListItem title="Collections" right={<ThemedText>{collectionsCount}</ThemedText>} />,
+        },
+        {
+          key: "trackers",
+          render: <TextListItem title="Trackers" right={<ThemedText>{trackersCount}</ThemedText>} />,
+        },
+        {
+          key: "entries",
+          render: <TextListItem title="Entries" right={<ThemedText>{entriesCount}</ThemedText>} />,
+        },
+      ],
+    },
+  ];
 
   return (
-    <ThemedScrollView>
-      <ThemedText type="title">Theme</ThemedText>
-      <ThemedToggleButtons
-        columns={2}
-        selectedOption={theme}
-        options={[
-          { label: "Light", value: "light" },
-          { label: "Dark", value: "dark" },
-        ]}
-        onChangeSelection={handleSetTheme}
-      />
-      <ThemedText type="title">Data Management</ThemedText>
-      <ThemedView style={styles.section}>
-        <ThemedView style={styles.counts}>
-          <ThemedView style={styles.row}>
-            <ThemedText>Collections:</ThemedText>
-            <ThemedText>{collectionsCount}</ThemedText>
-          </ThemedView>
-          <ThemedView style={styles.row}>
-            <ThemedText>Trackers:</ThemedText>
-            <ThemedText>{trackersCount}</ThemedText>
-          </ThemedView>
-          <ThemedView style={styles.row}>
-            <ThemedText>Entries:</ThemedText>
-            <ThemedText>{entriesCount}</ThemedText>
-          </ThemedView>
-        </ThemedView>
-        <ThemedView style={styles.row}>
-          <ThemedButton style={styles.flex1} onPress={handleExportSQL} title="Export data (SQLite)" />
-          <ThemedButton style={styles.flex1} onPress={exportDatabaseJSON} title="Export data (JSON)" />
-        </ThemedView>
-        <ThemedView style={styles.row}>
-          <ThemedButton style={styles.flex1} onPress={restoreDatabaseSQLite} title="Reset database (SQLite)" />
-          <ThemedButton style={styles.flex1} onPress={restoreDatabaseJSON} title="Reset database (JSON)" />
-        </ThemedView>
-        <ThemedButton onPress={reloadDb} title="Reload DB connection" />
-        <ThemedButton mode="danger" onPress={handleDeleteData} title="Delete all data" />
-      </ThemedView>
+    <>
       {ConfirmModal}
-    </ThemedScrollView>
+      <SectionList style={styles.list} sections={settingsData} />
+      <BottomSheet
+        snapPoints={[EXPORT_DATABASE_BOTTOM_SHEET_HEIGHT]}
+        ref={exportDbSheetRef}
+        onChange={exportSheetChange}
+      >
+        <ExportDatabaseBottomSheetView />
+      </BottomSheet>
+      <BottomSheet
+        snapPoints={[IMPORT_DATABASE_BOTTOM_SHEET_HEIGHT]}
+        ref={importDbSheetRef}
+        onChange={importSheetChange}
+      >
+        <ImportDatabaseBottomSheet />
+      </BottomSheet>
+    </>
   );
 }
 
-const styles = StyleSheet.create({
-  section: {
-    flexDirection: "column",
-    gap: Sizes.large,
-  },
-  counts: {
-    flexDirection: "column",
-    gap: Sizes.small,
-  },
-  flex1: {
-    flex: 1,
-  },
-  row: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    gap: Sizes.medium,
-  },
-});
+const createStyles = (theme: ThemedColors) =>
+  StyleSheet.create({
+    list: {
+      paddingHorizontal: Sizes.medium,
+    },
+    dangerText: {
+      color: theme.button.danger.background,
+    },
+  });

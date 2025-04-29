@@ -7,14 +7,17 @@ import { Sizes } from "@/constants/Sizes";
 
 interface SearchInputProps {
   value: string;
-  onChange: (text: string) => void;
+  editable?: boolean;
+  onChange?: (text: string) => void;
+  onFocus?: () => void;
+  hideClose?: boolean;
   autoFocus?: boolean;
   placeholder?: string;
   style?: StyleProp<TextStyle>;
 }
 
 function SearchInput(props: SearchInputProps) {
-  const { autoFocus, value, onChange, placeholder = "Search...", style } = props;
+  const { editable = true, hideClose, autoFocus, value, onChange, onFocus, placeholder = "Search...", style } = props;
   const inputRef = useRef<TextInput>(null);
   const { colors } = useColors();
   const { styles: customStyles } = useStyles(createSearchStyles);
@@ -36,20 +39,22 @@ function SearchInput(props: SearchInputProps) {
         ref={inputRef}
         value={value}
         onChangeText={onChange}
+        onFocus={onFocus}
         placeholder={placeholder}
         placeholderTextColor={colors.secondaryText}
         style={[customStyles.searchInput, style]}
         autoCapitalize="none"
         autoCorrect={false}
         returnKeyType="search"
+        editable={editable}
       />
-      {value.length > 0 && (
+      {!hideClose && value.length > 0 && (
         <Ionicons
           name="close-circle"
           size={20}
           color={colors.secondaryText}
           style={customStyles.clearIcon}
-          onPress={() => onChange("")}
+          onPress={() => onChange?.("")}
         />
       )}
     </View>

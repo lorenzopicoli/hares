@@ -98,7 +98,7 @@ function ThemedToggleButtons<V>(props: ThemedToggleButtonsProps<V>) {
   );
 
   return (
-    <View>
+    <View style={styles.container}>
       {label && <ThemedInputLabel label={label} />}
       <View style={styles.grid}>
         {chunkedOptions.map((chunkedOption, i) => (
@@ -129,6 +129,9 @@ function ThemedToggleButtons<V>(props: ThemedToggleButtonsProps<V>) {
 
 const createStyles = (theme: ThemedColors) =>
   StyleSheet.create({
+    container: {
+      marginBottom: 16,
+    },
     grid: {
       flex: 4,
       marginHorizontal: "auto",

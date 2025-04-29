@@ -6,6 +6,7 @@ export const Sizes = {
   small: spaceUnit,
   medium: spaceUnit * 2,
   large: spaceUnit * 3,
+  xLarge: spaceUnit * 4,
   list: {
     large: 80,
     medium: 60,
