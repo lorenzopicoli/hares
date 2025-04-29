@@ -1,7 +1,7 @@
 import ThemedScrollView from "@/components/ThemedScrollView";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import ThemedButton from "@/components/ThemedButton";
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { useTracker } from "@/hooks/data/useTracker";
 import { ThemedView } from "@/components/ThemedView";
 import { TrackerType } from "@/db/schema";
@@ -10,17 +10,20 @@ import { useEntries } from "@/hooks/data/useEntries";
 import EntriesListRow from "@/components/EntriesList/EntriesListRow";
 import useStyles from "@/hooks/useStyles";
 import { EntryCountLineChart, NumberTrackersLineChart } from "@/components/charts/LineCharts";
-import { ThemedText } from "@/components/ThemedText";
 import { Spacing } from "@/components/Spacing";
-import ThemedInput from "@/components/ThemedInput";
 import { XStack, YStack } from "@/components/Stacks";
-import ThemedToggleButtons from "@/components/ThemedToggleButtons";
 import { DateGroupingPeriod } from "@/utils/dateGroupPeriod";
 import { GroupFunction } from "@/utils/groupFunctions";
-import { StyleSheet } from "react-native";
-import type { ThemedColors } from "@/components/ThemeProvider";
+import { Pressable, StyleSheet, TouchableOpacity, View } from "react-native";
+import { useColors, type ThemedColors } from "@/components/ThemeProvider";
 import { Sizes } from "@/constants/Sizes";
 import { CalendarHeatmapChart } from "@/components/charts/CalendarHeatmapChart";
+import ChartCard from "@/components/ChartCard";
+import { ChartOptionsBottomSheet } from "@/components/BottomSheets/ChartOptionsBottomSheet";
+import type { BottomSheetModal } from "@gorhom/bottom-sheet";
+import { MaterialIcons } from "@expo/vector-icons";
+import SearchInput from "@/components/SearchInput";
+import { Separator } from "@/components/Separator";
 
 export default function StatsScreen() {
   const { trackerId: trackerIdParam } = useLocalSearchParams<{
@@ -28,6 +31,7 @@ export default function StatsScreen() {
   }>();
 
   const router = useRouter();
+  const { colors } = useColors();
   const { styles } = useStyles(createStyles);
   const trackerId = useMemo(() => (trackerIdParam ? +trackerIdParam : undefined), [trackerIdParam]);
   const { tracker } = useTracker(trackerId ?? -1);
@@ -36,6 +40,11 @@ export default function StatsScreen() {
   const [groupFun, setGroupFun] = useState<GroupFunction>(GroupFunction.avg);
   const [includeOther, setIncludeOther] = useState(false);
   const { entries } = useEntries({ trackerId, limit: 5 });
+  const optionsBottomSheetRef = useRef<BottomSheetModal>(null);
+
+  const showOptionsSheet = () => {
+    optionsBottomSheetRef.current?.present();
+  };
 
   const handleSelectTracker = () => {
     router.navigate({ pathname: "/stats/selectStatTracker" });
@@ -47,14 +56,18 @@ export default function StatsScreen() {
 
   return (
     <ThemedScrollView>
-      <ThemedText type="subtitle">Filters</ThemedText>
       <YStack alignItems="stretch">
-        <ThemedButton
-          title={tracker ? `Selected tracker ${tracker.name}` : "Select a tracker"}
-          mode="toggle"
-          onPress={handleSelectTracker}
-        />
         <XStack>
+          <ThemedView>
+            <Pressable onPressIn={handleSelectTracker}>
+              <SearchInput editable={false} hideClose value={tracker?.name ?? ""} />
+            </Pressable>
+          </ThemedView>
+          <TouchableOpacity style={styles.filterButton} onPress={showOptionsSheet}>
+            <MaterialIcons name="settings-input-component" size={20} color={colors.text} />
+          </TouchableOpacity>
+        </XStack>
+        {/* <XStack>
           <ThemedInput
             containerStyle={{ flex: 1 }}
             keyboardType="numeric"
@@ -96,46 +109,64 @@ export default function StatsScreen() {
             { label: "Min", value: GroupFunction.min },
           ]}
           columns={4}
-        />
+        /> */}
       </YStack>
       <Spacing size="xSmall" />
       {tracker ? (
         <>
           {tracker.type === TrackerType.Number || tracker.type === TrackerType.Scale ? (
             <>
-              <ThemedView style={{ height: 500 }}>
+              <ChartCard title="Daily values">
                 <CalendarHeatmapChart tracker={tracker} groupPeriod={groupPeriod} groupFun={groupFun} />
-              </ThemedView>
+              </ChartCard>
             </>
           ) : null}
-          <ThemedView style={{ height: 500 }}>
+          <ChartCard title="# of entries">
             <EntryCountLineChart tracker={tracker} groupPeriod={groupPeriod} />
-          </ThemedView>
+          </ChartCard>
 
           {tracker.type === TrackerType.TextList ? (
             <>
-              <ThemedView style={{ height: 500 }}>
+              <ChartCard title={`Top ${limit} entries in ${tracker.name}`}>
                 <TextListBarChart limit={limit} tracker={tracker} includeOthers={includeOther} />
-              </ThemedView>
+              </ChartCard>
             </>
           ) : null}
 
           {tracker.type === TrackerType.Number || tracker.type === TrackerType.Scale ? (
             <>
-              <ThemedView style={{ height: 500 }}>
+              <ChartCard title="Entry values">
                 <NumberTrackersLineChart tracker={tracker} groupPeriod={groupPeriod} groupFun={groupFun} />
-              </ThemedView>
+              </ChartCard>
             </>
           ) : null}
 
           <ThemedView>
-            {entries.map((entry) => (
-              <EntriesListRow key={entry.id} entry={entry} hideTrackerName style={styles.listItem} />
-            ))}
+            {/* <SectionList
+              style={styles.list}
+              sections={[
+                {
+                  title: <ThemedText type="title">Previous Entries</ThemedText>,
+                  data: entries.map((entry) => ({
+                    key: entry.id,
+                    render: <EntriesListRow entry={entry} hideTrackerName style={styles.listItem} />,
+                  })),
+                },
+              ]}
+            /> */}
+            <ChartCard title={"Entries"}>
+              {entries.map((entry) => (
+                <View key={entry.id} style={{ paddingHorizontal: Sizes.medium }}>
+                  <EntriesListRow entry={entry} hideTrackerName style={styles.listItem} />
+                  <Separator overrideHorizontalMargin={0} containerBackgroundColor={colors.secondaryBackground} />
+                </View>
+              ))}
+            </ChartCard>
           </ThemedView>
           {tracker ? <ThemedButton title="See all entries" onPress={handleSeeAllEntries} /> : null}
         </>
       ) : null}
+      <ChartOptionsBottomSheet ref={optionsBottomSheetRef} />
     </ThemedScrollView>
   );
 }
@@ -147,5 +178,16 @@ const createStyles = (theme: ThemedColors) =>
     },
     listItem: {
       paddingVertical: Sizes.medium,
+    },
+    filterButton: {
+      backgroundColor: theme.toggleButton.background,
+      height: 40,
+      width: 40,
+      borderRadius: Sizes.radius.small,
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    list: {
+      //   paddingHorizontal: Sizes.medium,
     },
   });

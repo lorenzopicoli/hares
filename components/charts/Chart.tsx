@@ -11,8 +11,7 @@ import {
   VisualMapComponent,
   CalendarComponent,
 } from "echarts/components";
-import { ThemedView } from "../ThemedView";
-import type { LayoutChangeEvent } from "react-native";
+import { View, type LayoutChangeEvent } from "react-native";
 import { Colors } from "@/constants/Colors";
 
 // Register extensions
@@ -52,10 +51,19 @@ echarts.registerTheme("haresDark", {
   title: {
     textStyle: {
       color: Colors.dark.text,
+      fontSize: 26,
     },
     subtextStyle: {
-      color: Colors.dark.text,
+      color: Colors.dark.secondaryText,
     },
+    left: "center",
+  },
+
+  grid: {
+    left: 30,
+    top: 20,
+    right: 10,
+    bottom: 20,
   },
   line: {
     itemStyle: {
@@ -82,7 +90,7 @@ echarts.registerTheme("haresDark", {
   calendar: {
     itemStyle: {
       borderWidth: 4,
-      borderColor: Colors.dark.background,
+      borderColor: Colors.dark.secondaryBackground,
       //   opacity: 0.7,
       color: "transparent",
       //   borderJoin: "round",
@@ -255,7 +263,7 @@ echarts.registerTheme("haresDark", {
     splitLine: {
       show: true,
       lineStyle: {
-        color: ["#aaaaaa"],
+        color: Colors.dark.border,
       },
     },
     splitArea: {
@@ -285,7 +293,7 @@ echarts.registerTheme("haresDark", {
     splitLine: {
       show: true,
       lineStyle: {
-        color: ["#aaaaaa"],
+        color: Colors.dark.border,
       },
     },
     splitArea: {
@@ -431,7 +439,7 @@ echarts.registerTheme("haresDark", {
       symbolSize: [30, 100],
     },
     outOfRange: {
-      color: [Colors.dark.border],
+      color: [Colors.dark.text],
       symbolSize: [30, 100],
     },
   },
@@ -503,8 +511,8 @@ export const Chart = forwardRef<ChartRef, { option: echarts.EChartsCoreOption }>
   };
 
   return (
-    <ThemedView style={{ marginLeft: -40, marginRight: -40 }} onLayout={handleLayout}>
+    <View style={{ flex: 1, marginLeft: -40, marginRight: -40 }} onLayout={handleLayout}>
       <SkiaChart useRNGH={false} ref={skiaRef} />
-    </ThemedView>
+    </View>
   );
 });

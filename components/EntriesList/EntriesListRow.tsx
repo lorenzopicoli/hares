@@ -44,7 +44,9 @@ export default function EntriesListRow(props: EntriesListRowProps) {
   return (
     <TouchableOpacity disabled={!props.onPress} onPress={handlePress}>
       <View style={[styles.container, style]}>
-        {entry.tracker?.name && !hideTrackerName ? <ThemedText type="subtitle">{entry.tracker.name}</ThemedText> : null}
+        {entry.tracker?.name && !hideTrackerName ? (
+          <ThemedText style={styles.title}>{entry.tracker.name}</ThemedText>
+        ) : null}
 
         <View style={styles.innerContainer}>
           <ThemedText style={styles.mainText}>
@@ -85,5 +87,9 @@ const createStyles = (theme: ThemedColors) =>
     },
     secondary: {
       color: theme.secondaryText,
+    },
+    title: {
+      fontSize: 20,
+      fontWeight: "bold",
     },
   });

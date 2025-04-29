@@ -20,6 +20,7 @@ export default function TextListItem(props: { title: string; right?: ReactNode }
 const createStyles = (theme: ThemedColors) =>
   StyleSheet.create({
     container: {
+      height: Sizes.list.medium,
       padding: Sizes.medium,
     },
   });

@@ -3,6 +3,8 @@ import type { EChartsCoreOption } from "echarts";
 import { useMemo } from "react";
 import { Chart } from "./Chart";
 import { useTopTextListStats } from "@/hooks/data/stats/useTopTextListStats";
+import { Sizes } from "@/constants/Sizes";
+import { View } from "react-native";
 
 interface Props {
   limit: number;
@@ -12,16 +14,10 @@ interface Props {
 
 export default function TextListBarChart(props: Props) {
   const { limit, tracker, includeOthers } = props;
-  //   const chartRef = useRef<ChartRef>(null);
 
   const { textListUsageCount } = useTopTextListStats({ trackerId: tracker.id, limit, includeOthers });
   const option: EChartsCoreOption = useMemo(
     () => ({
-      title: {
-        text: `Top ${limit} text entries`,
-        subtext: tracker.name,
-        left: "center",
-      },
       tooltip: {
         trigger: "item",
       },
@@ -55,8 +51,20 @@ export default function TextListBarChart(props: Props) {
         },
       ],
     }),
-    [limit, textListUsageCount, tracker.name],
+    [textListUsageCount],
   );
 
-  return <Chart option={option} />;
+  return (
+    <View
+      style={{
+        flex: 1,
+        padding: Sizes.medium,
+        marginLeft: 40,
+        marginRight: 40,
+        height: 300,
+      }}
+    >
+      <Chart option={option} />
+    </View>
+  );
 }

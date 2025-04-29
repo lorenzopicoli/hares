@@ -78,7 +78,7 @@ const createStyles = (theme: ThemedColors) =>
   StyleSheet.create({
     itemContainer: {
       backgroundColor: theme.secondaryBackground,
-      height: Sizes.list.medium,
+      //   height: Sizes.list.medium,
     },
     roundedTop: {
       borderTopLeftRadius: Sizes.radius.medium,

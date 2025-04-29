@@ -6,22 +6,18 @@ import { Chart } from "./Chart";
 import type { DateGroupingPeriod } from "@/utils/dateGroupPeriod";
 import { useNumberTrackerLineStats } from "@/hooks/data/stats/useNumberTrackerLineStats";
 import type { GroupFunction } from "@/utils/groupFunctions";
+import { View } from "react-native";
+import { Sizes } from "@/constants/Sizes";
 
 export function EntryCountLineChart(props: {
   tracker: Tracker;
   groupPeriod: DateGroupingPeriod;
 }) {
   const { tracker, groupPeriod } = props;
-  //   const chartRef = useRef<ChartRef>(null);
-
   const { entryCountStats } = useEntryCountStats({ trackerId: tracker.id, groupPeriod });
+
   const option: EChartsCoreOption = useMemo(
     () => ({
-      title: {
-        text: `Number of entries ${groupPeriod}`,
-        subtext: tracker.name,
-        left: "center",
-      },
       tooltip: {
         trigger: "axis",
       },
@@ -31,16 +27,29 @@ export function EntryCountLineChart(props: {
       yAxis: {},
       series: [
         {
+          smooth: true,
           data: entryCountStats.map((t) => t.value),
           type: "line",
           name: "No. of entries",
         },
       ],
     }),
-    [entryCountStats, tracker.name, groupPeriod],
+    [entryCountStats],
   );
 
-  return <Chart option={option} />;
+  return (
+    <View
+      style={{
+        flex: 1,
+        padding: Sizes.medium,
+        marginLeft: 40,
+        marginRight: 40,
+        height: 300,
+      }}
+    >
+      <Chart option={option} />
+    </View>
+  );
 }
 
 export function NumberTrackersLineChart(props: {
@@ -49,16 +58,9 @@ export function NumberTrackersLineChart(props: {
   groupFun: GroupFunction;
 }) {
   const { tracker, groupPeriod, groupFun } = props;
-  //   const chartRef = useRef<ChartRef>(null);
-
   const { entriesNumberValueStats } = useNumberTrackerLineStats({ trackerId: tracker.id, groupPeriod, groupFun });
   const option: EChartsCoreOption = useMemo(
     () => ({
-      title: {
-        text: `Entries values ${groupPeriod} (${groupFun})`,
-        subtext: tracker.name,
-        left: "center",
-      },
       tooltip: {
         trigger: "axis",
       },
@@ -68,14 +70,27 @@ export function NumberTrackersLineChart(props: {
       yAxis: {},
       series: [
         {
+          smooth: true,
           data: entriesNumberValueStats.map((t) => t.value),
           type: "line",
           name: "Value",
         },
       ],
     }),
-    [entriesNumberValueStats, tracker.name, groupPeriod, groupFun],
+    [entriesNumberValueStats],
   );
 
-  return <Chart option={option} />;
+  return (
+    <View
+      style={{
+        flex: 1,
+        padding: Sizes.medium,
+        marginLeft: 40,
+        marginRight: 40,
+        height: 300,
+      }}
+    >
+      <Chart option={option} />
+    </View>
+  );
 }

@@ -31,7 +31,7 @@ export default function SelectStatTrackerScreen() {
   return (
     <ThemedView>
       <View style={styles.searchContainer}>
-        <SearchInput value={searchQuery} onChange={setSearchQuery} placeholder="Search..." />
+        <SearchInput autoFocus value={searchQuery} onChange={setSearchQuery} placeholder="Search..." />
       </View>
       <ThemedView style={styles.listContainer}>
         <FlatList
