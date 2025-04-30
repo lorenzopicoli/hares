@@ -5,49 +5,61 @@ import { Chart } from "./Chart";
 import type { DateGroupingPeriod } from "@/utils/dateGroupPeriod";
 import type { GroupFunction } from "@/utils/groupFunctions";
 import { useNumberTrackerLineStats } from "@/hooks/data/stats/useNumberTrackerLineStats";
-import { addDays, format, parse } from "date-fns";
+import { addDays, format } from "date-fns";
 import { View } from "react-native";
+import type { StatsDateRange } from "../BottomSheets/ChartOptionsBottomSheet";
 
 export function CalendarHeatmapChart(props: {
   tracker: Tracker;
+  dateRange: StatsDateRange;
   groupPeriod: DateGroupingPeriod;
   groupFun: GroupFunction;
 }) {
-  const { tracker, groupFun, groupPeriod } = props;
+  const { tracker, dateRange, groupFun, groupPeriod } = props;
 
-  const { entriesNumberValueStats } = useNumberTrackerLineStats({ trackerId: tracker.id, groupPeriod, groupFun });
-  const getVirtualData = useCallback(
-    (year: number) => {
-      const startDate = parse(`${year}-01-01`, "yyyy-MM-dd", new Date());
-      const endDate = parse(`${year + 1}-01-01`, "yyyy-MM-dd", new Date());
-      const data = [];
+  const { entriesNumberValueStats } = useNumberTrackerLineStats({
+    trackerId: tracker.id,
+    groupPeriod,
+    groupFun,
+    dateRange,
+  });
+  const getVirtualData = useCallback(() => {
+    const data = [];
 
-      let currentDate = startDate;
-      while (currentDate < endDate) {
-        const date = format(currentDate, "yyyy-MM-dd");
-        const dayData = entriesNumberValueStats.find((entry) => entry.date === date);
-        data.push({
-          itemStyle: {
-            borderWidth: 1,
-            borderRadius: 4,
-            shadowColor: "rgba(0, 0, 0, 0.5)",
-            shadowBlur: dayData?.value ? 7 : 0,
-          },
-          value: [date, dayData?.value ?? -1],
-        });
-        currentDate = addDays(currentDate, 1);
+    let currentDate = dateRange.startDate;
+    let min = null;
+    let max = null;
+    while (currentDate < dateRange.endDate) {
+      const date = format(currentDate, "yyyy-MM-dd");
+      const dayData = entriesNumberValueStats.find((entry) => entry.date === date);
+      if (dayData && (max === null || dayData?.value > max)) {
+        max = dayData.value;
+      }
+      if (dayData && (min === null || dayData?.value < min)) {
+        min = dayData.value;
       }
 
-      return data;
-    },
-    [entriesNumberValueStats],
-  );
+      data.push({
+        itemStyle: {
+          borderWidth: 1,
+          borderRadius: 4,
+          shadowColor: "rgba(0, 0, 0, 0.5)",
+          shadowBlur: dayData?.value ? 7 : 0,
+        },
+        value: [date, dayData?.value ?? -1],
+      });
+      currentDate = addDays(currentDate, 1);
+    }
+
+    return { data, min, max };
+  }, [entriesNumberValueStats, dateRange]);
+  const chartData = useMemo(() => getVirtualData(), [getVirtualData]);
   const option: EChartsCoreOption = useMemo(
     () => ({
       tooltip: {},
       visualMap: {
-        min: 0,
-        max: 20,
+        min: Math.max(chartData.min ?? 0, 0),
+        max: chartData.max ?? 0,
         type: "piecewise",
         orient: "horizontal",
         left: "center",
@@ -56,7 +68,7 @@ export function CalendarHeatmapChart(props: {
         left: 50,
         right: 30,
         cellSize: ["auto", 18],
-        range: ["2025-01-01", "2025-04-26"],
+        range: [format(dateRange.startDate, "yyyy-MM-dd"), format(dateRange.endDate, "yyyy-MM-dd")],
         yearLabel: { show: false },
       },
       series: {
@@ -65,10 +77,10 @@ export function CalendarHeatmapChart(props: {
 
         name: "Value",
 
-        data: getVirtualData(2025),
+        data: chartData.data,
       },
     }),
-    [getVirtualData],
+    [chartData, dateRange],
   );
 
   return (

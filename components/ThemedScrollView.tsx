@@ -25,7 +25,7 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
-    padding: Sizes.scrollView.padding,
+    padding: Sizes.medium,
     gap: 16,
     overflow: "hidden",
   },

@@ -1,7 +1,7 @@
 import ThemedScrollView from "@/components/ThemedScrollView";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import ThemedButton from "@/components/ThemedButton";
-import { useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTracker } from "@/hooks/data/useTracker";
 import { ThemedView } from "@/components/ThemedView";
 import { TrackerType } from "@/db/schema";
@@ -19,28 +19,54 @@ import { useColors, type ThemedColors } from "@/components/ThemeProvider";
 import { Sizes } from "@/constants/Sizes";
 import { CalendarHeatmapChart } from "@/components/charts/CalendarHeatmapChart";
 import ChartCard from "@/components/ChartCard";
-import { ChartOptionsBottomSheet } from "@/components/BottomSheets/ChartOptionsBottomSheet";
+import { ChartOptionsBottomSheet, type StatsDateRange } from "@/components/BottomSheets/ChartOptionsBottomSheet";
 import type { BottomSheetModal } from "@gorhom/bottom-sheet";
 import { MaterialIcons } from "@expo/vector-icons";
 import SearchInput from "@/components/SearchInput";
 import { Separator } from "@/components/Separator";
+import { subMonths } from "date-fns";
 
 export default function StatsScreen() {
-  const { trackerId: trackerIdParam } = useLocalSearchParams<{
+  const {
+    trackerId: trackerIdParam,
+    startDate: startDateParam,
+    endDate: endDateParam,
+  } = useLocalSearchParams<{
     trackerId?: string;
+    startDate?: string;
+    endDate?: string;
   }>();
+  const optionsBottomSheetRef = useRef<BottomSheetModal>(null);
 
   const router = useRouter();
   const { colors } = useColors();
   const { styles } = useStyles(createStyles);
   const trackerId = useMemo(() => (trackerIdParam ? +trackerIdParam : undefined), [trackerIdParam]);
   const { tracker } = useTracker(trackerId ?? -1);
+  const { entries } = useEntries({ trackerId, limit: 5 });
+
   const [limit, setLimit] = useState(10);
   const [groupPeriod, setGroupPeriod] = useState<DateGroupingPeriod>(DateGroupingPeriod.daily);
   const [groupFun, setGroupFun] = useState<GroupFunction>(GroupFunction.avg);
   const [includeOther, setIncludeOther] = useState(false);
-  const { entries } = useEntries({ trackerId, limit: 5 });
-  const optionsBottomSheetRef = useRef<BottomSheetModal>(null);
+
+  const [dateRange, setDateRange] = useState({
+    startDate: startDateParam ? new Date(startDateParam) : new Date(),
+    endDate: endDateParam ? new Date(endDateParam) : subMonths(new Date(), 1),
+  });
+
+  useEffect(() => {
+    if (dateRange) {
+      router.setParams({
+        startDate: dateRange.startDate.toISOString(),
+        endDate: dateRange.endDate.toISOString(),
+      });
+    }
+  }, [dateRange, router]);
+
+  const handleDateRangeChange = useCallback((range: StatsDateRange) => {
+    setDateRange(range);
+  }, []);
 
   const showOptionsSheet = () => {
     optionsBottomSheetRef.current?.present();
@@ -64,52 +90,9 @@ export default function StatsScreen() {
             </Pressable>
           </ThemedView>
           <TouchableOpacity style={styles.filterButton} onPress={showOptionsSheet}>
-            <MaterialIcons name="settings-input-component" size={20} color={colors.text} />
+            <MaterialIcons name="date-range" size={20} color={colors.text} />
           </TouchableOpacity>
         </XStack>
-        {/* <XStack>
-          <ThemedInput
-            containerStyle={{ flex: 1 }}
-            keyboardType="numeric"
-            label="Limit"
-            onChangeText={(t) => setLimit(+t || 0)}
-          />
-
-          <ThemedView>
-            <ThemedToggleButtons
-              label="Remaining text"
-              onChangeSelection={(o) => setIncludeOther(!!o)}
-              options={[{ label: "Include", value: true }]}
-              columns={1}
-              allowUnselect
-              buttonContainerStyle={{ height: 48 }}
-            />
-          </ThemedView>
-        </XStack>
-        <ThemedToggleButtons
-          label="Group by"
-          selectedOption={groupPeriod}
-          onChangeSelection={(i) => setGroupPeriod(i ?? DateGroupingPeriod.daily)}
-          options={[
-            { label: "Daily", value: DateGroupingPeriod.daily },
-            { label: "Weekly", value: DateGroupingPeriod.weekly },
-            { label: "Monthly", value: DateGroupingPeriod.monthly },
-            { label: "Yearly", value: DateGroupingPeriod.yearly },
-          ]}
-          columns={4}
-        />
-        <ThemedToggleButtons
-          label="Group function"
-          selectedOption={groupFun}
-          onChangeSelection={(i) => setGroupFun(i ?? GroupFunction.avg)}
-          options={[
-            { label: "Average", value: GroupFunction.avg },
-            { label: "Sum", value: GroupFunction.sum },
-            { label: "Max", value: GroupFunction.max },
-            { label: "Min", value: GroupFunction.min },
-          ]}
-          columns={4}
-        /> */}
       </YStack>
       <Spacing size="xSmall" />
       {tracker ? (
@@ -117,12 +100,17 @@ export default function StatsScreen() {
           {tracker.type === TrackerType.Number || tracker.type === TrackerType.Scale ? (
             <>
               <ChartCard title="Daily values">
-                <CalendarHeatmapChart tracker={tracker} groupPeriod={groupPeriod} groupFun={groupFun} />
+                <CalendarHeatmapChart
+                  dateRange={dateRange}
+                  tracker={tracker}
+                  groupPeriod={groupPeriod}
+                  groupFun={groupFun}
+                />
               </ChartCard>
             </>
           ) : null}
           <ChartCard title="# of entries">
-            <EntryCountLineChart tracker={tracker} groupPeriod={groupPeriod} />
+            <EntryCountLineChart tracker={tracker} groupPeriod={groupPeriod} dateRange={dateRange} />
           </ChartCard>
 
           {tracker.type === TrackerType.TextList ? (
@@ -136,7 +124,12 @@ export default function StatsScreen() {
           {tracker.type === TrackerType.Number || tracker.type === TrackerType.Scale ? (
             <>
               <ChartCard title="Entry values">
-                <NumberTrackersLineChart tracker={tracker} groupPeriod={groupPeriod} groupFun={groupFun} />
+                <NumberTrackersLineChart
+                  tracker={tracker}
+                  groupPeriod={groupPeriod}
+                  groupFun={groupFun}
+                  dateRange={dateRange}
+                />
               </ChartCard>
             </>
           ) : null}
@@ -166,7 +159,7 @@ export default function StatsScreen() {
           {tracker ? <ThemedButton title="See all entries" onPress={handleSeeAllEntries} /> : null}
         </>
       ) : null}
-      <ChartOptionsBottomSheet ref={optionsBottomSheetRef} />
+      <ChartOptionsBottomSheet ref={optionsBottomSheetRef} onDateRangeChange={handleDateRangeChange} />
     </ThemedScrollView>
   );
 }

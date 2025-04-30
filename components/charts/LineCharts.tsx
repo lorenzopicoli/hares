@@ -8,13 +8,15 @@ import { useNumberTrackerLineStats } from "@/hooks/data/stats/useNumberTrackerLi
 import type { GroupFunction } from "@/utils/groupFunctions";
 import { View } from "react-native";
 import { Sizes } from "@/constants/Sizes";
+import type { StatsDateRange } from "../BottomSheets/ChartOptionsBottomSheet";
 
 export function EntryCountLineChart(props: {
   tracker: Tracker;
   groupPeriod: DateGroupingPeriod;
+  dateRange: StatsDateRange;
 }) {
-  const { tracker, groupPeriod } = props;
-  const { entryCountStats } = useEntryCountStats({ trackerId: tracker.id, groupPeriod });
+  const { tracker, groupPeriod, dateRange } = props;
+  const { entryCountStats } = useEntryCountStats({ trackerId: tracker.id, groupPeriod, dateRange });
 
   const option: EChartsCoreOption = useMemo(
     () => ({
@@ -56,9 +58,15 @@ export function NumberTrackersLineChart(props: {
   tracker: Tracker;
   groupPeriod: DateGroupingPeriod;
   groupFun: GroupFunction;
+  dateRange: StatsDateRange;
 }) {
-  const { tracker, groupPeriod, groupFun } = props;
-  const { entriesNumberValueStats } = useNumberTrackerLineStats({ trackerId: tracker.id, groupPeriod, groupFun });
+  const { tracker, groupPeriod, groupFun, dateRange } = props;
+  const { entriesNumberValueStats } = useNumberTrackerLineStats({
+    trackerId: tracker.id,
+    groupPeriod,
+    groupFun,
+    dateRange,
+  });
   const option: EChartsCoreOption = useMemo(
     () => ({
       tooltip: {
