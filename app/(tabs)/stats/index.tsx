@@ -10,7 +10,6 @@ import { useEntries } from "@/hooks/data/useEntries";
 import EntriesListRow from "@/components/EntriesList/EntriesListRow";
 import useStyles from "@/hooks/useStyles";
 import { EntryCountLineChart, NumberTrackersLineChart } from "@/components/charts/LineCharts";
-import { Spacing } from "@/components/Spacing";
 import { XStack, YStack } from "@/components/Stacks";
 import { DateGroupingPeriod } from "@/utils/dateGroupPeriod";
 import { GroupFunction } from "@/utils/groupFunctions";
@@ -92,7 +91,6 @@ export default function StatsScreen() {
           </TouchableOpacity>
         </XStack>
       </YStack>
-      <Spacing size="xSmall" />
       {tracker ? (
         <>
           {tracker.type === TrackerType.Number || tracker.type === TrackerType.Scale ? (
