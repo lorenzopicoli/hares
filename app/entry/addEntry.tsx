@@ -59,17 +59,6 @@ export default function AddEntryScreen() {
     { value: false, label: "No" },
   ];
 
-  const handleGoToSelectItems = useCallback(() => {
-    router.navigate({
-      pathname: "./textListSelection",
-      params: {
-        trackerId: trackerId,
-        entryId,
-        preSelectedItems: JSON.stringify(textListValues),
-      },
-    });
-  }, [router, trackerId, entryId]);
-
   const { control, setValue, watch, handleSubmit } = useForm<FormInputs>({
     defaultValues: async () => {
       if (!entryId) {
@@ -94,6 +83,17 @@ export default function AddEntryScreen() {
   });
   const textListValues = watch("textList");
   const chips = useMemo(() => textListValues?.map((t) => ({ label: t, id: t })) ?? [], [textListValues]);
+
+  const handleGoToSelectItems = useCallback(() => {
+    router.navigate({
+      pathname: "./textListSelection",
+      params: {
+        trackerId: trackerId,
+        entryId,
+        preSelectedItems: JSON.stringify(textListValues),
+      },
+    });
+  }, [router, trackerId, entryId, textListValues]);
 
   const onSubmit = async (data: FormInputs) => {
     const entry: NewTrackerEntry = {

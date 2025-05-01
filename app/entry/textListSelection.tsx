@@ -80,7 +80,6 @@ export default function TextListSelectionScreen() {
           <ThemedText>{item}</ThemedText>
           {selectedItems.has(item) ? <Ionicons style={styles.itemIcon} name="checkmark" size={20} /> : null}
         </ThemedView>
-        <Separator />
       </TouchableOpacity>
     );
   };
