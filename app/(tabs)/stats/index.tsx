@@ -155,7 +155,11 @@ export default function StatsScreen() {
           {tracker ? <ThemedButton title="See all entries" onPress={handleSeeAllEntries} /> : null}
         </>
       ) : null}
-      <ChartOptionsBottomSheet ref={optionsBottomSheetRef} onDateRangeChange={handleDateRangeChange} />
+      <ChartOptionsBottomSheet
+        ref={optionsBottomSheetRef}
+        onDateRangeChange={handleDateRangeChange}
+        initialDate={dateRange}
+      />
     </ThemedScrollView>
   );
 }

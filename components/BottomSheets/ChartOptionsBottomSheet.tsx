@@ -16,6 +16,7 @@ export interface StatsDateRange {
 
 type ChartOptionsBottomSheetProps = {
   onDateRangeChange?: (range: StatsDateRange) => void;
+  initialDate: StatsDateRange;
 };
 
 export const ChartOptionsBottomSheet = forwardRef<BottomSheetModal, ChartOptionsBottomSheetProps>((props, ref) => {
@@ -23,7 +24,10 @@ export const ChartOptionsBottomSheet = forwardRef<BottomSheetModal, ChartOptions
   const { colors } = useColors();
   const datePickerDefaultStyles = useDefaultStyles();
   const bottomSheetRef = useRef<BottomSheetModal>(null);
-  const [date, setDate] = useState<{ startDate: DateType; endDate: DateType }>();
+  const [date, setDate] = useState<{ startDate: DateType; endDate: DateType }>({
+    startDate: props.initialDate.startDate,
+    endDate: props.initialDate.endDate,
+  });
 
   useImperativeHandle(ref, () => bottomSheetRef.current as BottomSheetModal);
 
