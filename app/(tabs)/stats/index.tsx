@@ -14,7 +14,7 @@ import { Spacing } from "@/components/Spacing";
 import { XStack, YStack } from "@/components/Stacks";
 import { DateGroupingPeriod } from "@/utils/dateGroupPeriod";
 import { GroupFunction } from "@/utils/groupFunctions";
-import { Pressable, StyleSheet, TouchableOpacity, View } from "react-native";
+import { StyleSheet, TouchableOpacity, View } from "react-native";
 import { useColors, type ThemedColors } from "@/components/ThemeProvider";
 import { Sizes } from "@/constants/Sizes";
 import { CalendarHeatmapChart } from "@/components/charts/CalendarHeatmapChart";
@@ -51,8 +51,8 @@ export default function StatsScreen() {
   const [includeOther, setIncludeOther] = useState(false);
 
   const [dateRange, setDateRange] = useState({
-    startDate: startDateParam ? new Date(startDateParam) : new Date(),
-    endDate: endDateParam ? new Date(endDateParam) : subMonths(new Date(), 1),
+    startDate: startDateParam ? new Date(startDateParam) : subMonths(new Date(), 1),
+    endDate: endDateParam ? new Date(endDateParam) : new Date(),
   });
 
   useEffect(() => {
@@ -85,9 +85,7 @@ export default function StatsScreen() {
       <YStack alignItems="stretch">
         <XStack>
           <ThemedView>
-            <Pressable onPressIn={handleSelectTracker}>
-              <SearchInput editable={false} hideClose value={tracker?.name ?? ""} />
-            </Pressable>
+            <SearchInput onPress={handleSelectTracker} editable={false} hideClose value={tracker?.name ?? ""} />
           </ThemedView>
           <TouchableOpacity style={styles.filterButton} onPress={showOptionsSheet}>
             <MaterialIcons name="date-range" size={20} color={colors.text} />

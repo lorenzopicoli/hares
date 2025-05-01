@@ -14,10 +14,21 @@ interface SearchInputProps {
   autoFocus?: boolean;
   placeholder?: string;
   style?: StyleProp<TextStyle>;
+  onPress?: () => void;
 }
 
 function SearchInput(props: SearchInputProps) {
-  const { editable = true, hideClose, autoFocus, value, onChange, onFocus, placeholder = "Search...", style } = props;
+  const {
+    editable = true,
+    hideClose,
+    autoFocus,
+    value,
+    onPress,
+    onChange,
+    onFocus,
+    placeholder = "Search...",
+    style,
+  } = props;
   const inputRef = useRef<TextInput>(null);
   const { colors } = useColors();
   const { styles: customStyles } = useStyles(createSearchStyles);
@@ -36,6 +47,7 @@ function SearchInput(props: SearchInputProps) {
     <View style={customStyles.searchContainer}>
       <Ionicons name="search" size={20} color={colors.secondaryText} style={customStyles.searchIcon} />
       <TextInput
+        onPress={onPress}
         ref={inputRef}
         value={value}
         onChangeText={onChange}

@@ -8,8 +8,8 @@ export default function StatsRoot() {
         name="index"
         options={{ headerShown: true, headerTitle: "🐰 Stats" }}
         initialParams={{
-          startDate: new Date().toISOString(),
-          endDate: subMonths(new Date(), 1).toISOString(),
+          startDate: subMonths(new Date(), 1).toISOString(),
+          endDate: new Date().toISOString(),
         }}
       />
     </Stack>
