@@ -1,21 +1,37 @@
 import type { Tracker } from "@/db/schema";
 import type { EChartsCoreOption } from "echarts";
-import { useMemo } from "react";
+import { useMemo, useRef, useState } from "react";
 import { Chart } from "./Chart";
 import { useTopTextListStats } from "@/hooks/data/stats/useTopTextListStats";
 import { Sizes } from "@/constants/Sizes";
-import { View } from "react-native";
+import { TouchableOpacity, View, StyleSheet } from "react-native";
+import ChartCard from "../ChartCard";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
+import type { BottomSheetModal } from "@gorhom/bottom-sheet";
+import { useColors, type ThemedColors } from "../ThemeProvider";
+import useStyles from "@/hooks/useStyles";
+import { RankingChartOptionsBottomSheet } from "../BottomSheets/RankingChartOptionsBottomSheet";
+import type { StatsDateRange } from "../BottomSheets/StatsScreenOptionsBottomSheet";
 
 interface Props {
-  limit: number;
   tracker: Tracker;
-  includeOthers: boolean;
+  dateRange: StatsDateRange;
 }
 
 export default function TextListBarChart(props: Props) {
-  const { limit, tracker, includeOthers } = props;
+  const { tracker, dateRange } = props;
+  const optionsBottomSheet = useRef<BottomSheetModal>(null);
+  const { styles } = useStyles(createStyles);
+  const { colors } = useColors();
 
-  const { textListUsageCount } = useTopTextListStats({ trackerId: tracker.id, limit, includeOthers });
+  const [limit, setLimit] = useState(10);
+
+  const { textListUsageCount } = useTopTextListStats({
+    trackerId: tracker.id,
+    limit: limit ?? 10,
+    includeOthers: false,
+    dateRange,
+  });
   const option: EChartsCoreOption = useMemo(
     () => ({
       tooltip: {
@@ -54,17 +70,44 @@ export default function TextListBarChart(props: Props) {
     [textListUsageCount],
   );
 
+  const handleFilterPress = () => {
+    optionsBottomSheet.current?.present();
+  };
+
   return (
-    <View
-      style={{
-        flex: 1,
-        padding: Sizes.medium,
-        marginLeft: 40,
-        marginRight: 40,
-        height: 300,
-      }}
+    <ChartCard
+      title={"Ranking"}
+      right={
+        <TouchableOpacity style={styles.filterButton} onPress={handleFilterPress}>
+          <MaterialCommunityIcons name="filter-menu" size={20} color={colors.text} />
+        </TouchableOpacity>
+      }
+      onFilterPress={handleFilterPress}
     >
-      <Chart option={option} />
-    </View>
+      <View
+        style={{
+          flex: 1,
+          padding: Sizes.medium,
+          marginLeft: 40,
+          marginRight: 40,
+          height: 300,
+        }}
+      >
+        <Chart option={option} />
+      </View>
+      <RankingChartOptionsBottomSheet ref={optionsBottomSheet} limit={limit} onChangeLimit={setLimit} />
+    </ChartCard>
   );
 }
+
+const createStyles = (theme: ThemedColors) =>
+  StyleSheet.create({
+    filterButton: {
+      backgroundColor: theme.toggleButton.background,
+      height: 35,
+      width: 35,
+      borderRadius: Sizes.radius.small,
+      alignItems: "center",
+      justifyContent: "center",
+    },
+  });

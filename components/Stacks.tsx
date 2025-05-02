@@ -48,5 +48,6 @@ const createXStackStyles = (theme: ThemedColors) =>
   StyleSheet.create({
     container: {
       flexDirection: "row",
+      flexWrap: "wrap",
     },
   });

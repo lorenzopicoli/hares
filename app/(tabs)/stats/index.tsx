@@ -1,6 +1,5 @@
 import ThemedScrollView from "@/components/ThemedScrollView";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import ThemedButton from "@/components/ThemedButton";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTracker } from "@/hooks/data/useTracker";
 import { ThemedView } from "@/components/ThemedView";
@@ -13,17 +12,20 @@ import { EntryCountLineChart, NumberTrackersLineChart } from "@/components/chart
 import { XStack, YStack } from "@/components/Stacks";
 import { DateGroupingPeriod } from "@/utils/dateGroupPeriod";
 import { GroupFunction } from "@/utils/groupFunctions";
-import { StyleSheet, TouchableOpacity, View } from "react-native";
+import { Platform, Pressable, StyleSheet, TouchableOpacity, View } from "react-native";
 import { useColors, type ThemedColors } from "@/components/ThemeProvider";
 import { Sizes } from "@/constants/Sizes";
 import { CalendarHeatmapChart } from "@/components/charts/CalendarHeatmapChart";
 import ChartCard from "@/components/ChartCard";
-import { ChartOptionsBottomSheet, type StatsDateRange } from "@/components/BottomSheets/ChartOptionsBottomSheet";
 import type { BottomSheetModal } from "@gorhom/bottom-sheet";
-import { MaterialIcons } from "@expo/vector-icons";
+import { Entypo, MaterialIcons } from "@expo/vector-icons";
 import SearchInput from "@/components/SearchInput";
 import { Separator } from "@/components/Separator";
 import { subMonths } from "date-fns";
+import {
+  StatsScreenOptionsBottomSheet,
+  type StatsDateRange,
+} from "@/components/BottomSheets/StatsScreenOptionsBottomSheet";
 
 export default function StatsScreen() {
   const {
@@ -35,7 +37,7 @@ export default function StatsScreen() {
     startDate?: string;
     endDate?: string;
   }>();
-  const optionsBottomSheetRef = useRef<BottomSheetModal>(null);
+  const screenOptionsBottomSheetRef = useRef<BottomSheetModal>(null);
 
   const router = useRouter();
   const { colors } = useColors();
@@ -68,7 +70,7 @@ export default function StatsScreen() {
   }, []);
 
   const showOptionsSheet = () => {
-    optionsBottomSheetRef.current?.present();
+    screenOptionsBottomSheetRef.current?.present();
   };
 
   const handleSelectTracker = () => {
@@ -84,7 +86,14 @@ export default function StatsScreen() {
       <YStack alignItems="stretch">
         <XStack>
           <ThemedView>
-            <SearchInput onPress={handleSelectTracker} editable={false} hideClose value={tracker?.name ?? ""} />
+            <Pressable onPressIn={Platform.OS === "android" ? handleSelectTracker : undefined}>
+              <SearchInput
+                onPress={Platform.OS === "ios" ? handleSelectTracker : undefined}
+                editable={false}
+                hideClose
+                value={tracker?.name ?? ""}
+              />
+            </Pressable>
           </ThemedView>
           <TouchableOpacity style={styles.filterButton} onPress={showOptionsSheet}>
             <MaterialIcons name="date-range" size={20} color={colors.text} />
@@ -94,69 +103,42 @@ export default function StatsScreen() {
       {tracker ? (
         <>
           {tracker.type === TrackerType.Number || tracker.type === TrackerType.Scale ? (
-            <>
-              <ChartCard title="Daily values">
-                <CalendarHeatmapChart
-                  dateRange={dateRange}
-                  tracker={tracker}
-                  groupPeriod={groupPeriod}
-                  groupFun={groupFun}
-                />
-              </ChartCard>
-            </>
+            <CalendarHeatmapChart
+              dateRange={dateRange}
+              tracker={tracker}
+              groupPeriod={groupPeriod}
+              groupFun={groupFun}
+            />
           ) : null}
-          <ChartCard title="# of entries">
-            <EntryCountLineChart tracker={tracker} groupPeriod={groupPeriod} dateRange={dateRange} />
-          </ChartCard>
 
-          {tracker.type === TrackerType.TextList ? (
-            <>
-              <ChartCard title={`Top ${limit} entries in ${tracker.name}`}>
-                <TextListBarChart limit={limit} tracker={tracker} includeOthers={includeOther} />
-              </ChartCard>
-            </>
-          ) : null}
+          {tracker.type === TrackerType.TextList ? <TextListBarChart dateRange={dateRange} tracker={tracker} /> : null}
 
           {tracker.type === TrackerType.Number || tracker.type === TrackerType.Scale ? (
-            <>
-              <ChartCard title="Entry values">
-                <NumberTrackersLineChart
-                  tracker={tracker}
-                  groupPeriod={groupPeriod}
-                  groupFun={groupFun}
-                  dateRange={dateRange}
-                />
-              </ChartCard>
-            </>
+            <NumberTrackersLineChart tracker={tracker} dateRange={dateRange} />
           ) : null}
 
+          <EntryCountLineChart tracker={tracker} dateRange={dateRange} />
+
           <ThemedView>
-            {/* <SectionList
-              style={styles.list}
-              sections={[
-                {
-                  title: <ThemedText type="title">Previous Entries</ThemedText>,
-                  data: entries.map((entry) => ({
-                    key: entry.id,
-                    render: <EntriesListRow entry={entry} hideTrackerName style={styles.listItem} />,
-                  })),
-                },
-              ]}
-            /> */}
-            <ChartCard title={"Entries"}>
-              {entries.map((entry) => (
+            <ChartCard
+              title={"Latest entries"}
+              right={<Entypo name="chevron-small-right" size={24} color={colors.text} />}
+              onHeaderPress={handleSeeAllEntries}
+            >
+              {entries.map((entry, i) => (
                 <View key={entry.id} style={{ paddingHorizontal: Sizes.medium }}>
                   <EntriesListRow entry={entry} hideTrackerName style={styles.listItem} />
-                  <Separator overrideHorizontalMargin={0} containerBackgroundColor={colors.secondaryBackground} />
+                  {i !== entries.length - 1 ? (
+                    <Separator overrideHorizontalMargin={0} containerBackgroundColor={colors.secondaryBackground} />
+                  ) : null}
                 </View>
               ))}
             </ChartCard>
           </ThemedView>
-          {tracker ? <ThemedButton title="See all entries" onPress={handleSeeAllEntries} /> : null}
         </>
       ) : null}
-      <ChartOptionsBottomSheet
-        ref={optionsBottomSheetRef}
+      <StatsScreenOptionsBottomSheet
+        ref={screenOptionsBottomSheetRef}
         onDateRangeChange={handleDateRangeChange}
         initialDate={dateRange}
       />

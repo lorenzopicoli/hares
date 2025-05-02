@@ -7,7 +7,8 @@ import type { GroupFunction } from "@/utils/groupFunctions";
 import { useNumberTrackerLineStats } from "@/hooks/data/stats/useNumberTrackerLineStats";
 import { addDays, format } from "date-fns";
 import { View } from "react-native";
-import type { StatsDateRange } from "../BottomSheets/ChartOptionsBottomSheet";
+import ChartCard from "../ChartCard";
+import type { StatsDateRange } from "../BottomSheets/StatsScreenOptionsBottomSheet";
 
 export function CalendarHeatmapChart(props: {
   tracker: Tracker;
@@ -84,15 +85,17 @@ export function CalendarHeatmapChart(props: {
   );
 
   return (
-    <View
-      style={{
-        flex: 1,
-        marginLeft: 40,
-        marginRight: 40,
-        height: 270,
-      }}
-    >
-      <Chart option={option} />
-    </View>
+    <ChartCard title="Daily values">
+      <View
+        style={{
+          flex: 1,
+          marginLeft: 40,
+          marginRight: 40,
+          height: 270,
+        }}
+      >
+        <Chart option={option} />
+      </View>
+    </ChartCard>
   );
 }

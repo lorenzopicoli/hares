@@ -12,17 +12,19 @@ export default function BottomSheetListItem(props: {
   title: string | ReactNode;
   onPress?: () => void;
   right?: ReactNode;
+  fullWidth?: boolean;
 }) {
+  const { left, title, onPress, right, fullWidth = true } = props;
   const { styles } = useStyles(createStyles);
   return (
-    <TouchableOpacity style={styles.container} onPress={props.onPress}>
+    <TouchableOpacity style={[styles.container, fullWidth && styles.fullWidth]} onPress={onPress}>
       <XStack style={styles.xStack} alignItems="center" justifyContent="space-between">
         <XStack justifyContent="center" gap={Sizes.small}>
-          {props.left ? props.left : null}
-          {typeof props.title === "string" ? <ThemedText>{props.title}</ThemedText> : props.title}
+          {left ? left : null}
+          {typeof title === "string" ? <ThemedText>{title}</ThemedText> : title}
         </XStack>
 
-        {props.right ? props.right : <Entypo name="chevron-small-right" size={24} color={styles.iconColor.color} />}
+        {right !== undefined ? right : <Entypo name="chevron-small-right" size={24} color={styles.iconColor.color} />}
       </XStack>
     </TouchableOpacity>
   );
@@ -33,6 +35,8 @@ const createStyles = (theme: ThemedColors) =>
     container: {
       paddingHorizontal: Sizes.medium,
       height: 40,
+    },
+    fullWidth: {
       width: "100%",
     },
     xStack: {

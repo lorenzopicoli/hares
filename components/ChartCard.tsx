@@ -1,15 +1,17 @@
 import useStyles from "@/hooks/useStyles";
 import { useColors, type ThemedColors } from "./ThemeProvider";
 import { Sizes } from "@/constants/Sizes";
-import type { PropsWithChildren } from "react";
+import type { PropsWithChildren, ReactNode } from "react";
 import { XStack, YStack } from "./Stacks";
 import { ThemedText } from "./ThemedText";
-import { StyleSheet, TouchableOpacity } from "react-native";
+import { StyleSheet, TouchableHighlight, View } from "react-native";
 import { Separator } from "./Separator";
-import { MaterialCommunityIcons } from "@expo/vector-icons";
 
 interface ChartCardProps extends PropsWithChildren {
   title: string;
+  right?: ReactNode;
+  onFilterPress?: () => void;
+  onHeaderPress?: () => void;
 }
 
 export default function ChartCard(props: ChartCardProps) {
@@ -18,14 +20,14 @@ export default function ChartCard(props: ChartCardProps) {
   return (
     <YStack gap={0} alignItems="stretch" style={styles.card}>
       <YStack style={styles.topSection} gap={Sizes.medium} alignItems="center">
-        <XStack>
-          <ThemedText style={styles.title} type="title">
-            {props.title}
-          </ThemedText>
-          <TouchableOpacity style={styles.filterButton} onPress={() => console.log("a")}>
-            <MaterialCommunityIcons name="filter-menu" size={20} color={colors.text} />
-          </TouchableOpacity>
-        </XStack>
+        <TouchableHighlight underlayColor="none" style={styles.headerPress} onPress={props?.onHeaderPress}>
+          <XStack>
+            <ThemedText style={styles.title} type="title">
+              {props.title}
+            </ThemedText>
+            {props.right ? <View style={styles.right}>{props.right}</View> : null}
+          </XStack>
+        </TouchableHighlight>
         <Separator overrideHorizontalMargin={0} containerBackgroundColor={colors.secondaryBackground} />
       </YStack>
       {props.children}
@@ -56,13 +58,11 @@ const createStyles = (theme: ThemedColors) =>
     title: {
       flex: 1,
     },
-    filterButton: {
+    headerPress: {
+      flex: 1,
+      width: "100%",
+    },
+    right: {
       alignSelf: "flex-end",
-      backgroundColor: theme.toggleButton.background,
-      height: 35,
-      width: 35,
-      borderRadius: Sizes.radius.small,
-      alignItems: "center",
-      justifyContent: "center",
     },
   });

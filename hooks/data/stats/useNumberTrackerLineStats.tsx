@@ -1,4 +1,4 @@
-import type { StatsDateRange } from "@/components/BottomSheets/ChartOptionsBottomSheet";
+import type { StatsDateRange } from "@/components/BottomSheets/StatsScreenOptionsBottomSheet";
 import { useDatabase } from "@/contexts/DatabaseContext";
 import { entriesTable } from "@/db/schema";
 import { type DateGroupingPeriod, formatSqlDateByGroupingPeriod } from "@/utils/dateGroupPeriod";
