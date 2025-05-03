@@ -42,7 +42,7 @@ export const NumberChartOptionsBottomSheet = forwardRef<BottomSheetModal, Number
               >
                 Time period:
               </ThemedText>
-              <XStack gap={Sizes.small}>
+              <XStack flexWrap="wrap" gap={Sizes.small}>
                 <BottomSheetListItem
                   title="Daily"
                   left={<RadioButton checked={groupPeriod === DateGroupingPeriod.daily} />}
@@ -86,7 +86,7 @@ export const NumberChartOptionsBottomSheet = forwardRef<BottomSheetModal, Number
               >
                 Calculation method:
               </ThemedText>
-              <XStack gap={Sizes.small}>
+              <XStack flexWrap="wrap" gap={Sizes.small}>
                 <BottomSheetListItem
                   title="Average"
                   left={<RadioButton checked={groupFun === GroupFunction.avg} />}
