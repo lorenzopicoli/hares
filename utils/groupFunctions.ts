@@ -1,4 +1,4 @@
-import { avg, max, min, sum } from "drizzle-orm";
+import { avg, max, min, sum, type SQL } from "drizzle-orm";
 import type { SQLiteColumn } from "drizzle-orm/sqlite-core";
 
 export enum GroupFunction {
@@ -8,7 +8,7 @@ export enum GroupFunction {
   min = "min",
 }
 
-export function sqlFromGroupFunction(fun: GroupFunction, column: SQLiteColumn) {
+export function sqlFromGroupFunction(fun: GroupFunction, column: SQLiteColumn | SQL<unknown>) {
   switch (fun) {
     case GroupFunction.avg:
       return avg(column);

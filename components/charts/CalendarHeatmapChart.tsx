@@ -24,7 +24,7 @@ export function CalendarHeatmapChart(props: {
 
   const optionsBottomSheet = useRef<BottomSheetModal>(null);
   const { styles } = useStyles(createStyles);
-  const { colors } = useColors();
+  const { colors, theme } = useColors();
 
   const [groupFun, setGroupFun] = useState(GroupFunction.avg);
 
@@ -55,7 +55,7 @@ export function CalendarHeatmapChart(props: {
         itemStyle: {
           borderWidth: 1,
           borderRadius: 4,
-          shadowColor: "rgba(0, 0, 0, 0.5)",
+          shadowColor: theme === "dark" ? "rgba(0, 0, 0, 0.5)" : "rgba(0, 0, 0, 0.2)",
           shadowBlur: dayData?.value ? 7 : 0,
         },
         // If no value, we just have to set something out of range so the coloring is correct
@@ -65,18 +65,22 @@ export function CalendarHeatmapChart(props: {
     }
 
     return { data, min, max };
-  }, [entriesNumberValueStats, dateRange]);
+  }, [entriesNumberValueStats, dateRange, theme]);
+
   const chartData = useMemo(() => getVirtualData(), [getVirtualData]);
+  const min = useMemo(() => Math.max(chartData.min ?? 0, 0), [chartData.min]);
+  const max = useMemo(() => chartData.max ?? 0, [chartData.max]);
   const option: EChartsCoreOption = useMemo(
     () => ({
       tooltip: {},
       visualMap: {
-        min: Math.max(chartData.min ?? 0, 0),
-        max: chartData.max ?? 0,
+        show: max !== min,
+        min,
+        max,
         type: "piecewise",
         orient: "horizontal",
         itemGap: 5,
-        text: [`   ${String(chartData.max ?? 0)}`, `${String(Math.max(chartData.min ?? 0, 0))}     `],
+        text: [`   ${String(max)}`, `${String(min)}     `],
         left: "center",
       },
       calendar: {
@@ -98,7 +102,7 @@ export function CalendarHeatmapChart(props: {
         data: chartData.data,
       },
     }),
-    [chartData, dateRange],
+    [chartData.data, max, min, dateRange],
   );
 
   // For some reason the chart doesn't render properly on first render, but forcing a re-render fixes it

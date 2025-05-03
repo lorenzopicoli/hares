@@ -1,8 +1,8 @@
-import type { StatsDateRange } from "@/components/BottomSheets/ChartOptionsBottomSheet";
+import type { StatsDateRange } from "@/components/BottomSheets/StatsScreenOptionsBottomSheet";
 import { useDatabase } from "@/contexts/DatabaseContext";
 import { entriesTable } from "@/db/schema";
 import { type DateGroupingPeriod, formatSqlDateByGroupingPeriod } from "@/utils/dateGroupPeriod";
-import { count, sql } from "drizzle-orm";
+import { sql } from "drizzle-orm";
 import { useLiveQuery } from "drizzle-orm/expo-sqlite";
 
 export function useEntryCountStats(params: {
@@ -12,18 +12,23 @@ export function useEntryCountStats(params: {
 }) {
   const { trackerId, groupPeriod, dateRange } = params;
   const { db } = useDatabase();
+  const groupedDate = formatSqlDateByGroupingPeriod(entriesTable.date, groupPeriod);
+
   const { data: entryCountStats } = useLiveQuery(
     db
       .select({
-        date: formatSqlDateByGroupingPeriod(entriesTable.date, groupPeriod),
-        value: count(entriesTable.id),
+        date: groupedDate,
+        value: sql<number>`SUM(COUNT(${entriesTable.id})) OVER (
+          ORDER BY ${groupedDate}
+          ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW
+        )`.as("value"),
       })
       .from(entriesTable)
       .where(sql`${entriesTable.trackerId} = ${trackerId} AND
         ${entriesTable.date} > ${dateRange.startDate.valueOf() / 1000} AND
         ${entriesTable.date} < ${dateRange.endDate.valueOf() / 1000}`)
-      .groupBy(formatSqlDateByGroupingPeriod(entriesTable.date, groupPeriod))
-      .orderBy(formatSqlDateByGroupingPeriod(entriesTable.date, groupPeriod)),
+      .groupBy(groupedDate)
+      .orderBy(groupedDate),
     [trackerId, groupPeriod, dateRange.startDate, dateRange.endDate],
   );
 

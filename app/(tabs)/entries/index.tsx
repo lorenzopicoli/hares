@@ -4,7 +4,7 @@ import { Separator } from "@/components/Separator";
 import { ThemedView } from "@/components/ThemedView";
 import type { TrackerEntry } from "@/db/schema";
 import { useEffect, useRef, useState } from "react";
-import { useColors, type ThemedColors } from "@/components/ThemeProvider";
+import type { ThemedColors } from "@/components/ThemeProvider";
 import EntriesListRow from "@/components/EntriesList/EntriesListRow";
 import useStyles from "@/hooks/useStyles";
 import { Sizes } from "@/constants/Sizes";
@@ -14,6 +14,7 @@ import {
   EntryOptionsBottomSheet,
   type EntryOptionsBottomSheetRef,
 } from "@/components/BottomSheets/EntryOptionsBottomSheet";
+import EmptyState from "@/components/EmptyState";
 
 export default function EntriesScreen() {
   const { styles } = useStyles(createStyles);
@@ -23,7 +24,6 @@ export default function EntriesScreen() {
   }>();
   const [searchText, setSearchText] = useState<string>(searchTextParam ?? "");
   const { entries } = useEntries({ searchText });
-  const { colors } = useColors();
   const entryOptionsBottomSheetRef = useRef<EntryOptionsBottomSheetRef>(null);
 
   useEffect(() => {
@@ -51,15 +51,21 @@ export default function EntriesScreen() {
           placeholder="Search..."
         />
       </View>
-      <ThemedView style={styles.listContainer}>
-        <FlatList
-          data={entries}
-          renderItem={renderItem}
-          keyboardShouldPersistTaps={Platform.OS === "android" ? "always" : undefined}
-          keyExtractor={(item) => item.id.toString()}
-          ItemSeparatorComponent={Separator}
-        />
-      </ThemedView>
+      {entries ? (
+        <ThemedView style={styles.listContainer}>
+          <FlatList
+            data={entries}
+            renderItem={renderItem}
+            keyboardShouldPersistTaps={Platform.OS === "android" ? "always" : undefined}
+            keyExtractor={(item) => item.id.toString()}
+            ItemSeparatorComponent={Separator}
+          />
+        </ThemedView>
+      ) : (
+        <ThemedView>
+          <EmptyState title="No entries yet" subTitle="Add an entry by selecting a tracker in the 'Track' page" />
+        </ThemedView>
+      )}
       <EntryOptionsBottomSheet ref={entryOptionsBottomSheetRef} />
     </ThemedView>
   );

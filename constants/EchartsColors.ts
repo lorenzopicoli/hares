@@ -501,15 +501,12 @@ echarts.registerTheme("haresLight", {
     itemStyle: {
       borderWidth: 4,
       borderColor: Colors.light.secondaryBackground,
-      //   opacity: 0.7,
       color: "transparent",
-      //   borderJoin: "round",
-      //   borderRadius: 2,
     },
     splitLine: {
       show: false,
       lineStyle: {
-        width: 2,
+        width: 1,
         color: Colors.light.tint,
       },
     },

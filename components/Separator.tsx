@@ -33,6 +33,8 @@ const createStyles = (theme: ThemedColors) =>
   StyleSheet.create({
     container: {
       width: "100%",
+      // Avoids a weird little glitch where there would be a gap between list items
+      marginTop: -1,
       backgroundColor: theme.background,
     },
     separator: {

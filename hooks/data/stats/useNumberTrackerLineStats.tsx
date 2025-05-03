@@ -18,7 +18,10 @@ export function useNumberTrackerLineStats(params: {
     db
       .select({
         date: formatSqlDateByGroupingPeriod(entriesTable.date, groupPeriod).mapWith(String),
-        value: sqlFromGroupFunction(groupFun, entriesTable.numberValue).mapWith(Number),
+        value: sqlFromGroupFunction(
+          groupFun,
+          sql`COALESCE(${entriesTable.numberValue}, ${entriesTable.booleanValue})`,
+        ).mapWith(Number),
       })
       .from(entriesTable)
       .where(sql`${entriesTable.trackerId} = ${trackerId} AND

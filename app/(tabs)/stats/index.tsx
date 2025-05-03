@@ -24,6 +24,7 @@ import {
   StatsScreenOptionsBottomSheet,
   type StatsDateRange,
 } from "@/components/BottomSheets/StatsScreenOptionsBottomSheet";
+import EmptyState from "@/components/EmptyState";
 
 export default function StatsScreen() {
   const {
@@ -85,6 +86,7 @@ export default function StatsScreen() {
                 editable={false}
                 hideClose
                 value={tracker?.name ?? ""}
+                placeholder="Select tracker..."
               />
             </Pressable>
           </ThemedView>
@@ -95,7 +97,9 @@ export default function StatsScreen() {
       </YStack>
       {tracker ? (
         <>
-          {tracker.type === TrackerType.Number || tracker.type === TrackerType.Scale ? (
+          {tracker.type === TrackerType.Number ||
+          tracker.type === TrackerType.Scale ||
+          tracker.type === TrackerType.Boolean ? (
             <CalendarHeatmapChart dateRange={dateRange} tracker={tracker} />
           ) : null}
 
@@ -124,7 +128,14 @@ export default function StatsScreen() {
             </ChartCard>
           </ThemedView>
         </>
-      ) : null}
+      ) : (
+        <ThemedView>
+          <EmptyState
+            title="No tracker selected"
+            subTitle="Use the search bar above to choose a tracker and view its stats."
+          />
+        </ThemedView>
+      )}
       <StatsScreenOptionsBottomSheet
         ref={screenOptionsBottomSheetRef}
         onDateRangeChange={handleDateRangeChange}

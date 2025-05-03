@@ -26,6 +26,7 @@ export const Colors = {
     tabIconDefault: "#687076",
     tabIconSelected: tintColorLight,
     secondaryText: "#687076",
+    logoBg: "#e0e0e5",
     border: "#e0e0e5",
     input: {
       background: "#f0f2f5",
@@ -80,6 +81,7 @@ export const Colors = {
     tabIconDefault: "#9BA1A6",
     tabIconSelected: tintColorDark,
     secondaryText: "#9BA1A6",
+    logoBg: "#babbcf",
     border: "#3a3e52",
     input: {
       background: "#323549",
