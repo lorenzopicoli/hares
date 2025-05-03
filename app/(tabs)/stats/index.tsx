@@ -46,10 +46,8 @@ export default function StatsScreen() {
   const { tracker } = useTracker(trackerId ?? -1);
   const { entries } = useEntries({ trackerId, limit: 5 });
 
-  const [limit, setLimit] = useState(10);
   const [groupPeriod, setGroupPeriod] = useState<DateGroupingPeriod>(DateGroupingPeriod.daily);
   const [groupFun, setGroupFun] = useState<GroupFunction>(GroupFunction.avg);
-  const [includeOther, setIncludeOther] = useState(false);
 
   const [dateRange, setDateRange] = useState({
     startDate: startDateParam ? new Date(startDateParam) : subMonths(new Date(), 1),

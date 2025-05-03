@@ -36,16 +36,14 @@ export const TrackScreenBottomSheet = forwardRef<BottomSheetModal, TrackScreenBo
 
   const handleEditCollection = useCallback(() => {
     bottomSheetRef.current?.dismiss();
-    if (props.collectionId) {
-      router.navigate({
-        pathname: "/collection/addCollection",
-        params: { collectionId: props.collectionId },
-      });
-    }
+    router.navigate({
+      pathname: "/collection/addCollection",
+      params: { collectionId: props.collectionId, isEditingAll: props.collectionId ? undefined : "true" },
+    });
   }, [router, props.collectionId]);
 
   return (
-    <BottomSheet snapPoints={[props.collectionId ? 230 : 150]} ref={bottomSheetRef}>
+    <BottomSheet snapPoints={[230]} ref={bottomSheetRef}>
       <ThemedView>
         <YStack style={styles.container}>
           <BottomSheetListItem
@@ -59,16 +57,12 @@ export const TrackScreenBottomSheet = forwardRef<BottomSheetModal, TrackScreenBo
             left={<Entypo name="folder" size={20} color={colors.text} />}
             onPress={handleAddCollection}
           />
-          {props.collectionId ? (
-            <>
-              <Separator containerBackgroundColor="transparent" />
-              <BottomSheetListItem
-                title="Edit current collection"
-                left={<MaterialIcons name="mode-edit" size={20} color={colors.text} />}
-                onPress={handleEditCollection}
-              />
-            </>
-          ) : null}
+          <Separator containerBackgroundColor="transparent" />
+          <BottomSheetListItem
+            title="Edit current collection"
+            left={<MaterialIcons name="mode-edit" size={20} color={colors.text} />}
+            onPress={handleEditCollection}
+          />
         </YStack>
       </ThemedView>
     </BottomSheet>

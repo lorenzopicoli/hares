@@ -24,6 +24,7 @@ import { Controller, useFieldArray, useForm, type FieldArrayWithId } from "react
 import ThemedInputLabel from "@/components/ThemedInputLabel";
 import { useLazyCollection } from "@/hooks/data/useCollection";
 import SearchInput from "@/components/SearchInput";
+import { useReorderTrackers } from "@/hooks/data/useReorderTrackers";
 
 LogBox.ignoreLogs(["VirtualizedLists should never be nested inside plain ScrollViews"]);
 
@@ -32,6 +33,7 @@ interface TrackItemProps {
   onPress?: (tracker: TrackerInCollection) => void;
   onRemove?: (tracker: TrackerInCollection) => void;
   hideDrag?: boolean;
+  hideRemove?: boolean;
 }
 
 interface TrackerInCollection {
@@ -59,7 +61,7 @@ function TrackerItem(props: TrackItemProps) {
       <View style={styles.itemContainer}>
         <ThemedText>{props.tracker.tracker.name}</ThemedText>
         <View style={styles.itemActions}>
-          {props.tracker.isInCollection && <Feather name="x" size={25} color={colors.text} />}
+          {props.tracker.isInCollection && !props.hideRemove && <Feather name="x" size={25} color={colors.text} />}
           {props.tracker.isInCollection && <MaterialIcons name="drag-indicator" size={25} color={colors.text} />}
           {!props.tracker.isInCollection && <Entypo name="plus" size={24} color={colors.text} />}
         </View>
@@ -71,7 +73,10 @@ function TrackerItem(props: TrackItemProps) {
 export default function AddCollectionScreen() {
   const router = useRouter();
   const { styles } = useStyles(createStyles);
-  const { collectionId: collectionIdParam } = useLocalSearchParams<{ collectionId?: string }>();
+  const { collectionId: collectionIdParam, isEditingAll } = useLocalSearchParams<{
+    collectionId?: string;
+    isEditingAll?: string;
+  }>();
   const collectionId = useMemo(() => (collectionIdParam ? +collectionIdParam : undefined), [collectionIdParam]);
 
   const [isOutOfOrder, setIsOutOfOrder] = useState(false);
@@ -79,10 +84,20 @@ export default function AddCollectionScreen() {
 
   const { upsertCollection } = useUpsertCollection();
   const { fetchCollection } = useLazyCollection();
-  const { fetchTrackersForAddCollection } = useTrackersForAddCollection();
+  const { fetchTrackersForAddCollection, fetchAllTrackers } = useTrackersForAddCollection();
+  const { reorderTrackers } = useReorderTrackers();
+
   const { control, handleSubmit } = useForm<FormInputs>({
     defaultValues: async () => {
-      const trackers = await fetchTrackersForAddCollection(collectionId);
+      const trackers = isEditingAll ? await fetchAllTrackers() : await fetchTrackersForAddCollection(collectionId);
+
+      if (isEditingAll) {
+        return {
+          name: "All",
+          trackers,
+        };
+      }
+
       if (collectionId) {
         const collection = await fetchCollection(collectionId);
         return {
@@ -123,9 +138,13 @@ export default function AddCollectionScreen() {
         trackerId: t.tracker.id,
       }));
 
-    await upsertCollection({ name: data.name }, relationship, collectionId).catch((e) => {
-      console.log("Failed to upsert collection", e);
-    });
+    if (isEditingAll) {
+      await reorderTrackers(relationship);
+    } else {
+      await upsertCollection({ name: data.name }, relationship, collectionId).catch((e) => {
+        console.log("Failed to upsert collection", e);
+      });
+    }
 
     router.dismiss();
   };
@@ -182,7 +201,14 @@ export default function AddCollectionScreen() {
         key={item.id}
         name={`trackers.${index}`}
         render={({ field: { value: _value } }) => {
-          return <TrackerItem hideDrag={searchQuery !== ""} onPress={handlePress} tracker={item} />;
+          return (
+            <TrackerItem
+              hideRemove={!!isEditingAll}
+              hideDrag={searchQuery !== ""}
+              onPress={isEditingAll ? undefined : handlePress}
+              tracker={item}
+            />
+          );
         }}
       />
     );
@@ -204,17 +230,18 @@ export default function AddCollectionScreen() {
             rules: {
               required: {
                 message: "Name is required",
-                value: true,
+                value: !isEditingAll,
               },
             },
           }}
+          editable={!isEditingAll}
           label="Collection name"
           autoCapitalize="sentences"
         />
 
-        <ThemedInputLabel label="Select trackers for this collection" />
+        <ThemedInputLabel label={isEditingAll ? "Reorder trackers" : "Select trackers for this collection"} />
 
-        <SearchInput value={searchQuery} placeholder="Search..." onChange={setSearchQuery} />
+        {!isEditingAll ? <SearchInput value={searchQuery} placeholder="Search..." onChange={setSearchQuery} /> : null}
         <NestedReorderableList
           style={styles.reorderableList}
           data={filteredTrackers}
@@ -228,7 +255,7 @@ export default function AddCollectionScreen() {
       <View style={styles.submitButtonContainer}>
         <ThemedButton
           fullWidth
-          title={collectionId ? "Edit collection" : "Create collection"}
+          title={collectionId || isEditingAll ? "Edit collection" : "Create collection"}
           onPress={handleSubmit(onSubmit)}
         />
       </View>

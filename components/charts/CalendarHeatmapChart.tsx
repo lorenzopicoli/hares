@@ -1,6 +1,6 @@
 import type { Tracker } from "@/db/schema";
 import type { EChartsCoreOption } from "echarts";
-import { useCallback, useMemo } from "react";
+import { useCallback, useEffect, useMemo, useReducer } from "react";
 import { Chart } from "./Chart";
 import type { DateGroupingPeriod } from "@/utils/dateGroupPeriod";
 import type { GroupFunction } from "@/utils/groupFunctions";
@@ -24,6 +24,7 @@ export function CalendarHeatmapChart(props: {
     groupFun,
     dateRange,
   });
+  const [_, forceUpdate] = useReducer((x) => x + 1, 0);
   const getVirtualData = useCallback(() => {
     const data = [];
 
@@ -47,7 +48,8 @@ export function CalendarHeatmapChart(props: {
           shadowColor: "rgba(0, 0, 0, 0.5)",
           shadowBlur: dayData?.value ? 7 : 0,
         },
-        value: [date, dayData?.value ?? -1],
+        // If no value, we just have to set something out of range so the coloring is correct
+        value: [date, dayData?.value ?? Number.MAX_SAFE_INTEGER],
       });
       currentDate = addDays(currentDate, 1);
     }
@@ -83,6 +85,15 @@ export function CalendarHeatmapChart(props: {
     }),
     [chartData, dateRange],
   );
+
+  // For some reason the chart doesn't render properly on first render, but forcing a re-render fixes it
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      forceUpdate();
+    }, 2000);
+
+    return () => clearTimeout(timer);
+  }, []);
 
   return (
     <ChartCard title="Daily values">

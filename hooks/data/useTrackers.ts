@@ -53,5 +53,15 @@ export function useTrackersForAddCollection() {
     [db],
   );
 
-  return { fetchTrackersForAddCollection };
+  const fetchAllTrackers = useCallback(() => {
+    return db
+      .select({
+        tracker: getTableColumns(trackersTable),
+        isInCollection: sql`1=1`.mapWith(Boolean),
+      })
+      .from(trackersTable)
+      .orderBy(trackersTable.index);
+  }, [db]);
+
+  return { fetchTrackersForAddCollection, fetchAllTrackers };
 }
