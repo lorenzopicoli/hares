@@ -22,6 +22,7 @@ interface ThemedToggleButtonsProps<V> {
   onChangeSelection?: (option: V | null) => void;
   error?: string;
   allowUnselect?: boolean;
+  containerStyle?: StyleProp<ViewStyle>;
 }
 
 interface FormThemedToggleButtonsProps<T extends FieldValues, K extends Path<T>, V>
@@ -58,6 +59,7 @@ function ThemedToggleButtons<V>(props: ThemedToggleButtonsProps<V>) {
     label,
     onChangeSelection,
     buttonContainerStyle,
+    containerStyle,
     selectedOption: controlledSelectedOption,
     allowUnselect = false,
     error,
@@ -98,7 +100,7 @@ function ThemedToggleButtons<V>(props: ThemedToggleButtonsProps<V>) {
   );
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, containerStyle]}>
       {label && <ThemedInputLabel label={label} />}
       <View style={styles.grid}>
         {chunkedOptions.map((chunkedOption, i) => (

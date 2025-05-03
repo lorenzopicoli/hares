@@ -68,7 +68,7 @@ export default function TextListBarChart(props: Props) {
         },
       ],
     }),
-    [textListUsageCount],
+    [textListUsageCount, colors.darkTint],
   );
 
   const handleFilterPress = () => {

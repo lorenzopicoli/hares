@@ -67,6 +67,7 @@ export default function SectionList(props: SectionListProps) {
       ItemSeparatorComponent={() => <Separator containerBackgroundColor={colors.secondaryBackground} />}
       {...props}
       keyExtractor={(it) => String(it.key)}
+      style={[props.style, styles.list]}
       sections={props.sections}
       renderItem={renderItem}
       renderSectionHeader={renderSectionHeader}
@@ -76,6 +77,9 @@ export default function SectionList(props: SectionListProps) {
 
 const createStyles = (theme: ThemedColors) =>
   StyleSheet.create({
+    list: {
+      marginTop: -Sizes.xLarge, // cancels out the first section top margin
+    },
     itemContainer: {
       backgroundColor: theme.secondaryBackground,
       //   height: Sizes.list.medium,

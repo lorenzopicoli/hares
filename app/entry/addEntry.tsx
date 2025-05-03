@@ -24,6 +24,8 @@ import { useUpsertEntry } from "@/hooks/data/useUpsertEntry";
 import { FormThemedInput } from "@/components/ThemedInput";
 import { Separator } from "@/components/Separator";
 import { YStack } from "@/components/Stacks";
+import ActionableListItem from "@/components/ActionableListItem";
+import SectionList from "@/components/SectionList";
 
 interface FormInputs {
   dateInformation: EntryDateInformation;
@@ -190,7 +192,19 @@ export default function AddEntryScreen() {
       case TrackerType.TextList:
         return (
           <View style={styles.textListControls}>
-            <ThemedButton title="Select items" mode="toggle" onPress={handleGoToSelectItems} />
+            <SectionList
+              sections={[
+                {
+                  data: [
+                    {
+                      key: "select-items",
+                      render: <ActionableListItem title="Select items" onPress={handleGoToSelectItems} />,
+                    },
+                  ],
+                },
+              ]}
+            />
+
             {chips.length > 0 ? <ChipGroup chips={chips} /> : null}
           </View>
         );
