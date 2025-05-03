@@ -7,6 +7,7 @@ import { Sizes } from "@/constants/Sizes";
 import useStyles from "@/hooks/useStyles";
 import type { ThemedColors } from "./ThemeProvider";
 import { ThemedView } from "./ThemedView";
+import { useSettings } from "./SettingsProvieder";
 
 interface Props {
   searchQuery?: string;
@@ -19,6 +20,7 @@ function TrackerGridView(props: Props) {
   const { collectionId, searchQuery, onSelectTracker, onLongPressTracker } = props;
   const { trackers } = useTrackers({ collectionId, searchQuery });
   const { styles } = useStyles(createStyles);
+  const { settings } = useSettings();
 
   const renderItem = ({ item: tracker }: { item: Tracker }) => {
     return (
@@ -37,11 +39,13 @@ function TrackerGridView(props: Props) {
   return (
     <ThemedView style={styles.container}>
       <FlatList
+        key={`track-grid-${settings.trackersGridColsNumber}`}
         data={trackers}
         renderItem={renderItem}
+        showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps={Platform.OS === "android" ? "always" : undefined}
         keyExtractor={(item) => item.id.toString()}
-        numColumns={2}
+        numColumns={settings.trackersGridColsNumber}
       />
     </ThemedView>
   );
@@ -50,7 +54,8 @@ function TrackerGridView(props: Props) {
 const createStyles = (theme: ThemedColors) =>
   StyleSheet.create({
     container: {
-      padding: Sizes.xSmall,
+      paddingRight: Sizes.xSmall,
+      paddingLeft: Sizes.xSmall,
     },
     gridItem: {
       flex: 1,

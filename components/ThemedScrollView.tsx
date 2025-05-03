@@ -25,7 +25,7 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
-    padding: Sizes.medium,
+    paddingHorizontal: Sizes.small,
     gap: 16,
     overflow: "hidden",
   },

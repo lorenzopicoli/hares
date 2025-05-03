@@ -40,7 +40,7 @@ const createStyles = (theme: ThemedColors) =>
     card: {
       flex: 1,
       paddingVertical: Sizes.large,
-      backgroundColor: theme.secondaryBackground,
+      backgroundColor: theme.cardBackground,
       borderRadius: Sizes.radius.medium,
       shadowColor: "#000",
       shadowOffset: {

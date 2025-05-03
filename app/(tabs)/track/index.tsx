@@ -16,6 +16,7 @@ import {
   TrackerOptionsBottomSheet,
   type TrackerOptionsBottomSheetRef,
 } from "@/components/BottomSheets/TrackerOptionsBottomSheet";
+import { useSettings } from "@/components/SettingsProvieder";
 
 type TabRoute = Route & {
   key: string;
@@ -29,8 +30,14 @@ export default function TrackScreen() {
   const [tabIndex, setTabIndex] = useState(0);
   const [searchQuery, setSearchQuery] = useState("");
   const { colors } = useColors();
+  const { settings } = useSettings();
 
-  const { collectionsWithAll: collections } = useCollections();
+  const { collectionsWithAll, collections: collectionsWithoutAll } = useCollections();
+
+  const collections = useMemo(
+    () => (settings.showAllCollection ? collectionsWithAll : collectionsWithoutAll),
+    [collectionsWithAll, collectionsWithoutAll, settings.showAllCollection],
+  );
 
   const screenBottomSheetRef = useRef<BottomSheetModal>(null);
   const trackerOptionsBottomSheetRef = useRef<TrackerOptionsBottomSheetRef>(null);

@@ -122,3 +122,12 @@ export const textListEntriesRelations = relations(textListEntriesTable, ({ one }
 
 export type TextListEntry = typeof textListEntriesTable.$inferSelect;
 export type NewTextListEntry = typeof textListEntriesTable.$inferInsert;
+
+export const settingsTable = sqliteTable("settings", {
+  id: int().primaryKey({ autoIncrement: true }),
+  trackersGridColsNumber: int("trackers_grid_cols_number").notNull().default(2),
+  showAllCollection: int("show_all_collection", { mode: "boolean" }).notNull().default(true),
+});
+
+export type Settings = typeof settingsTable.$inferSelect;
+export type NewSettings = typeof settingsTable.$inferInsert;

@@ -19,7 +19,7 @@ export default function TabLayout() {
           color: colors.text,
         },
 
-        tabBarStyle: { backgroundColor: colors.background },
+        tabBarStyle: { backgroundColor: colors.background, borderTopWidth: 0, borderColor: colors.background },
       }}
     >
       <Tabs.Screen

@@ -93,6 +93,7 @@ const createStyles = (theme: ThemedColors) =>
       borderColor: theme.input.border,
       height: 48,
       paddingHorizontal: 12,
+      backgroundColor: theme.input.background,
     },
     inputFocused: {
       borderColor: theme.input.focusedBorder,

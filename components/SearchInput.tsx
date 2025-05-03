@@ -78,6 +78,8 @@ const createSearchStyles = (theme: ThemedColors) =>
     searchContainer: {
       flexDirection: "row",
       alignItems: "center",
+      borderWidth: 1,
+      borderColor: theme.input.border,
       borderRadius: Sizes.radius.small,
       paddingHorizontal: Sizes.small,
       height: Sizes.inputHeight,

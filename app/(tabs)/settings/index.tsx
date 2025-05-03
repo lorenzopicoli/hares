@@ -9,7 +9,7 @@ import { useColors, type ThemedColors } from "@/components/ThemeProvider";
 import SectionList, { type ISection } from "@/components/SectionList";
 import ActionableListItem from "@/components/ActionableListItem";
 import TextListItem from "@/components/TextListItem";
-import { useCallback, useRef } from "react";
+import { useRef, useState } from "react";
 import useStyles from "@/hooks/useStyles";
 import { BottomSheet, useBottomSheetBackHandler } from "@/components/BottomSheet";
 import type { BottomSheetModal } from "@gorhom/bottom-sheet";
@@ -19,6 +19,9 @@ import ExportDatabaseBottomSheetView, {
 import ImportDatabaseBottomSheet, {
   IMPORT_DATABASE_BOTTOM_SHEET_HEIGHT,
 } from "@/components/BottomSheets/ImportDatabaseBottomSheet";
+import { ThemedView } from "@/components/ThemedView";
+import { useSettings } from "@/components/SettingsProvieder";
+import { TrackerGridSettingsBottomSheet } from "@/components/BottomSheets/TrackerGridSettingsBottomSheet";
 
 export default function SettingsScreen() {
   const { reloadDb } = useDatabase();
@@ -26,13 +29,20 @@ export default function SettingsScreen() {
   const { confirm, ConfirmModal } = useConfirmModal();
   const { deleteDatabase } = useDeleteDatabase();
   const { theme, setTheme } = useColors();
-  const toggleTheme = useCallback(() => setTheme(theme === "dark" ? "light" : "dark"), [setTheme, theme]);
+  const { settings, updateSettings } = useSettings();
+  const [localTheme, setLocalTheme] = useState(theme);
+  const [localShowAllCollection, setLocalShowAllCollection] = useState(settings.showAllCollection);
   const { styles } = useStyles(createStyles);
 
+  const trackerGridSettingsSheet = useRef<BottomSheetModal>(null);
   const exportDbSheetRef = useRef<BottomSheetModal>(null);
   const importDbSheetRef = useRef<BottomSheetModal>(null);
   const { handleSheetPositionChange: exportSheetChange } = useBottomSheetBackHandler(exportDbSheetRef);
   const { handleSheetPositionChange: importSheetChange } = useBottomSheetBackHandler(importDbSheetRef);
+
+  const showTrackerGridSettings = () => {
+    trackerGridSettingsSheet.current?.present();
+  };
 
   const showExportDbSheet = () => {
     exportDbSheetRef.current?.present();
@@ -57,18 +67,47 @@ export default function SettingsScreen() {
     await deleteDatabase();
   };
 
+  const handleThemeChange = () => {
+    setLocalTheme(localTheme === "dark" ? "light" : "dark");
+    setTheme(theme === "dark" ? "light" : "dark");
+  };
+
+  const handleShowAllCollectionChange = async () => {
+    setLocalShowAllCollection(!localShowAllCollection);
+    await updateSettings({ showAllCollection: !localShowAllCollection });
+  };
+
+  const handleChangeNCols = async (nCols: number) => {
+    await updateSettings({ trackersGridColsNumber: nCols });
+  };
+
   const settingsData: ISection[] = [
     {
+      title: <ThemedText type="title">General</ThemedText>,
       data: [
         {
           key: "theme",
           render: (
             <ActionableListItem
               title="Dark mode"
-              onPress={toggleTheme}
-              right={<Switch onChange={toggleTheme} value={theme === "dark"} />}
+              onPress={handleThemeChange}
+              right={<Switch onChange={handleThemeChange} value={localTheme === "dark"} />}
             />
           ),
+        },
+        {
+          key: "show-all-collection",
+          render: (
+            <ActionableListItem
+              title="Show tab for all trackers"
+              onPress={handleShowAllCollectionChange}
+              right={<Switch onChange={handleShowAllCollectionChange} value={localShowAllCollection} />}
+            />
+          ),
+        },
+        {
+          key: "tracker-grid-cols",
+          render: <ActionableListItem title="Tracker grid" onPress={showTrackerGridSettings} />,
         },
       ],
     },
@@ -118,9 +157,14 @@ export default function SettingsScreen() {
   ];
 
   return (
-    <>
+    <ThemedView>
       {ConfirmModal}
       <SectionList style={styles.list} sections={settingsData} />
+      <TrackerGridSettingsBottomSheet
+        ref={trackerGridSettingsSheet}
+        initialNCols={settings.trackersGridColsNumber}
+        onChangeNCols={handleChangeNCols}
+      />
       <BottomSheet
         snapPoints={[EXPORT_DATABASE_BOTTOM_SHEET_HEIGHT]}
         ref={exportDbSheetRef}
@@ -135,7 +179,7 @@ export default function SettingsScreen() {
       >
         <ImportDatabaseBottomSheet />
       </BottomSheet>
-    </>
+    </ThemedView>
   );
 }
 

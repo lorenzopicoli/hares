@@ -28,7 +28,6 @@ const ThemeProvider = ({ children }: PropsWithChildren) => {
 
   const changeTheme = useCallback(
     async (theme: "dark" | "light") => {
-      console.log("Set theme", theme);
       await AsyncStorage.setItem("theme", theme);
       await readTheme();
     },

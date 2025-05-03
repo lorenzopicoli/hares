@@ -64,6 +64,13 @@
       "when": 1745278603011,
       "tag": "0008_hot_sway",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "6",
+      "when": 1746292721293,
+      "tag": "0009_greedy_blazing_skull",
+      "breakpoints": true
     }
   ]
 }

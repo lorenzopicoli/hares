@@ -8,13 +8,14 @@ import { ThemeProvider as MyThemeProvider, useColors } from "@/components/ThemeP
 import "react-native-reanimated";
 
 import { Platform, SafeAreaView } from "react-native";
-import { Colors, NavBarColors } from "@/constants/Colors";
+import { Colors, defaultStackNavigationStyling, NavBarColors } from "@/constants/Colors";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { DatabaseProvider } from "@/contexts/DatabaseContext";
 import LoadingDatabase from "@/components/LoadingDatabase";
 import { enableScreens } from "react-native-screens";
 import { StatusBar } from "expo-status-bar";
 import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
+import { SettingsProvider } from "@/components/SettingsProvieder";
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
@@ -22,12 +23,30 @@ SplashScreen.preventAutoHideAsync();
 function RootStack() {
   return (
     <Stack>
-      <Stack.Screen name="(tabs)" options={{ headerTitle: "Home", headerShown: false }} />
-      <Stack.Screen name="collection/addCollection" options={{ headerShown: true, headerTitle: "🐰 Add Collection" }} />
-      <Stack.Screen name="entry/addEntry" options={{ headerShown: true, headerTitle: "🐰 Add Entry" }} />
-      <Stack.Screen name="entry/textListSelection" options={{ headerShown: true, headerTitle: "🐰 Entry items" }} />
-      <Stack.Screen name="tracker/addTracker" options={{ headerShown: true, headerTitle: "🐰 Add Tracker" }} />
-      <Stack.Screen name="stats/selectStatTracker" options={{ headerShown: true, headerTitle: "🐰 Select tracker" }} />
+      <Stack.Screen
+        name="(tabs)"
+        options={{ ...defaultStackNavigationStyling, headerTitle: "Home", headerShown: false }}
+      />
+      <Stack.Screen
+        name="collection/addCollection"
+        options={{ ...defaultStackNavigationStyling, headerShown: true, headerTitle: "🐰 Add Collection" }}
+      />
+      <Stack.Screen
+        name="entry/addEntry"
+        options={{ ...defaultStackNavigationStyling, headerShown: true, headerTitle: "🐰 Add Entry" }}
+      />
+      <Stack.Screen
+        name="entry/textListSelection"
+        options={{ ...defaultStackNavigationStyling, headerShown: true, headerTitle: "🐰 Entry items" }}
+      />
+      <Stack.Screen
+        name="tracker/addTracker"
+        options={{ ...defaultStackNavigationStyling, headerShown: true, headerTitle: "🐰 Add Tracker" }}
+      />
+      <Stack.Screen
+        name="stats/selectStatTracker"
+        options={{ ...defaultStackNavigationStyling, headerShown: true, headerTitle: "🐰 Select tracker" }}
+      />
       <Stack.Screen name="+not-found" />
     </Stack>
   );
@@ -63,11 +82,13 @@ function ThemedLayout() {
     <ThemeProvider value={NavBarColors[theme]}>
       <Suspense fallback={<LoadingDatabase />}>
         <DatabaseProvider onLoad={handleDbLoaded}>
-          <BottomSheetModalProvider>
-            <SafeAreaView style={{ flex: 0, backgroundColor: NavBarColors[theme].colors.background }} />
-            <RootStack />
-            <StatusBar style={theme === "light" ? "dark" : "light"} />
-          </BottomSheetModalProvider>
+          <SettingsProvider>
+            <BottomSheetModalProvider>
+              <SafeAreaView style={{ flex: 0, backgroundColor: NavBarColors[theme].colors.background }} />
+              <RootStack />
+              <StatusBar style={theme === "light" ? "dark" : "light"} />
+            </BottomSheetModalProvider>
+          </SettingsProvider>
         </DatabaseProvider>
       </Suspense>
     </ThemeProvider>

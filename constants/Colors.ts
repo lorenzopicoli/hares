@@ -17,8 +17,10 @@ export const Colors = {
   light: {
     text: "#1e1e24",
     background: "#ffffff",
-    secondaryBackground: colors.spaceCadet,
+    secondaryBackground: "#f0f2f5",
+    cardBackground: "#f7f7f7",
     tint: tintColorLight,
+    lightTint: "#c48ae0",
     darkTint: "#6b10a3",
     icon: "#687076",
     tabIconDefault: "#687076",
@@ -26,8 +28,8 @@ export const Colors = {
     secondaryText: "#687076",
     border: "#e0e0e5",
     input: {
-      background: "#F8F9FA",
-      border: "#E6E8EB",
+      background: "#f0f2f5",
+      border: "#d0d4db",
       focusedBorder: colors.frenchViolet,
       borderError: errorColor,
       backgroundDisabled: "#F1F3F5",
@@ -35,8 +37,8 @@ export const Colors = {
       textError: errorColor,
     },
     toggleButton: {
-      background: "#F8F9FA",
-      border: "#E6E8EB",
+      background: "#E6E8EB",
+      border: "#E2E4E7",
       selected: {
         background: "#f2e6fa",
         border: colors.frenchViolet,
@@ -69,8 +71,10 @@ export const Colors = {
   dark: {
     text: "#ECEDEE",
     secondaryBackground: colors.spaceCadet,
+    cardBackground: colors.spaceCadet,
     background: "#1e223a",
     tint: tintColorDark,
+    lightTint: "#c48ae0",
     darkTint: "#7213ab",
     icon: "#9BA1A6",
     tabIconDefault: "#9BA1A6",
@@ -135,8 +139,8 @@ export const NavBarColors = {
     colors: {
       primary: colors.frenchViolet,
       background: "#ffffff",
-      card: "#f8f8f8",
-      text: "#1e1e24",
+      card: Colors.light.background,
+      text: Colors.light.text,
       border: "#e0e0e5",
       notification: colors.auburn,
     },
@@ -147,10 +151,15 @@ export const NavBarColors = {
     colors: {
       primary: tintColorDark,
       background: "#1e223a",
-      card: "#1e223a",
-      text: "#ECEDEE",
-      border: "#3a3e52",
+      card: Colors.dark.background,
+      text: Colors.dark.text,
+      border: "3a3e52",
       notification: "#c33036",
     },
   },
+};
+
+export const defaultStackNavigationStyling = {
+  headerShadowVisible: false,
+  headerTitleAlign: "center" as const,
 };

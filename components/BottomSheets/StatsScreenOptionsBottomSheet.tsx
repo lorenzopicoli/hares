@@ -11,6 +11,7 @@ import { StyleSheet, View } from "react-native";
 import { YStack } from "../Stacks";
 import ThemedToggleButtons from "../ThemedToggleButtons";
 import { endOfDay, startOfDay, subMonths, subWeeks } from "date-fns";
+import { Colors } from "@/constants/Colors";
 
 export interface StatsDateRange {
   startDate: Date;
@@ -115,11 +116,12 @@ export const StatsScreenOptionsBottomSheet = forwardRef<BottomSheetModal, StatsS
                   ...datePickerDefaultStyles,
                   range_middle: { backgroundColor: colors.darkTint },
                   selected: { backgroundColor: colors.tint },
-                  range_start_label: { color: colors.text },
-                  range_end_label: { color: colors.text },
-                  selected_label: { color: colors.text },
+                  range_start_label: { color: Colors.dark.text },
+                  range_end_label: { color: Colors.dark.text },
+                  range_fill: { backgroundColor: "transparent" },
+                  selected_label: { color: Colors.dark.text },
                   day_label: { color: colors.text },
-                  range_middle_label: { color: colors.text },
+                  range_middle_label: { color: Colors.dark.text },
                   today: { backgroundColor: colors.secondaryBackground },
                 }}
               />

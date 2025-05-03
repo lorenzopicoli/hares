@@ -62,6 +62,7 @@ export default function SectionList(props: SectionListProps) {
   return (
     <RNSectionList
       showsVerticalScrollIndicator={false}
+      contentContainerStyle={{ paddingBottom: Sizes.small }}
       bounces={false}
       onEndReachedThreshold={0.5}
       ItemSeparatorComponent={() => <Separator containerBackgroundColor={colors.secondaryBackground} />}

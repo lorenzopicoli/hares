@@ -1,6 +1,6 @@
 import type { Tracker } from "@/db/schema";
 import type { EChartsCoreOption } from "echarts";
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useReducer, useRef, useState } from "react";
 import { Chart } from "./Chart";
 import { useTopTextListStats } from "@/hooks/data/stats/useTopTextListStats";
 import { Sizes } from "@/constants/Sizes";
@@ -22,8 +22,8 @@ export default function TextListBarChart(props: Props) {
   const { tracker, dateRange } = props;
   const optionsBottomSheet = useRef<BottomSheetModal>(null);
   const { styles } = useStyles(createStyles);
-  const { colors } = useColors();
-
+  const { colors, theme } = useColors();
+  const [_, forceUpdate] = useReducer((x) => x + 1, 0);
   const [limit, setLimit] = useState(10);
 
   const { textListUsageCount } = useTopTextListStats({
@@ -57,7 +57,12 @@ export default function TextListBarChart(props: Props) {
       },
       series: [
         {
-          color: colors.darkTint,
+          color: theme === "dark" ? colors.darkTint : colors.lightTint,
+          itemStyle: {
+            borderRadius: [0, 3, 3, 0],
+            barBorderWidth: 1,
+            barBorderColor: theme === "dark" ? colors.tint : colors.darkTint,
+          },
           data: textListUsageCount.map((t) => t.value),
           type: "bar",
           label: {
@@ -68,12 +73,21 @@ export default function TextListBarChart(props: Props) {
         },
       ],
     }),
-    [textListUsageCount, colors.darkTint],
+    [textListUsageCount, colors, theme],
   );
 
   const handleFilterPress = () => {
     optionsBottomSheet.current?.present();
   };
+
+  // For some reason the chart doesn't render properly on first render, but forcing a re-render fixes it
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      forceUpdate();
+    }, 2000);
+
+    return () => clearTimeout(timer);
+  }, []);
 
   return (
     <ChartCard

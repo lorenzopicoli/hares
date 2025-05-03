@@ -136,9 +136,6 @@ export default function StatsScreen() {
 
 const createStyles = (theme: ThemedColors) =>
   StyleSheet.create({
-    listContainer: {
-      paddingVertical: Sizes.small,
-    },
     listItem: {
       paddingVertical: Sizes.medium,
     },
@@ -149,8 +146,5 @@ const createStyles = (theme: ThemedColors) =>
       borderRadius: Sizes.radius.small,
       alignItems: "center",
       justifyContent: "center",
-    },
-    list: {
-      //   paddingHorizontal: Sizes.medium,
     },
   });
