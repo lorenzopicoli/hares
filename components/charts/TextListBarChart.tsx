@@ -57,6 +57,7 @@ export default function TextListBarChart(props: Props) {
       },
       series: [
         {
+          color: colors.darkTint,
           data: textListUsageCount.map((t) => t.value),
           type: "bar",
           label: {

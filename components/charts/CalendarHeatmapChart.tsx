@@ -1,26 +1,36 @@
 import type { Tracker } from "@/db/schema";
 import type { EChartsCoreOption } from "echarts";
-import { useCallback, useEffect, useMemo, useReducer } from "react";
+import { useCallback, useEffect, useMemo, useReducer, useRef, useState } from "react";
 import { Chart } from "./Chart";
-import type { DateGroupingPeriod } from "@/utils/dateGroupPeriod";
-import type { GroupFunction } from "@/utils/groupFunctions";
+import { GroupFunction } from "@/utils/groupFunctions";
 import { useNumberTrackerLineStats } from "@/hooks/data/stats/useNumberTrackerLineStats";
 import { addDays, format } from "date-fns";
-import { View } from "react-native";
+import { StyleSheet, TouchableOpacity, View } from "react-native";
 import ChartCard from "../ChartCard";
 import type { StatsDateRange } from "../BottomSheets/StatsScreenOptionsBottomSheet";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
+import type { BottomSheetModal } from "@gorhom/bottom-sheet";
+import { useColors, type ThemedColors } from "../ThemeProvider";
+import { Sizes } from "@/constants/Sizes";
+import useStyles from "@/hooks/useStyles";
+import { NumberChartOptionsBottomSheet } from "../BottomSheets/NumberChartOptionsBottomSheet";
+import { DateGroupingPeriod } from "@/utils/dateGroupPeriod";
 
 export function CalendarHeatmapChart(props: {
   tracker: Tracker;
   dateRange: StatsDateRange;
-  groupPeriod: DateGroupingPeriod;
-  groupFun: GroupFunction;
 }) {
-  const { tracker, dateRange, groupFun, groupPeriod } = props;
+  const { tracker, dateRange } = props;
+
+  const optionsBottomSheet = useRef<BottomSheetModal>(null);
+  const { styles } = useStyles(createStyles);
+  const { colors } = useColors();
+
+  const [groupFun, setGroupFun] = useState(GroupFunction.avg);
 
   const { entriesNumberValueStats } = useNumberTrackerLineStats({
     trackerId: tracker.id,
-    groupPeriod,
+    groupPeriod: DateGroupingPeriod.daily,
     groupFun,
     dateRange,
   });
@@ -65,6 +75,8 @@ export function CalendarHeatmapChart(props: {
         max: chartData.max ?? 0,
         type: "piecewise",
         orient: "horizontal",
+        itemGap: 5,
+        text: [`   ${String(chartData.max ?? 0)}`, `${String(Math.max(chartData.min ?? 0, 0))}     `],
         left: "center",
       },
       calendar: {
@@ -73,6 +85,9 @@ export function CalendarHeatmapChart(props: {
         cellSize: ["auto", 18],
         range: [format(dateRange.startDate, "yyyy-MM-dd"), format(dateRange.endDate, "yyyy-MM-dd")],
         yearLabel: { show: false },
+        dayLabel: {
+          firstDay: 1, // start on Monday
+        },
       },
       series: {
         type: "heatmap",
@@ -95,8 +110,20 @@ export function CalendarHeatmapChart(props: {
     return () => clearTimeout(timer);
   }, []);
 
+  const handleFilterPress = () => {
+    optionsBottomSheet.current?.present();
+  };
+
   return (
-    <ChartCard title="Daily values">
+    <ChartCard
+      title="Daily values"
+      right={
+        <TouchableOpacity style={styles.filterButton} onPress={handleFilterPress}>
+          <MaterialCommunityIcons name="filter-menu" size={20} color={colors.text} />
+        </TouchableOpacity>
+      }
+      onFilterPress={handleFilterPress}
+    >
       <View
         style={{
           flex: 1,
@@ -107,6 +134,19 @@ export function CalendarHeatmapChart(props: {
       >
         <Chart option={option} />
       </View>
+      <NumberChartOptionsBottomSheet ref={optionsBottomSheet} groupFun={groupFun} onChangeGroupFun={setGroupFun} />
     </ChartCard>
   );
 }
+
+const createStyles = (theme: ThemedColors) =>
+  StyleSheet.create({
+    filterButton: {
+      backgroundColor: theme.toggleButton.background,
+      height: 35,
+      width: 35,
+      borderRadius: Sizes.radius.small,
+      alignItems: "center",
+      justifyContent: "center",
+    },
+  });
