@@ -10,8 +10,6 @@ import EntriesListRow from "@/components/EntriesList/EntriesListRow";
 import useStyles from "@/hooks/useStyles";
 import { EntryCountLineChart, NumberTrackersLineChart } from "@/components/charts/LineCharts";
 import { XStack, YStack } from "@/components/Stacks";
-import { DateGroupingPeriod } from "@/utils/dateGroupPeriod";
-import { GroupFunction } from "@/utils/groupFunctions";
 import { Platform, Pressable, StyleSheet, TouchableOpacity, View } from "react-native";
 import { useColors, type ThemedColors } from "@/components/ThemeProvider";
 import { Sizes } from "@/constants/Sizes";
@@ -45,9 +43,6 @@ export default function StatsScreen() {
   const trackerId = useMemo(() => (trackerIdParam ? +trackerIdParam : undefined), [trackerIdParam]);
   const { tracker } = useTracker(trackerId ?? -1);
   const { entries } = useEntries({ trackerId, limit: 5 });
-
-  const [groupPeriod, setGroupPeriod] = useState<DateGroupingPeriod>(DateGroupingPeriod.daily);
-  const [groupFun, setGroupFun] = useState<GroupFunction>(GroupFunction.avg);
 
   const [dateRange, setDateRange] = useState({
     startDate: startDateParam ? new Date(startDateParam) : subMonths(new Date(), 1),
@@ -101,12 +96,7 @@ export default function StatsScreen() {
       {tracker ? (
         <>
           {tracker.type === TrackerType.Number || tracker.type === TrackerType.Scale ? (
-            <CalendarHeatmapChart
-              dateRange={dateRange}
-              tracker={tracker}
-              groupPeriod={groupPeriod}
-              groupFun={groupFun}
-            />
+            <CalendarHeatmapChart dateRange={dateRange} tracker={tracker} />
           ) : null}
 
           {tracker.type === TrackerType.TextList ? <TextListBarChart dateRange={dateRange} tracker={tracker} /> : null}
