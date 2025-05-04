@@ -13,6 +13,7 @@ import useStyles from "@/hooks/useStyles";
 import type { SharedValue } from "react-native-reanimated";
 import Animated, { useAnimatedStyle, interpolate } from "react-native-reanimated";
 import { TouchableWithoutFeedback } from "react-native-gesture-handler";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export interface BottomSheetProps extends BottomSheetModalProps {
   snapPoints: (string | number)[] | SharedValue<(string | number)[]>;
@@ -38,6 +39,7 @@ const Backdrop = ({ animatedIndex, style }: BottomSheetBackdropProps) => {
 
 export const BottomSheet = forwardRef<BottomSheetModal, BottomSheetProps>((props, ref) => {
   const { snapPoints, children, showHandle } = props;
+  const insets = useSafeAreaInsets();
   const { styles } = useStyles(createStyles);
   const bottomSheetRef = useRef<BottomSheetModal>(null);
   const { handleSheetPositionChange } = useBottomSheetBackHandler(bottomSheetRef);
@@ -56,7 +58,9 @@ export const BottomSheet = forwardRef<BottomSheetModal, BottomSheetProps>((props
         backgroundStyle={styles.bottomSheetBackgroundContainer}
         style={styles.bottomSheetContainer}
         index={1}
-        snapPoints={snapPoints}
+        snapPoints={
+          Array.isArray(snapPoints) && snapPoints.length === 1 ? [+snapPoints[0] + insets.bottom] : snapPoints
+        }
         onChange={handleSheetPositionChange}
         ref={bottomSheetRef}
       >

@@ -1,7 +1,7 @@
 import { FlatList, StyleSheet, TouchableOpacity, View } from "react-native";
 import SearchInput from "@/components/SearchInput";
 import { Separator } from "@/components/Separator";
-import { ThemedView } from "@/components/ThemedView";
+import { ThemedSafeAreaView, ThemedView } from "@/components/ThemedView";
 import type { Tracker } from "@/db/schema";
 import { useState } from "react";
 import type { ThemedColors } from "@/components/ThemeProvider";
@@ -29,20 +29,22 @@ export default function SelectStatTrackerScreen() {
   };
 
   return (
-    <ThemedView>
-      <View style={styles.searchContainer}>
-        <SearchInput value={searchQuery} onChange={setSearchQuery} placeholder="Search..." autoFocus />
-      </View>
-      <ThemedView style={styles.listContainer}>
-        <FlatList
-          data={trackers}
-          renderItem={renderItem}
-          keyboardShouldPersistTaps="always"
-          keyExtractor={(item) => item.id.toString()}
-          ItemSeparatorComponent={Separator}
-        />
+    <ThemedSafeAreaView>
+      <ThemedView>
+        <View style={styles.searchContainer}>
+          <SearchInput value={searchQuery} onChange={setSearchQuery} placeholder="Search..." />
+        </View>
+        <ThemedView style={styles.listContainer}>
+          <FlatList
+            data={trackers}
+            renderItem={renderItem}
+            keyboardShouldPersistTaps="always"
+            keyExtractor={(item) => item.id.toString()}
+            ItemSeparatorComponent={Separator}
+          />
+        </ThemedView>
       </ThemedView>
-    </ThemedView>
+    </ThemedSafeAreaView>
   );
 }
 
