@@ -22,6 +22,8 @@ import ImportDatabaseBottomSheet, {
 import { ThemedView } from "@/components/ThemedView";
 import { useSettings } from "@/components/SettingsProvieder";
 import { TrackerGridSettingsBottomSheet } from "@/components/BottomSheets/TrackerGridSettingsBottomSheet";
+import { StorageAccessFramework } from "expo-file-system";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function SettingsScreen() {
   const { reloadDb } = useDatabase();
@@ -65,6 +67,21 @@ export default function SettingsScreen() {
     }
 
     await deleteDatabase();
+  };
+
+  const handleScheduledExportFolder = async () => {
+    // Requests permissions for external directory
+    const permissions = await StorageAccessFramework.requestDirectoryPermissionsAsync();
+
+    if (permissions.granted) {
+      // Gets SAF URI from response
+      const uri = permissions.directoryUri;
+
+      // Gets all files inside of selected directory
+      const files = await StorageAccessFramework.readDirectoryAsync(uri);
+      await AsyncStorage.setItem("scheduledExportFolder", uri);
+      alert(`Files inside ${uri}:\n\n${JSON.stringify(files)}`);
+    }
   };
 
   const handleThemeChange = () => {
@@ -151,6 +168,15 @@ export default function SettingsScreen() {
         {
           key: "entries",
           render: <TextListItem title="Entries" right={<ThemedText>{entriesCount}</ThemedText>} />,
+        },
+      ],
+    },
+    {
+      title: <ThemedText type="title">Scheduled Exports</ThemedText>,
+      data: [
+        {
+          key: "folder",
+          render: <ActionableListItem title="Destination folder" onPress={handleScheduledExportFolder} />,
         },
       ],
     },
