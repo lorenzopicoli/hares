@@ -4,22 +4,28 @@ import * as FileSystem from "expo-file-system";
 import * as Sharing from "expo-sharing";
 import * as schema from "@/db/schema";
 import { useCallback } from "react";
+import type { SQLiteDatabase } from "expo-sqlite";
+
+export const exportDatabase = async (db: SQLiteDatabase, backupName: string) => {
+  await db.execAsync("PRAGMA wal_checkpoint(FULL)");
+  const appPath = FileSystem.documentDirectory;
+  const dbPath = `${appPath}SQLite/${DATABASE_NAME}`;
+  const backupPath = `${appPath}SQLite/${backupName.replace(".db", "")}.sqlite`;
+
+  await FileSystem.copyAsync({
+    from: dbPath,
+    to: backupPath,
+  });
+
+  return backupPath;
+};
 
 export const useExportDatabase = () => {
   const { db } = useDatabase();
   const exportDatabaseSQLite = useCallback(
     async (backupName: string) => {
       try {
-        await db.$client.execAsync("PRAGMA wal_checkpoint(FULL)");
-        const appPath = FileSystem.documentDirectory;
-        const dbPath = `${appPath}/SQLite/${DATABASE_NAME}`;
-        const backupPath = `${appPath}/SQLite/${backupName.replace(".db", "")}.sqlite`;
-
-        await FileSystem.copyAsync({
-          from: dbPath,
-          to: backupPath,
-        });
-
+        const backupPath = await exportDatabase(db.$client, backupName);
         if (await Sharing.isAvailableAsync()) {
           await Sharing.shareAsync(backupPath);
         } else {
@@ -42,6 +48,8 @@ export const useExportDatabase = () => {
         "collectionsTrackersTable",
         "entriesTable",
         "textListEntriesTable",
+        "settings",
+        "export_logs",
       ];
       // biome-ignore lint/suspicious/noExplicitAny: <explanation>
       const data: any = {};

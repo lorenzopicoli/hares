@@ -131,3 +131,13 @@ export const settingsTable = sqliteTable("settings", {
 
 export type Settings = typeof settingsTable.$inferSelect;
 export type NewSettings = typeof settingsTable.$inferInsert;
+
+export const exportLogsTable = sqliteTable("export_logs", {
+  id: int().primaryKey({ autoIncrement: true }),
+  createdAt: integer({ mode: "timestamp" }).$defaultFn(() => new Date()),
+  finishedAt: integer({ mode: "timestamp" }),
+  destinationFolder: text(),
+});
+
+export type ExportLog = typeof settingsTable.$inferSelect;
+export type NewExportLog = typeof settingsTable.$inferInsert;

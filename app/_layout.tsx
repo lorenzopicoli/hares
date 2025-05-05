@@ -17,8 +17,6 @@ import { StatusBar } from "expo-status-bar";
 import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
 import { SettingsProvider } from "@/components/SettingsProvieder";
 
-import "@/hooks/useBackgroundTask";
-
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
 

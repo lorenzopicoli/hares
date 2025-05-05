@@ -70,6 +70,8 @@ export const useRestoreDatabase = () => {
         "collectionsTrackersTable",
         "entriesTable",
         "textListEntriesTable",
+        "settings",
+        "export_logs",
       ];
 
       // biome-ignore lint/suspicious/noExplicitAny: <explanation>

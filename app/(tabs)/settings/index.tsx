@@ -1,4 +1,4 @@
-import { StyleSheet, Switch } from "react-native";
+import { Platform, StyleSheet, Switch } from "react-native";
 import { ThemedText } from "@/components/ThemedText";
 import { useDatabase } from "@/contexts/DatabaseContext";
 import { useConfirmModal } from "@/hooks/useConfirmModal";
@@ -22,25 +22,28 @@ import ImportDatabaseBottomSheet, {
 import { ThemedView } from "@/components/ThemedView";
 import { useSettings } from "@/components/SettingsProvieder";
 import { TrackerGridSettingsBottomSheet } from "@/components/BottomSheets/TrackerGridSettingsBottomSheet";
-import { StorageAccessFramework } from "expo-file-system";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useScheduledExport } from "@/hooks/useScheduledExport";
+import { ScheduledExportFrequencyBottomSheet } from "@/components/BottomSheets/ScheduledExportFrequencyBottomSheet";
 
 export default function SettingsScreen() {
   const { reloadDb } = useDatabase();
   const { collectionsCount, trackersCount, entriesCount } = useCounts();
   const { confirm, ConfirmModal } = useConfirmModal();
   const { deleteDatabase } = useDeleteDatabase();
-  const { theme, setTheme } = useColors();
+  const { colors, theme, setTheme } = useColors();
   const { settings, updateSettings } = useSettings();
   const [localTheme, setLocalTheme] = useState(theme);
   const [localShowAllCollection, setLocalShowAllCollection] = useState(settings.showAllCollection);
   const { styles } = useStyles(createStyles);
 
   const trackerGridSettingsSheet = useRef<BottomSheetModal>(null);
+  const scheduledExportFrequencySheet = useRef<BottomSheetModal>(null);
   const exportDbSheetRef = useRef<BottomSheetModal>(null);
   const importDbSheetRef = useRef<BottomSheetModal>(null);
   const { handleSheetPositionChange: exportSheetChange } = useBottomSheetBackHandler(exportDbSheetRef);
   const { handleSheetPositionChange: importSheetChange } = useBottomSheetBackHandler(importDbSheetRef);
+  const { setExportFrequency, exportFrequency, currentExportFolder, requestFolderAccess, setupScheduledExport } =
+    useScheduledExport();
 
   const showTrackerGridSettings = () => {
     trackerGridSettingsSheet.current?.present();
@@ -53,6 +56,17 @@ export default function SettingsScreen() {
   const showImportDbSheet = () => {
     importDbSheetRef.current?.present();
   };
+
+  const showExportFrequencySheet = () => {
+    scheduledExportFrequencySheet.current?.present();
+  };
+
+  const handleChangeExportFrequency = (frequency: number | null) => {
+    setExportFrequency(frequency);
+    scheduledExportFrequencySheet.current?.dismiss();
+  };
+
+  const handleShowExportLogs = () => {};
 
   const handleDeleteData = async () => {
     const confirmed = await confirm({
@@ -70,18 +84,7 @@ export default function SettingsScreen() {
   };
 
   const handleScheduledExportFolder = async () => {
-    // Requests permissions for external directory
-    const permissions = await StorageAccessFramework.requestDirectoryPermissionsAsync();
-
-    if (permissions.granted) {
-      // Gets SAF URI from response
-      const uri = permissions.directoryUri;
-
-      // Gets all files inside of selected directory
-      const files = await StorageAccessFramework.readDirectoryAsync(uri);
-      await AsyncStorage.setItem("scheduledExportFolder", uri);
-      alert(`Files inside ${uri}:\n\n${JSON.stringify(files)}`);
-    }
+    requestFolderAccess();
   };
 
   const handleThemeChange = () => {
@@ -173,12 +176,46 @@ export default function SettingsScreen() {
     },
     {
       title: <ThemedText type="title">Scheduled Exports</ThemedText>,
-      data: [
-        {
-          key: "folder",
-          render: <ActionableListItem title="Destination folder" onPress={handleScheduledExportFolder} />,
-        },
-      ],
+      data:
+        Platform.OS === "android"
+          ? [
+              {
+                key: "export-folder",
+                render: (
+                  <ActionableListItem
+                    title="Destination folder"
+                    subtitle={currentExportFolder?.replace(
+                      "content://com.android.externalstorage.documents/tree/primary%3A",
+                      "",
+                    )}
+                    onPress={handleScheduledExportFolder}
+                  />
+                ),
+              },
+              {
+                key: "export-frequency",
+                render: (
+                  <ActionableListItem
+                    title="Frequency"
+                    subtitle={exportFrequency ? `Every ${exportFrequency} days` : "Never"}
+                    onPress={showExportFrequencySheet}
+                  />
+                ),
+              },
+              {
+                key: "export-logs",
+                render: <ActionableListItem title="Logs" onPress={handleShowExportLogs} />,
+              },
+            ]
+          : [
+              {
+                key: "export-unavailable",
+
+                render: (
+                  <TextListItem title="Scheduled export is unavailable on iOS. Try setting up an export reminder." />
+                ),
+              },
+            ],
     },
   ];
 
@@ -190,6 +227,10 @@ export default function SettingsScreen() {
         ref={trackerGridSettingsSheet}
         initialNCols={settings.trackersGridColsNumber}
         onChangeNCols={handleChangeNCols}
+      />
+      <ScheduledExportFrequencyBottomSheet
+        ref={scheduledExportFrequencySheet}
+        onFrequencyChange={handleChangeExportFrequency}
       />
       <BottomSheet
         snapPoints={[EXPORT_DATABASE_BOTTOM_SHEET_HEIGHT]}
