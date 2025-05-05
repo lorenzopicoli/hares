@@ -139,5 +139,5 @@ export const exportLogsTable = sqliteTable("export_logs", {
   destinationFolder: text(),
 });
 
-export type ExportLog = typeof settingsTable.$inferSelect;
-export type NewExportLog = typeof settingsTable.$inferInsert;
+export type ExportLog = typeof exportLogsTable.$inferSelect;
+export type NewExportLog = typeof exportLogsTable.$inferInsert;

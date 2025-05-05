@@ -48,8 +48,8 @@ export const useExportDatabase = () => {
         "collectionsTrackersTable",
         "entriesTable",
         "textListEntriesTable",
-        "settings",
-        "export_logs",
+        "settingsTable ",
+        "exportLogsTable ",
       ];
       // biome-ignore lint/suspicious/noExplicitAny: <explanation>
       const data: any = {};
