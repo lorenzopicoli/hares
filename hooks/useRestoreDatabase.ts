@@ -70,7 +70,7 @@ export const useRestoreDatabase = () => {
         "collectionsTrackersTable",
         "entriesTable",
         "textListEntriesTable",
-        "settingsTable ",
+        "settingsTable",
         "exportLogsTable ",
       ];
 
