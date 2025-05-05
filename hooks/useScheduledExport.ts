@@ -163,8 +163,9 @@ export const useScheduledExport = () => {
         enableHeadless: true,
 
         requiredNetworkType: BackgroundFetch.NETWORK_TYPE_NONE,
-        // delay: intervalInMin * 1000,
-        delay: 5000,
+        // Replace 31 days just for now
+        delay: intervalDays === 31 ? 5000 : intervalInMin * 1000,
+        // delay: 5000,
       });
     },
     [stopAllScheduledExports],
