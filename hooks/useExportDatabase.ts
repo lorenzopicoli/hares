@@ -49,7 +49,7 @@ export const useExportDatabase = () => {
         "entriesTable",
         "textListEntriesTable",
         "settingsTable",
-        "exportLogsTable ",
+        "exportLogsTable",
       ];
       // biome-ignore lint/suspicious/noExplicitAny: <explanation>
       const data: any = {};
