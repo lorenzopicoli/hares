@@ -157,7 +157,7 @@ export const useScheduledExport = () => {
 
         requiredNetworkType: BackgroundFetch.NETWORK_TYPE_NONE,
         // Replace 31 days just for now
-        delay: intervalDays === 31 ? 5000 : intervalInMin * 1000,
+        delay: intervalDays === 31 ? 5000 : intervalInMin * 60 * 1000,
         // delay: 5000,
       });
     },
