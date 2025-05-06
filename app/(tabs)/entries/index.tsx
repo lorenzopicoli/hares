@@ -3,7 +3,7 @@ import SearchInput from "@/components/SearchInput";
 import { Separator } from "@/components/Separator";
 import { ThemedView } from "@/components/ThemedView";
 import type { TrackerEntry } from "@/db/schema";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import type { ThemedColors } from "@/components/ThemeProvider";
 import EntriesListRow from "@/components/EntriesList/EntriesListRow";
 import useStyles from "@/hooks/useStyles";
@@ -22,8 +22,9 @@ export default function EntriesScreen() {
   const { searchText: searchTextParam } = useLocalSearchParams<{
     searchText?: string;
   }>();
+  const [limit, setLimit] = useState(50);
   const [searchText, setSearchText] = useState<string>(searchTextParam ?? "");
-  const { entries } = useEntries({ searchText });
+  const { entries } = useEntries({ searchText, limit });
   const entryOptionsBottomSheetRef = useRef<EntryOptionsBottomSheetRef>(null);
 
   useEffect(() => {
@@ -38,6 +39,10 @@ export default function EntriesScreen() {
     };
     return <EntriesListRow style={styles.listItem} entry={item} onPress={handlePress} />;
   };
+
+  const handleOnEndReached = useCallback(() => {
+    setLimit((prev) => prev + 50);
+  }, []);
 
   return (
     <ThemedView>
@@ -59,6 +64,8 @@ export default function EntriesScreen() {
             keyboardShouldPersistTaps={Platform.OS === "android" ? "always" : undefined}
             keyExtractor={(item) => item.id.toString()}
             ItemSeparatorComponent={Separator}
+            onEndReached={handleOnEndReached}
+            onEndReachedThreshold={0.8}
           />
         </ThemedView>
       ) : (

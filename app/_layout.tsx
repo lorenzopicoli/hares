@@ -47,6 +47,10 @@ function RootStack() {
         name="stats/selectStatTracker"
         options={{ ...defaultStackNavigationStyling, headerShown: true, headerTitle: "🐰 Select tracker" }}
       />
+      <Stack.Screen
+        name="settings/exportLogs"
+        options={{ ...defaultStackNavigationStyling, headerShown: true, headerTitle: "🐰 Export Logs" }}
+      />
       <Stack.Screen name="+not-found" />
     </Stack>
   );

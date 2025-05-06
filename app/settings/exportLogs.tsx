@@ -66,6 +66,6 @@ const createStyles = (theme: ThemedColors) =>
       padding: Sizes.medium,
     },
     bold: {
-      fontWeight: 800,
+      fontWeight: 700,
     },
   });
