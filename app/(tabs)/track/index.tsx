@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { StyleSheet, View } from "react-native";
+import { StyleSheet, TouchableOpacity, View } from "react-native";
 import { type NavigationState, type Route, type SceneRendererProps, TabBar, TabView } from "react-native-tab-view";
 import type { Tracker } from "@/db/schema";
 import TrackerGridView from "@/components/TrackerGridView";
@@ -17,7 +17,6 @@ import {
   type TrackerOptionsBottomSheetRef,
 } from "@/components/BottomSheets/TrackerOptionsBottomSheet";
 import { useSettings } from "@/components/SettingsProvieder";
-import { TouchableOpacity } from "react-native-gesture-handler";
 
 type TabRoute = Route & {
   key: string;
@@ -85,7 +84,7 @@ export default function TrackScreen() {
     navigation.setOptions({
       headerRight: () => (
         <View>
-          <TouchableOpacity onPress={showScreenBottomSheet}>
+          <TouchableOpacity onPressIn={showScreenBottomSheet}>
             <Entypo name="dots-three-vertical" size={25} color={colors.text} />
           </TouchableOpacity>
         </View>

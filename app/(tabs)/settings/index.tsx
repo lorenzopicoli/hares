@@ -221,6 +221,13 @@ export default function SettingsScreen() {
 
   return (
     <ThemedView>
+      <BottomSheet
+        snapPoints={[IMPORT_DATABASE_BOTTOM_SHEET_HEIGHT]}
+        ref={importDbSheetRef}
+        onChange={importSheetChange}
+      >
+        <ImportDatabaseBottomSheet />
+      </BottomSheet>
       {ConfirmModal}
       <SectionList style={styles.list} sections={settingsData} />
       <TrackerGridSettingsBottomSheet
@@ -238,13 +245,6 @@ export default function SettingsScreen() {
         onChange={exportSheetChange}
       >
         <ExportDatabaseBottomSheetView />
-      </BottomSheet>
-      <BottomSheet
-        snapPoints={[IMPORT_DATABASE_BOTTOM_SHEET_HEIGHT]}
-        ref={importDbSheetRef}
-        onChange={importSheetChange}
-      >
-        <ImportDatabaseBottomSheet />
       </BottomSheet>
     </ThemedView>
   );

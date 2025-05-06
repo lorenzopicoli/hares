@@ -1,4 +1,4 @@
-import { BackHandler, StyleSheet, type NativeEventSubscription } from "react-native";
+import { BackHandler, Pressable as RNPressable, StyleSheet, type NativeEventSubscription } from "react-native";
 import type { ThemedColors } from "@/components/ThemeProvider";
 import { forwardRef, useCallback, useImperativeHandle, useRef, type ReactNode } from "react";
 import {
@@ -8,12 +8,13 @@ import {
   type BottomSheetBackdropProps,
   type BottomSheetModalProps,
 } from "@gorhom/bottom-sheet";
-import { ThemedView } from "@/components/ThemedView";
 import useStyles from "@/hooks/useStyles";
 import type { SharedValue } from "react-native-reanimated";
-import Animated, { useAnimatedStyle, interpolate } from "react-native-reanimated";
-import { TouchableWithoutFeedback } from "react-native-gesture-handler";
+import Animated, { FadeIn, FadeOut } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { ThemedView } from "./ThemedView";
+
+const AnimatedPressable = Animated.createAnimatedComponent(RNPressable);
 
 export interface BottomSheetProps extends BottomSheetModalProps {
   snapPoints: (string | number)[] | SharedValue<(string | number)[]>;
@@ -21,19 +22,17 @@ export interface BottomSheetProps extends BottomSheetModalProps {
   children: ReactNode;
 }
 
-const Backdrop = ({ animatedIndex, style }: BottomSheetBackdropProps) => {
-  const animatedStyle = useAnimatedStyle(() => ({
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
-    opacity: interpolate(animatedIndex.value, [-1, 0], [0, 1]),
-  }));
+const Backdrop = ({ animatedIndex, style, ...other }: BottomSheetBackdropProps) => {
   const { dismiss } = useBottomSheetModal();
-
-  const handleDismiss = useCallback(() => dismiss(), [dismiss]);
-
   return (
-    <Animated.View style={[style, animatedStyle]}>
-      <TouchableWithoutFeedback style={{ height: "100%", width: "100%" }} onPress={handleDismiss} />
-    </Animated.View>
+    <AnimatedPressable
+      onPressIn={() => {
+        dismiss();
+      }}
+      entering={FadeIn.duration(50)}
+      exiting={FadeOut.duration(10)}
+      style={[style, { backgroundColor: "rgba(0, 0, 0, 0.4)" }]}
+    />
   );
 };
 
@@ -43,15 +42,12 @@ export const BottomSheet = forwardRef<BottomSheetModal, BottomSheetProps>((props
   const { styles } = useStyles(createStyles);
   const bottomSheetRef = useRef<BottomSheetModal>(null);
   const { handleSheetPositionChange } = useBottomSheetBackHandler(bottomSheetRef);
-
   useImperativeHandle(ref, () => bottomSheetRef.current as BottomSheetModal);
 
   return (
     <>
       <BottomSheetModal
         {...props}
-        // detached={true}
-        enableDismissOnClose
         backdropComponent={Backdrop}
         handleIndicatorStyle={styles.bottomSheetIndicatorStyle}
         handleComponent={showHandle ? undefined : () => null}
@@ -82,7 +78,6 @@ const createStyles = (theme: ThemedColors) =>
       borderTopRightRadius: 10,
       borderTopLeftRadius: 10,
       backgroundColor: theme.background,
-      //   marginHorizontal: 7,
       flex: 1,
     },
     bottomSheetIndicatorStyle: {
