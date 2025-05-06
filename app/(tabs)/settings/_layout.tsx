@@ -8,6 +8,11 @@ export default function SettingsRoot() {
         name="index"
         options={{ ...defaultStackNavigationStyling, headerShown: true, headerTitle: "🐰 Settings" }}
       />
+
+      <Stack.Screen
+        name="exportLogs"
+        options={{ ...defaultStackNavigationStyling, headerShown: true, headerTitle: "🐰 Export Logs" }}
+      />
     </Stack>
   );
 }

@@ -24,17 +24,19 @@ import { useSettings } from "@/components/SettingsProvieder";
 import { TrackerGridSettingsBottomSheet } from "@/components/BottomSheets/TrackerGridSettingsBottomSheet";
 import { useScheduledExport } from "@/hooks/useScheduledExport";
 import { ScheduledExportFrequencyBottomSheet } from "@/components/BottomSheets/ScheduledExportFrequencyBottomSheet";
+import { useRouter } from "expo-router";
 
 export default function SettingsScreen() {
   const { reloadDb } = useDatabase();
   const { collectionsCount, trackersCount, entriesCount } = useCounts();
   const { confirm, ConfirmModal } = useConfirmModal();
   const { deleteDatabase } = useDeleteDatabase();
-  const { colors, theme, setTheme } = useColors();
+  const { theme, setTheme } = useColors();
   const { settings, updateSettings } = useSettings();
   const [localTheme, setLocalTheme] = useState(theme);
   const [localShowAllCollection, setLocalShowAllCollection] = useState(settings.showAllCollection);
   const { styles } = useStyles(createStyles);
+  const router = useRouter();
 
   const trackerGridSettingsSheet = useRef<BottomSheetModal>(null);
   const scheduledExportFrequencySheet = useRef<BottomSheetModal>(null);
@@ -66,7 +68,9 @@ export default function SettingsScreen() {
     scheduledExportFrequencySheet.current?.dismiss();
   };
 
-  const handleShowExportLogs = () => {};
+  const handleShowExportLogs = () => {
+    router.navigate({ pathname: "/settings/exportLogs" });
+  };
 
   const handleDeleteData = async () => {
     const confirmed = await confirm({
