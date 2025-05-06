@@ -59,7 +59,6 @@ export async function handleBackgroundExport(taskId: string, isTimeout: boolean)
       encoding: "base64",
     });
 
-    // console.log("string contents", contentsString);
     const destinationFileUri = await FileSystem.StorageAccessFramework.createFileAsync(
       destinationFolder,
       `${backupName}.sqlite`,
@@ -68,12 +67,6 @@ export async function handleBackgroundExport(taskId: string, isTimeout: boolean)
     await FileSystem.StorageAccessFramework.writeAsStringAsync(destinationFileUri, contentsString, {
       encoding: "base64",
     });
-    // console.log("SAF uri", destinationFileUri);
-    // await FileSystem.StorageAccessFramework.moveAsync({
-    //   from: backupPath,
-    //   to: destinationPath,
-    // });
-
     console.log("DB copied to", destinationPath);
 
     await FileSystem.deleteAsync(backupPath, { idempotent: true });
