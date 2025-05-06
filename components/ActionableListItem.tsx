@@ -1,5 +1,5 @@
 import { StyleSheet, TouchableOpacity } from "react-native";
-import { XStack } from "./Stacks";
+import { XStack, YStack } from "./Stacks";
 import type { ThemedColors } from "./ThemeProvider";
 import useStyles from "@/hooks/useStyles";
 import { ThemedText } from "./ThemedText";
@@ -9,6 +9,7 @@ import { Sizes } from "@/constants/Sizes";
 
 export default function ActionableListItem(props: {
   title: string | ReactNode;
+  subtitle?: string | ReactNode;
   onPress?: () => void;
   right?: ReactNode;
 }) {
@@ -16,7 +17,16 @@ export default function ActionableListItem(props: {
   return (
     <TouchableOpacity style={styles.container} onPress={props.onPress}>
       <XStack style={styles.xStack} alignItems="center" justifyContent="space-between">
-        {typeof props.title === "string" ? <ThemedText>{props.title}</ThemedText> : props.title}
+        <YStack gap={0}>
+          {typeof props.title === "string" ? <ThemedText>{props.title}</ThemedText> : props.title}
+          {props.subtitle ? (
+            typeof props.subtitle === "string" ? (
+              <ThemedText type="subtitle">{props.subtitle}</ThemedText>
+            ) : (
+              props.subtitle
+            )
+          ) : null}
+        </YStack>
 
         {props.right ? props.right : <Entypo name="chevron-small-right" size={24} color={styles.iconColor.color} />}
       </XStack>

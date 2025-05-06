@@ -11,6 +11,7 @@ import m0006 from './0006_solid_paladin.sql';
 import m0007 from './0007_reflective_iron_fist.sql';
 import m0008 from './0008_hot_sway.sql';
 import m0009 from './0009_greedy_blazing_skull.sql';
+import m0010 from './0010_married_winter_soldier.sql';
 
   export default {
     journal,
@@ -24,7 +25,8 @@ m0005,
 m0006,
 m0007,
 m0008,
-m0009
+m0009,
+m0010
     }
   }
   

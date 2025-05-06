@@ -1,6 +1,6 @@
 {
-  "name": "native",
-  "main": "expo-router/entry",
+  "name": "hares",
+  "main": "index.js",
   "version": "1.0.0",
   "scripts": {
     "start": "expo start",
@@ -50,6 +50,7 @@
     "react-dom": "18.3.1",
     "react-hook-form": "^7.55.0",
     "react-native": "0.76.9",
+    "react-native-background-fetch": "^4.2.8",
     "react-native-gesture-handler": "~2.20.2",
     "react-native-pager-view": "6.5.1",
     "react-native-reanimated": "~3.16.1",

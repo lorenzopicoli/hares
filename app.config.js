@@ -50,7 +50,7 @@ export default {
       },
     ],
     "expo-localization",
-    "expo-background-task",
+    "react-native-background-fetch",
   ],
   experiments: {
     typedRoutes: true,
