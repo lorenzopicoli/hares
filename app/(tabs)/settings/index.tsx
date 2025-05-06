@@ -184,9 +184,11 @@ export default function SettingsScreen() {
                 render: (
                   <ActionableListItem
                     title="Destination folder"
-                    subtitle={currentExportFolder?.replace(
-                      "content://com.android.externalstorage.documents/tree/primary%3A",
-                      "",
+                    subtitle={decodeURIComponent(
+                      currentExportFolder?.replace(
+                        "content://com.android.externalstorage.documents/tree/primary%3A",
+                        "",
+                      ) ?? "No folder selected",
                     )}
                     onPress={handleScheduledExportFolder}
                   />
