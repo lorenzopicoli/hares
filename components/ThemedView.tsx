@@ -23,9 +23,9 @@ export function ThemedSafeAreaView({ style, lightColor, darkColor, ...otherProps
   if (Platform.OS === "ios") {
     return (
       <KeyboardAvoidingView style={{ flex: 1 }} keyboardVerticalOffset={insets.bottom + 60} behavior={"padding"}>
-        <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }} {...otherProps} />
+        <SafeAreaView style={[{ flex: 1, backgroundColor: colors.background }, style]} {...otherProps} />
       </KeyboardAvoidingView>
     );
   }
-  return <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }} {...otherProps} />;
+  return <SafeAreaView style={[{ flex: 1, backgroundColor: colors.background }, style]} {...otherProps} />;
 }

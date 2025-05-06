@@ -76,7 +76,7 @@ export default function StatsScreen() {
   };
 
   return (
-    <ThemedScrollView>
+    <ThemedScrollView contentStyle={styles.scrollViewContent}>
       <YStack alignItems="stretch">
         <XStack>
           <ThemedView>
@@ -147,6 +147,9 @@ export default function StatsScreen() {
 
 const createStyles = (theme: ThemedColors) =>
   StyleSheet.create({
+    scrollViewContent: {
+      paddingHorizontal: Sizes.medium,
+    },
     listItem: {
       paddingVertical: Sizes.medium,
     },

@@ -85,8 +85,8 @@ export default function TextListSelectionScreen() {
   };
 
   return (
-    <ThemedSafeAreaView>
-      <SearchInput value={searchQuery} onChange={setSearchQuery} autoFocus placeholder="Search..." />
+    <ThemedSafeAreaView style={styles.container}>
+      <SearchInput value={searchQuery} onChange={setSearchQuery} autoCapitalize="words" autoFocus />
       <FlatList
         data={data}
         renderItem={renderItem}
@@ -101,13 +101,15 @@ export default function TextListSelectionScreen() {
 
 const createStyles = (theme: ThemedColors) =>
   StyleSheet.create({
-    container: {},
+    container: {
+      paddingHorizontal: Sizes.small,
+    },
     itemInnerContainer: {
       flexDirection: "row",
       justifyContent: "space-between",
       alignItems: "center",
-      paddingHorizontal: Sizes.medium,
       height: Sizes.list.medium,
+      paddingHorizontal: Sizes.medium,
     },
     itemIcon: {
       color: theme.tint,

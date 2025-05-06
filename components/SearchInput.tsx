@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from "react";
-import { TextInput, View, StyleSheet, type StyleProp, type TextStyle } from "react-native";
+import { TextInput, View, StyleSheet, type StyleProp, type TextStyle, type TextInputProps } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import useStyles from "@/hooks/useStyles";
 import { useColors, type ThemedColors } from "./ThemeProvider";
@@ -14,6 +14,7 @@ interface SearchInputProps {
   autoFocus?: boolean;
   placeholder?: string;
   style?: StyleProp<TextStyle>;
+  autoCapitalize?: TextInputProps["autoCapitalize"];
   onPress?: () => void;
 }
 
@@ -27,6 +28,7 @@ function SearchInput(props: SearchInputProps) {
     onChange,
     onFocus,
     placeholder = "Search...",
+    autoCapitalize,
     style,
   } = props;
   const inputRef = useRef<TextInput>(null);
@@ -55,7 +57,7 @@ function SearchInput(props: SearchInputProps) {
         placeholder={placeholder}
         placeholderTextColor={colors.secondaryText}
         style={[customStyles.searchInput, style]}
-        autoCapitalize="none"
+        autoCapitalize={autoCapitalize ?? "none"}
         autoCorrect={false}
         returnKeyType="search"
         editable={editable}

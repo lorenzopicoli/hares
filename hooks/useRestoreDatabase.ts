@@ -21,7 +21,8 @@ export const useRestoreDatabase = () => {
       if (!(await FileSystem.getInfoAsync(backupPath)).exists) {
         return;
       }
-      const dbPath = db.$client.databasePath;
+      const dbPath = `file://${db.$client.databasePath}`;
+
       try {
         await db.$client.execAsync("PRAGMA wal_checkpoint(FULL)");
 
