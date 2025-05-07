@@ -10,12 +10,12 @@ import ThemedInput from "../ThemedInput";
 
 type RankingChartOptionsBottomSheet = {
   onChangeLimit?: (limit: number) => void;
-  limit: number;
+  initialLimit: number;
 };
 
 export const RankingChartOptionsBottomSheet = forwardRef<BottomSheetModal, RankingChartOptionsBottomSheet>(
   (props, ref) => {
-    const { limit, onChangeLimit } = props;
+    const { initialLimit, onChangeLimit } = props;
     const { styles } = useStyles(createStyles);
     const bottomSheetRef = useRef<BottomSheetModal>(null);
 
@@ -30,8 +30,8 @@ export const RankingChartOptionsBottomSheet = forwardRef<BottomSheetModal, Ranki
         <YStack gap={Sizes.small} style={styles.container}>
           <View style={styles.flex}>
             <ThemedInput
-              label="Time period:"
-              value={String(limit)}
+              label="Items in ranking:"
+              defaultValue={String(initialLimit)}
               keyboardType="numeric"
               onChangeText={handleTextChange}
             />

@@ -17,7 +17,7 @@ export function useEntryCountStats(params: {
   const { data: entryCountStats } = useLiveQuery(
     db
       .select({
-        date: groupedDate,
+        date: groupedDate.mapWith(String),
         value: sql<number>`SUM(COUNT(${entriesTable.id})) OVER (
           ORDER BY ${groupedDate}
           ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW

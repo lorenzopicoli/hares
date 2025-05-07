@@ -110,7 +110,7 @@ export default function TextListBarChart(props: Props) {
       >
         <Chart option={option} />
       </View>
-      <RankingChartOptionsBottomSheet ref={optionsBottomSheet} limit={limit} onChangeLimit={setLimit} />
+      <RankingChartOptionsBottomSheet ref={optionsBottomSheet} initialLimit={limit} onChangeLimit={setLimit} />
     </ChartCard>
   );
 }

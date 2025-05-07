@@ -1,9 +1,9 @@
 import type { Tracker } from "@/db/schema";
 import { useEntryCountStats } from "@/hooks/data/stats/useEntryCountStats";
 import type { EChartsCoreOption } from "echarts";
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { Chart } from "./Chart";
-import { DateGroupingPeriod } from "@/utils/dateGroupPeriod";
+import { DateGroupingPeriod, getExpandedData } from "@/utils/dateGroupPeriod";
 import { useNumberTrackerLineStats } from "@/hooks/data/stats/useNumberTrackerLineStats";
 import { GroupFunction } from "@/utils/groupFunctions";
 import { TouchableOpacity, View, StyleSheet } from "react-native";
@@ -15,7 +15,6 @@ import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useColors, type ThemedColors } from "../ThemeProvider";
 import useStyles from "@/hooks/useStyles";
 import { NumberChartOptionsBottomSheet } from "../BottomSheets/NumberChartOptionsBottomSheet";
-import { addDays, format } from "date-fns";
 
 export function EntryCountLineChart(props: {
   tracker: Tracker;
@@ -27,29 +26,10 @@ export function EntryCountLineChart(props: {
   const [groupPeriod, setGroupPeriod] = useState(DateGroupingPeriod.daily);
   const { entryCountStats } = useEntryCountStats({ trackerId: tracker.id, groupPeriod, dateRange });
   const optionsBottomSheet = useRef<BottomSheetModal>(null);
-  const getVirtualData = useCallback(() => {
-    const data = [];
-
-    let currentDate = dateRange.startDate;
-    let prevVal = 0;
-
-    while (currentDate < dateRange.endDate) {
-      const date = format(currentDate, "yyyy-MM-dd");
-      const dayData = entryCountStats.find((entry) => entry.date === date);
-
-      data.push({
-        date,
-        value: dayData?.value ?? prevVal,
-      });
-      if (dayData?.value) {
-        prevVal = dayData.value;
-      }
-      currentDate = addDays(currentDate, 1);
-    }
-
-    return data;
-  }, [entryCountStats, dateRange]);
-  const chartData = useMemo(() => getVirtualData(), [getVirtualData]);
+  const chartData = useMemo(
+    () => getExpandedData(dateRange, groupPeriod, entryCountStats),
+    [entryCountStats, dateRange, groupPeriod],
+  );
   const option: EChartsCoreOption = useMemo(
     () => ({
       tooltip: {
@@ -120,6 +100,10 @@ export function NumberTrackersLineChart(props: {
     groupFun,
     dateRange,
   });
+  const chartData = useMemo(
+    () => getExpandedData(dateRange, groupPeriod, entriesNumberValueStats),
+    [entriesNumberValueStats, dateRange, groupPeriod],
+  );
   const optionsBottomSheet = useRef<BottomSheetModal>(null);
   const option: EChartsCoreOption = useMemo(
     () => ({
@@ -127,19 +111,19 @@ export function NumberTrackersLineChart(props: {
         trigger: "axis",
       },
       xAxis: {
-        data: entriesNumberValueStats.map((t) => t.date),
+        data: chartData.map((t) => t.date),
       },
       yAxis: {},
       series: [
         {
           smooth: true,
-          data: entriesNumberValueStats.map((t) => t.value),
+          data: chartData.map((t) => t.value),
           type: "line",
           name: "Value",
         },
       ],
     }),
-    [entriesNumberValueStats],
+    [chartData],
   );
 
   const handleFilterPress = () => {
