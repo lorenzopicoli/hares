@@ -76,7 +76,7 @@ export const NumberChartOptionsBottomSheet = forwardRef<BottomSheetModal, Number
           ) : null}
           {groupFun ? (
             <>
-              <Separator containerBackgroundColor="transparent" />
+              {groupPeriod ? <Separator containerBackgroundColor="transparent" /> : null}
               <ThemedText
                 style={{
                   paddingHorizontal: Sizes.medium,
