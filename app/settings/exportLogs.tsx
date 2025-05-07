@@ -56,7 +56,7 @@ export default function ExportLogsScreen() {
 const createStyles = (theme: ThemedColors) =>
   StyleSheet.create({
     container: {
-      paddingHorizontal: Sizes.small,
+      paddingHorizontal: Sizes.medium,
     },
     itemInnerContainer: {
       flexDirection: "row",

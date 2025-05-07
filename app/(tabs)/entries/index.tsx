@@ -45,8 +45,8 @@ export default function EntriesScreen() {
   }, []);
 
   return (
-    <ThemedView>
-      <View style={styles.searchContainer}>
+    <ThemedView style={styles.container}>
+      <View>
         <SearchInput
           value={searchText}
           onChange={(text) => {
@@ -57,12 +57,14 @@ export default function EntriesScreen() {
         />
       </View>
       {entries ? (
-        <ThemedView style={styles.listContainer}>
+        <ThemedView>
           <FlatList
             data={entries}
             renderItem={renderItem}
             keyboardShouldPersistTaps={Platform.OS === "android" ? "always" : undefined}
+            contentContainerStyle={styles.listContainer}
             keyExtractor={(item) => item.id.toString()}
+            showsVerticalScrollIndicator={false}
             ItemSeparatorComponent={Separator}
             onEndReached={handleOnEndReached}
             onEndReachedThreshold={0.8}
@@ -81,12 +83,12 @@ export default function EntriesScreen() {
 const createStyles = (theme: ThemedColors) =>
   StyleSheet.create({
     listContainer: {
-      paddingVertical: Sizes.small,
+      paddingVertical: Sizes.medium,
     },
     listItem: {
       padding: Sizes.medium,
     },
-    searchContainer: {
-      paddingHorizontal: Sizes.small,
+    container: {
+      paddingHorizontal: Sizes.medium,
     },
   });

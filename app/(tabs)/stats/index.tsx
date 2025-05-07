@@ -14,7 +14,6 @@ import { Platform, Pressable, StyleSheet, TouchableOpacity, View } from "react-n
 import { useColors, type ThemedColors } from "@/components/ThemeProvider";
 import { Sizes } from "@/constants/Sizes";
 import { CalendarHeatmapChart } from "@/components/charts/CalendarHeatmapChart";
-import ChartCard from "@/components/ChartCard";
 import type { BottomSheetModal } from "@gorhom/bottom-sheet";
 import { Entypo, MaterialIcons } from "@expo/vector-icons";
 import SearchInput from "@/components/SearchInput";
@@ -25,6 +24,8 @@ import {
   type StatsDateRange,
 } from "@/components/BottomSheets/StatsScreenOptionsBottomSheet";
 import EmptyState from "@/components/EmptyState";
+import { Spacing } from "@/components/Spacing";
+import Card from "@/components/Card";
 
 export default function StatsScreen() {
   const {
@@ -112,7 +113,7 @@ export default function StatsScreen() {
           <EntryCountLineChart tracker={tracker} dateRange={dateRange} />
 
           <ThemedView>
-            <ChartCard
+            <Card
               title={"Latest entries"}
               right={<Entypo name="chevron-small-right" size={24} color={colors.text} />}
               onHeaderPress={handleSeeAllEntries}
@@ -125,7 +126,8 @@ export default function StatsScreen() {
                   ) : null}
                 </View>
               ))}
-            </ChartCard>
+            </Card>
+            <Spacing size="xSmall" />
           </ThemedView>
         </>
       ) : (

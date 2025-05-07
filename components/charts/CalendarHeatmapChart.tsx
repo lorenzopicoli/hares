@@ -6,7 +6,6 @@ import { GroupFunction } from "@/utils/groupFunctions";
 import { useNumberTrackerLineStats } from "@/hooks/data/stats/useNumberTrackerLineStats";
 import { addDays, format } from "date-fns";
 import { StyleSheet, TouchableOpacity, View } from "react-native";
-import ChartCard from "../ChartCard";
 import type { StatsDateRange } from "../BottomSheets/StatsScreenOptionsBottomSheet";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import type { BottomSheetModal } from "@gorhom/bottom-sheet";
@@ -15,6 +14,7 @@ import { Sizes } from "@/constants/Sizes";
 import useStyles from "@/hooks/useStyles";
 import { NumberChartOptionsBottomSheet } from "../BottomSheets/NumberChartOptionsBottomSheet";
 import { DateGroupingPeriod } from "@/utils/dateGroupPeriod";
+import Card from "../Card";
 
 export function CalendarHeatmapChart(props: {
   tracker: Tracker;
@@ -119,7 +119,7 @@ export function CalendarHeatmapChart(props: {
   };
 
   return (
-    <ChartCard
+    <Card
       title="Daily values"
       right={
         <TouchableOpacity style={styles.filterButton} onPress={handleFilterPress}>
@@ -139,7 +139,7 @@ export function CalendarHeatmapChart(props: {
         <Chart option={option} />
       </View>
       <NumberChartOptionsBottomSheet ref={optionsBottomSheet} groupFun={groupFun} onChangeGroupFun={setGroupFun} />
-    </ChartCard>
+    </Card>
   );
 }
 

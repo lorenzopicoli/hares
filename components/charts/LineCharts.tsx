@@ -9,12 +9,12 @@ import { GroupFunction } from "@/utils/groupFunctions";
 import { TouchableOpacity, View, StyleSheet } from "react-native";
 import { Sizes } from "@/constants/Sizes";
 import type { StatsDateRange } from "../BottomSheets/StatsScreenOptionsBottomSheet";
-import ChartCard from "../ChartCard";
 import type { BottomSheetModal } from "@gorhom/bottom-sheet";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useColors, type ThemedColors } from "../ThemeProvider";
 import useStyles from "@/hooks/useStyles";
 import { NumberChartOptionsBottomSheet } from "../BottomSheets/NumberChartOptionsBottomSheet";
+import Card from "../Card";
 
 export function EntryCountLineChart(props: {
   tracker: Tracker;
@@ -56,7 +56,7 @@ export function EntryCountLineChart(props: {
   };
 
   return (
-    <ChartCard
+    <Card
       title="Log frequency"
       right={
         <TouchableOpacity style={styles.filterButton} onPress={handleFilterPress}>
@@ -81,7 +81,7 @@ export function EntryCountLineChart(props: {
         groupPeriod={groupPeriod}
         onChangeGroupPeriod={setGroupPeriod}
       />
-    </ChartCard>
+    </Card>
   );
 }
 
@@ -131,7 +131,7 @@ export function NumberTrackersLineChart(props: {
   };
 
   return (
-    <ChartCard
+    <Card
       title="Values"
       right={
         <TouchableOpacity style={styles.filterButton} onPress={handleFilterPress}>
@@ -158,7 +158,7 @@ export function NumberTrackersLineChart(props: {
         groupFun={groupFun}
         onChangeGroupFun={setGroupFun}
       />
-    </ChartCard>
+    </Card>
   );
 }
 

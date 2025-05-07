@@ -7,14 +7,14 @@ import { ThemedText } from "./ThemedText";
 import { StyleSheet, TouchableHighlight, View } from "react-native";
 import { Separator } from "./Separator";
 
-interface ChartCardProps extends PropsWithChildren {
+interface CardProps extends PropsWithChildren {
   title: string;
   right?: ReactNode;
   onFilterPress?: () => void;
   onHeaderPress?: () => void;
 }
 
-export default function ChartCard(props: ChartCardProps) {
+export default function Card(props: CardProps) {
   const { styles } = useStyles(createStyles);
   const { colors } = useColors();
   return (
@@ -40,7 +40,7 @@ const createStyles = (theme: ThemedColors) =>
     card: {
       flex: 1,
       paddingVertical: Sizes.large,
-      backgroundColor: theme.cardBackground,
+      backgroundColor: theme.secondaryBackground,
       borderRadius: Sizes.radius.medium,
       shadowColor: "#000",
       shadowOffset: {
@@ -50,7 +50,7 @@ const createStyles = (theme: ThemedColors) =>
       shadowOpacity: 0.25,
       shadowRadius: 3.84,
 
-      elevation: 5,
+      elevation: 4,
     },
     topSection: {
       paddingHorizontal: Sizes.large,

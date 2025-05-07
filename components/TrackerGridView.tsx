@@ -47,6 +47,7 @@ function TrackerGridView(props: Props) {
           key={`track-grid-${settings.trackersGridColsNumber}`}
           data={trackers}
           renderItem={renderItem}
+          contentContainerStyle={styles.flatListContent}
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps={Platform.OS === "android" ? "always" : undefined}
           keyExtractor={(item) => item.id.toString()}
@@ -71,9 +72,9 @@ function TrackerGridView(props: Props) {
 
 const createStyles = (theme: ThemedColors) =>
   StyleSheet.create({
-    container: {
-      paddingRight: Sizes.xSmall,
-      paddingLeft: Sizes.xSmall,
+    container: {},
+    flatListContent: {
+      padding: Sizes.small,
     },
     emptyStateContainer: {
       flex: 1,
@@ -88,13 +89,23 @@ const createStyles = (theme: ThemedColors) =>
       padding: Sizes.xSmall,
     },
     card: {
-      backgroundColor: theme.toggleButton.background,
+      backgroundColor: theme.cardBackground,
       borderRadius: Sizes.radius.small,
       padding: Sizes.medium,
       minHeight: 100,
       justifyContent: "center",
       borderWidth: 1,
       borderColor: theme.toggleButton.border,
+
+      shadowColor: "#000",
+      shadowOffset: {
+        width: 0,
+        height: 2,
+      },
+      shadowOpacity: 0.25,
+      shadowRadius: 3.84,
+
+      elevation: 4,
     },
     cardText: {
       color: theme.text,

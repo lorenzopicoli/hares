@@ -80,6 +80,7 @@ export default function EntrySliderInput(props: EntrySliderInputProps) {
 const createStyles = (theme: ThemedColors) =>
   StyleSheet.create({
     sliderContainer: {
+      marginTop: Sizes.medium,
       flexDirection: "row",
       justifyContent: "space-between",
       alignItems: "center",

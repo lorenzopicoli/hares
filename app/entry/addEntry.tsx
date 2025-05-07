@@ -7,7 +7,7 @@ import { TrackerType, type EntryDateInformation, type NewTrackerEntry, type Peri
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { ThemedText } from "@/components/ThemedText";
 import { useCallback, useEffect, useMemo } from "react";
-import type { ThemedColors } from "@/components/ThemeProvider";
+import { useColors, type ThemedColors } from "@/components/ThemeProvider";
 import useStyles from "@/hooks/useStyles";
 import { FormThemedToggleButtons } from "@/components/ThemedToggleButtons";
 import { Spacing } from "@/components/Spacing";
@@ -23,9 +23,9 @@ import { useLazyEntry } from "@/hooks/data/useEntry";
 import { useUpsertEntry } from "@/hooks/data/useUpsertEntry";
 import { FormThemedInput } from "@/components/ThemedInput";
 import { Separator } from "@/components/Separator";
-import { YStack } from "@/components/Stacks";
 import ActionableListItem from "@/components/ActionableListItem";
 import SectionList from "@/components/SectionList";
+import Card from "@/components/Card";
 
 interface FormInputs {
   dateInformation: EntryDateInformation;
@@ -48,6 +48,7 @@ export default function AddEntryScreen() {
     textListSelections?: string;
   }>();
 
+  const { colors } = useColors();
   const entryId = useMemo(() => (entryIdParam ? +entryIdParam : undefined), [entryIdParam]);
   const trackerId = useMemo(() => +trackerIdParam, [trackerIdParam]);
 
@@ -180,6 +181,7 @@ export default function AddEntryScreen() {
         return (
           <FormThemedToggleButtons
             label=""
+            containerStyle={{ marginBottom: 0 }}
             columns={2}
             form={{
               control,
@@ -216,7 +218,7 @@ export default function AddEntryScreen() {
 
   return (
     <ThemedSafeAreaView>
-      <ThemedScrollView>
+      <ThemedScrollView contentStyle={styles.contentStyle}>
         {tracker?.description ? (
           <ThemedText>
             <ThemedText style={styles.bold}>Description: </ThemedText>
@@ -225,14 +227,12 @@ export default function AddEntryScreen() {
         ) : null}
         <ThemedView>{renderEntryInput()}</ThemedView>
 
-        <Spacing size="xSmall" />
         <FormEntryDateSelection
           form={{
             control,
             name: "dateInformation",
           }}
         />
-        <Spacing size="xSmall" />
         <FormThemedInput
           form={{
             control,
@@ -241,17 +241,19 @@ export default function AddEntryScreen() {
           label="Comments/Notes"
           autoCapitalize="sentences"
         />
-        <Spacing size="small" />
+
+        <Spacing size="xSmall" />
         {lastEntries.length > 0 ? (
-          <>
-            <ThemedText type="title">Previous entries</ThemedText>
-            {lastEntries.map((entry) => (
-              <YStack key={entry.id}>
-                <EntriesListRow entry={entry} />
-                <Separator overrideHorizontalMargin={0} />
-              </YStack>
+          <Card title="Latest entries">
+            {lastEntries.map((entry, i) => (
+              <View key={entry.id} style={{ paddingHorizontal: Sizes.medium }}>
+                <EntriesListRow entry={entry} hideTrackerName style={styles.listItem} />
+                {i !== lastEntries.length - 1 ? (
+                  <Separator overrideHorizontalMargin={0} containerBackgroundColor={colors.secondaryBackground} />
+                ) : null}
+              </View>
             ))}
-          </>
+          </Card>
         ) : null}
       </ThemedScrollView>
       <View style={styles.submitButtonContainer}>
@@ -269,8 +271,14 @@ const createStyles = (theme: ThemedColors) =>
     textListControls: {
       gap: Sizes.medium,
     },
+    listItem: {
+      paddingVertical: Sizes.medium,
+    },
     submitButtonContainer: {
       paddingHorizontal: Sizes.medium,
       marginBottom: Sizes.medium,
+    },
+    contentStyle: {
+      paddingVertical: Sizes.medium,
     },
   });

@@ -5,13 +5,13 @@ import { Chart } from "./Chart";
 import { useTopTextListStats } from "@/hooks/data/stats/useTopTextListStats";
 import { Sizes } from "@/constants/Sizes";
 import { TouchableOpacity, View, StyleSheet } from "react-native";
-import ChartCard from "../ChartCard";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import type { BottomSheetModal } from "@gorhom/bottom-sheet";
 import { useColors, type ThemedColors } from "../ThemeProvider";
 import useStyles from "@/hooks/useStyles";
 import { RankingChartOptionsBottomSheet } from "../BottomSheets/RankingChartOptionsBottomSheet";
 import type { StatsDateRange } from "../BottomSheets/StatsScreenOptionsBottomSheet";
+import Card from "../Card";
 
 interface Props {
   tracker: Tracker;
@@ -90,7 +90,7 @@ export default function TextListBarChart(props: Props) {
   }, []);
 
   return (
-    <ChartCard
+    <Card
       title={"Ranking"}
       right={
         <TouchableOpacity style={styles.filterButton} onPress={handleFilterPress}>
@@ -111,7 +111,7 @@ export default function TextListBarChart(props: Props) {
         <Chart option={option} />
       </View>
       <RankingChartOptionsBottomSheet ref={optionsBottomSheet} initialLimit={limit} onChangeLimit={setLimit} />
-    </ChartCard>
+    </Card>
   );
 }
 

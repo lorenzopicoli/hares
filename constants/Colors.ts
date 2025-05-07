@@ -155,7 +155,7 @@ export const NavBarColors = {
       background: "#1e223a",
       card: Colors.dark.background,
       text: Colors.dark.text,
-      border: "3a3e52",
+      border: "#3a3e52",
       notification: "#c33036",
     },
   },

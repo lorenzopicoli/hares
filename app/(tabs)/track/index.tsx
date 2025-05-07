@@ -85,7 +85,7 @@ export default function TrackScreen() {
       headerRight: () => (
         <View>
           <TouchableOpacity onPressIn={showScreenBottomSheet}>
-            <Entypo name="dots-three-vertical" size={25} color={colors.text} />
+            <Entypo name="plus" size={30} color={colors.text} />
           </TouchableOpacity>
         </View>
       ),
@@ -133,7 +133,7 @@ const createStyles = (theme: ThemedColors) =>
       backgroundColor: theme.background,
     },
     searchContainer: {
-      paddingHorizontal: Sizes.small,
+      paddingHorizontal: Sizes.medium,
     },
     tabBar: {
       backgroundColor: theme.background,

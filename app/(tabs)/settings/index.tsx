@@ -1,4 +1,4 @@
-import { Platform, StyleSheet, Switch } from "react-native";
+import { Platform, StyleSheet } from "react-native";
 import { ThemedText } from "@/components/ThemedText";
 import { useDatabase } from "@/contexts/DatabaseContext";
 import { useConfirmModal } from "@/hooks/useConfirmModal";
@@ -25,6 +25,7 @@ import { TrackerGridSettingsBottomSheet } from "@/components/BottomSheets/Tracke
 import { useScheduledExport } from "@/hooks/useScheduledExport";
 import { ScheduledExportFrequencyBottomSheet } from "@/components/BottomSheets/ScheduledExportFrequencyBottomSheet";
 import { useRouter } from "expo-router";
+import { ThemedSwitch } from "@/components/ThemedSwitch";
 
 export default function SettingsScreen() {
   const { reloadDb } = useDatabase();
@@ -115,7 +116,7 @@ export default function SettingsScreen() {
             <ActionableListItem
               title="Dark mode"
               onPress={handleThemeChange}
-              right={<Switch onChange={handleThemeChange} value={localTheme === "dark"} />}
+              right={<ThemedSwitch onChange={handleThemeChange} value={localTheme === "dark"} />}
             />
           ),
         },
@@ -125,7 +126,7 @@ export default function SettingsScreen() {
             <ActionableListItem
               title="Show tab for all trackers"
               onPress={handleShowAllCollectionChange}
-              right={<Switch onChange={handleShowAllCollectionChange} value={localShowAllCollection} />}
+              right={<ThemedSwitch onChange={handleShowAllCollectionChange} value={localShowAllCollection} />}
             />
           ),
         },

@@ -108,16 +108,20 @@ export default function EntryDateSelection(props: EntryDateSelectionProps) {
   const listData = useMemo(
     () => [
       {
-        title: (
-          <ThemedText style={styles.largerText}>
-            <ThemedText style={styles.bold}>Date: </ThemedText>
-            {currentDateFormatted}
-          </ThemedText>
-        ),
         data: [
           {
             key: "change-date",
-            render: <ActionableListItem title="Change date" onPress={showDatePicker} />,
+            render: (
+              <ActionableListItem
+                title={
+                  <ThemedText>
+                    <ThemedText style={styles.bold}>Date: </ThemedText>
+                    {currentDateFormatted}
+                  </ThemedText>
+                }
+                onPress={showDatePicker}
+              />
+            ),
           },
           {
             key: "date-presets",
@@ -164,9 +168,6 @@ const createStyles = (theme: ThemedColors) =>
     },
     bold: {
       fontWeight: 700,
-      fontSize: 18,
-    },
-    largerText: {
       fontSize: 18,
     },
   });
