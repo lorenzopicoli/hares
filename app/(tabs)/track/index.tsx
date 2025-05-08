@@ -18,6 +18,7 @@ import {
 } from "@/components/BottomSheets/TrackerOptionsBottomSheet";
 import { useSettings } from "@/components/SettingsProvieder";
 import { XStack } from "@/components/Stacks";
+import { Fonts } from "@/constants/Colors";
 
 type TabRoute = Route & {
   key: string;
@@ -116,6 +117,9 @@ export default function TrackScreen() {
         renderScene={renderTrackers}
         onIndexChange={setTabIndex}
         renderTabBar={TrackerTabBar}
+        commonOptions={{
+          labelStyle: { ...Fonts.medium },
+        }}
       />
 
       <TrackScreenBottomSheet collectionId={collectionId} ref={screenBottomSheetRef} />

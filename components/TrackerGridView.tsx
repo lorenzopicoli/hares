@@ -11,6 +11,7 @@ import { useSettings } from "./SettingsProvieder";
 import EmptyState from "./EmptyState";
 import { ThemedText } from "./ThemedText";
 import { Entypo } from "@expo/vector-icons";
+import { Fonts } from "@/constants/Colors";
 
 interface Props {
   searchQuery?: string;
@@ -110,6 +111,7 @@ const createStyles = (theme: ThemedColors) =>
     cardText: {
       color: theme.text,
       fontSize: Sizes.font.larger,
+      ...Fonts.regular,
       textAlign: "center",
     },
   });

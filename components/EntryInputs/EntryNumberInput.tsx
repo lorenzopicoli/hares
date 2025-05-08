@@ -7,6 +7,7 @@ import type { ThemedColors } from "../ThemeProvider";
 import { type FieldValues, type Path, type ControllerProps, Controller } from "react-hook-form";
 import InputErrorLabel from "../InputErrorLabel";
 import { Pressable } from "react-native-gesture-handler";
+import { Fonts } from "@/constants/Colors";
 
 export interface EntryNumberInputProps extends Omit<TextInputProps, "onChangeText" | "value"> {
   onChangeText?: (value: number | null) => void;
@@ -177,6 +178,7 @@ const createStyles = (theme: ThemedColors) =>
     numberInput: {
       flex: 1,
       color: theme.input.text,
+      ...Fonts.medium,
       fontSize: 70,
       fontWeight: 600,
       textAlign: "center",

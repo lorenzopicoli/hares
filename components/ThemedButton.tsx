@@ -1,8 +1,9 @@
 import React from "react";
-import { StyleSheet, Text, TouchableOpacity, type StyleProp, type TextStyle, type ViewStyle } from "react-native";
+import { StyleSheet, TouchableOpacity, type StyleProp, type TextStyle, type ViewStyle } from "react-native";
 import type { ThemedColors } from "./ThemeProvider";
 import useStyles from "@/hooks/useStyles";
 import { Sizes } from "@/constants/Sizes";
+import { ThemedText } from "./ThemedText";
 
 interface ThemedButtonProps {
   title?: string;
@@ -40,7 +41,7 @@ const ThemedButton: React.FC<ThemedButtonProps> = ({
       onPress={onPress}
       disabled={disabled}
     >
-      <Text
+      <ThemedText
         style={[
           styles.text,
           disabled && styles.disabledText,
@@ -52,7 +53,7 @@ const ThemedButton: React.FC<ThemedButtonProps> = ({
         ]}
       >
         {title}
-      </Text>
+      </ThemedText>
     </TouchableOpacity>
   );
 };

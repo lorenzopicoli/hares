@@ -4,6 +4,7 @@ import { Ionicons } from "@expo/vector-icons";
 import useStyles from "@/hooks/useStyles";
 import { useColors, type ThemedColors } from "./ThemeProvider";
 import { Sizes } from "@/constants/Sizes";
+import { Fonts } from "@/constants/Colors";
 
 interface SearchInputProps {
   value: string;
@@ -94,6 +95,7 @@ const createSearchStyles = (theme: ThemedColors) =>
     searchInput: {
       flex: 1,
       fontSize: 16,
+      ...Fonts.regular,
       color: theme.text,
       height: "100%",
       padding: 0,

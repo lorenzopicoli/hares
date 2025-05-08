@@ -51,6 +51,7 @@ export default {
     ],
     "expo-localization",
     "react-native-background-fetch",
+    "expo-font",
   ],
   experiments: {
     typedRoutes: true,

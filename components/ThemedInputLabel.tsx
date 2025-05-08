@@ -2,6 +2,7 @@ import React from "react";
 import { Text, StyleSheet } from "react-native";
 import type { ThemedColors } from "./ThemeProvider";
 import useStyles from "@/hooks/useStyles";
+import { Fonts } from "@/constants/Colors";
 
 interface ThemedInputLabelProps {
   label?: string;
@@ -15,6 +16,7 @@ export default function ThemedInputLabel({ label }: ThemedInputLabelProps) {
 const createStyles = (theme: ThemedColors) =>
   StyleSheet.create({
     label: {
+      ...Fonts.medium,
       color: theme.secondaryText,
       fontSize: 14,
       marginBottom: 8,

@@ -1,7 +1,7 @@
 import { ThemeProvider } from "@react-navigation/native";
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
-import React, { Suspense, useCallback, useEffect } from "react";
+import React, { Suspense, useCallback, useEffect, useState } from "react";
 import * as NavigationBar from "expo-navigation-bar";
 import * as SystemUI from "expo-system-ui";
 import { ThemeProvider as MyThemeProvider, useColors } from "@/components/ThemeProvider";
@@ -16,6 +16,8 @@ import { enableScreens } from "react-native-screens";
 import { StatusBar } from "expo-status-bar";
 import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
 import { SettingsProvider } from "@/components/SettingsProvieder";
+import { useFonts } from "expo-font";
+import { Barlow_400Regular, Barlow_500Medium, Barlow_600SemiBold, Barlow_700Bold } from "@expo-google-fonts/barlow";
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
@@ -70,10 +72,27 @@ export default function RootLayout() {
 
 function ThemedLayout() {
   const { theme } = useColors();
+  const [loaded, error] = useFonts({
+    // HaresFontRegular: Montserrat_400Regular,
+    // HaresFontMedium: Montserrat_500Medium,
+    // HaresFontSemiBold: Montserrat_600SemiBold,
+    // HaresFontBold: Montserrat_700Bold,
+    HaresFontRegular: Barlow_400Regular,
+    HaresFontMedium: Barlow_500Medium,
+    HaresFontSemiBold: Barlow_600SemiBold,
+    HaresFontBold: Barlow_700Bold,
+  });
+  const [dbLoaded, setDbLoaded] = useState(false);
 
   const handleDbLoaded = useCallback(() => {
-    SplashScreen.hideAsync();
+    setDbLoaded(true);
   }, []);
+
+  useEffect(() => {
+    if (loaded && !error && dbLoaded) {
+      SplashScreen.hideAsync();
+    }
+  }, [loaded, error, dbLoaded]);
 
   useEffect(() => {
     if (Platform.OS === "android") {

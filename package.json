@@ -16,6 +16,8 @@
     "preset": "jest-expo"
   },
   "dependencies": {
+    "@expo-google-fonts/barlow": "^0.3.0",
+    "@expo-google-fonts/montserrat": "^0.3.0",
     "@expo/vector-icons": "^14.0.2",
     "@gorhom/bottom-sheet": "^5.1.4",
     "@react-native-async-storage/async-storage": "1.23.1",
@@ -77,7 +79,10 @@
   },
   "expo": {
     "install": {
-      "exclude": ["react-native-reanimated", "react-native-gesture-handler"]
+      "exclude": [
+        "react-native-reanimated",
+        "react-native-gesture-handler"
+      ]
     }
   },
   "private": true

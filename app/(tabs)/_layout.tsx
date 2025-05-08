@@ -3,13 +3,15 @@ import { Tabs } from "expo-router";
 import { useColors } from "@/components/ThemeProvider";
 import { HapticPressable } from "@/components/HapticPressable";
 import { MaterialIcons } from "@expo/vector-icons";
+import { Fonts } from "@/constants/Colors";
+import { ThemedText } from "@/components/ThemedText";
 
 export default function TabLayout() {
   const { colors } = useColors();
 
   return (
     <Tabs
-      screenOptions={{
+      screenOptions={({ route }) => ({
         tabBarActiveTintColor: colors.tint,
         headerShown: false,
         tabBarButton: HapticPressable,
@@ -17,14 +19,30 @@ export default function TabLayout() {
         tabBarActiveBackgroundColor: colors.background,
         tabBarLabelStyle: {
           color: colors.text,
+          ...Fonts.regular,
         },
-
+        tabBarLabel: ({ focused }) => {
+          const textStyleProperty = focused ? Fonts.bold : Fonts.regular;
+          return (
+            <ThemedText
+              style={{
+                ...textStyleProperty,
+                // marginRight: -1,
+                fontSize: 10,
+                lineHeight: 13,
+                textTransform: "capitalize",
+              }}
+            >
+              {route.name}
+            </ThemedText>
+          );
+        },
         tabBarStyle: {
           backgroundColor: colors.background,
           borderTopWidth: 1,
           borderColor: colors.border,
         },
-      }}
+      })}
     >
       <Tabs.Screen
         name="index"

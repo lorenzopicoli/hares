@@ -1,4 +1,4 @@
-import { DarkTheme, DefaultTheme } from "@react-navigation/native";
+import { DarkTheme, DefaultTheme, type Theme } from "@react-navigation/native";
 
 export const colors = {
   frenchViolet: "#8614cc",
@@ -134,7 +134,41 @@ export const Colors = {
   },
 };
 
-export const NavBarColors = {
+export const FontsAndWeights = {
+  regular: {
+    fontFamily: "HaresFontRegular",
+    fontWeight: "400" as const,
+  },
+  medium: {
+    fontFamily: "HaresFontMedium",
+    fontWeight: "500" as const,
+  },
+  bold: {
+    fontFamily: "HaresSemiBold",
+    fontWeight: "600" as const,
+  },
+  heavy: {
+    fontFamily: "HaresFontBold",
+    fontWeight: "700" as const,
+  },
+};
+
+export const Fonts = {
+  regular: {
+    fontFamily: "HaresFontRegular",
+  },
+  medium: {
+    fontFamily: "HaresFontMedium",
+  },
+  bold: {
+    fontFamily: "HaresSemiBold",
+  },
+  heavy: {
+    fontFamily: "HaresFontBold",
+  },
+};
+
+export const NavBarColors: Record<string, Theme> = {
   light: {
     ...DefaultTheme,
     dark: false,
@@ -145,6 +179,9 @@ export const NavBarColors = {
       text: Colors.light.text,
       border: "#e0e0e5",
       notification: colors.auburn,
+    },
+    fonts: {
+      ...FontsAndWeights,
     },
   },
   dark: {
@@ -157,6 +194,9 @@ export const NavBarColors = {
       text: Colors.dark.text,
       border: "#3a3e52",
       notification: "#c33036",
+    },
+    fonts: {
+      ...FontsAndWeights,
     },
   },
 };
