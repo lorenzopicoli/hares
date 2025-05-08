@@ -119,7 +119,7 @@ export default function StatsScreen() {
               onHeaderPress={handleSeeAllEntries}
             >
               {entries.map((entry, i) => (
-                <View key={entry.id} style={{ paddingHorizontal: Sizes.medium }}>
+                <View key={entry.id} style={{ paddingHorizontal: Sizes.large }}>
                   <EntriesListRow entry={entry} hideTrackerName style={styles.listItem} />
                   {i !== entries.length - 1 ? (
                     <Separator overrideHorizontalMargin={0} containerBackgroundColor={colors.secondaryBackground} />
