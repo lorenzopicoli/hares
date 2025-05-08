@@ -47,7 +47,7 @@ export default function StatsScreen() {
   const { entries } = useEntries({ trackerId, limit: 5 });
 
   const [dateRange, setDateRange] = useState({
-    startDate: startDateParam ? new Date(startDateParam) : subMonths(new Date(), 1),
+    startDate: startDateParam ? new Date(startDateParam) : subMonths(new Date(), 3),
     endDate: endDateParam ? new Date(endDateParam) : new Date(),
   });
 

@@ -85,7 +85,6 @@ const createSearchStyles = (theme: ThemedColors) =>
       borderRadius: Sizes.radius.small,
       paddingHorizontal: Sizes.small,
       height: Sizes.inputHeight,
-      marginHorizontal: 2,
       marginVertical: Sizes.small,
       backgroundColor: theme.input.background,
     },

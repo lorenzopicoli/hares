@@ -108,7 +108,6 @@ export default function SettingsScreen() {
 
   const settingsData: ISection[] = [
     {
-      title: <ThemedText type="title">General</ThemedText>,
       data: [
         {
           key: "theme",
@@ -163,23 +162,6 @@ export default function SettingsScreen() {
       ],
     },
     {
-      title: <ThemedText type="title">Usage</ThemedText>,
-      data: [
-        {
-          key: "collection",
-          render: <TextListItem title="Collections" right={<ThemedText>{collectionsCount}</ThemedText>} />,
-        },
-        {
-          key: "trackers",
-          render: <TextListItem title="Trackers" right={<ThemedText>{trackersCount}</ThemedText>} />,
-        },
-        {
-          key: "entries",
-          render: <TextListItem title="Entries" right={<ThemedText>{entriesCount}</ThemedText>} />,
-        },
-      ],
-    },
-    {
       title: <ThemedText type="title">Scheduled Exports</ThemedText>,
       data:
         Platform.OS === "android"
@@ -218,11 +200,26 @@ export default function SettingsScreen() {
               {
                 key: "export-unavailable",
 
-                render: (
-                  <TextListItem title="Scheduled export is unavailable on iOS. Try setting up an export reminder." />
-                ),
+                render: <TextListItem title="Scheduled export is unavailable on iOS." />,
               },
             ],
+    },
+    {
+      title: <ThemedText type="title">Usage</ThemedText>,
+      data: [
+        {
+          key: "collection",
+          render: <TextListItem title="Collections" right={<ThemedText>{collectionsCount}</ThemedText>} />,
+        },
+        {
+          key: "trackers",
+          render: <TextListItem title="Trackers" right={<ThemedText>{trackersCount}</ThemedText>} />,
+        },
+        {
+          key: "entries",
+          render: <TextListItem title="Entries" right={<ThemedText>{entriesCount}</ThemedText>} />,
+        },
+      ],
     },
   ];
 

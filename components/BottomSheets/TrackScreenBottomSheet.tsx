@@ -2,7 +2,7 @@ import { StyleSheet } from "react-native";
 import { YStack } from "../Stacks";
 import { useColors, type ThemedColors } from "../ThemeProvider";
 import useStyles from "@/hooks/useStyles";
-import { Entypo, MaterialIcons } from "@expo/vector-icons";
+import { Entypo } from "@expo/vector-icons";
 import { Sizes } from "@/constants/Sizes";
 import { ThemedView } from "../ThemedView";
 import BottomSheetListItem from "../BottomSheetListItem";
@@ -34,16 +34,8 @@ export const TrackScreenBottomSheet = forwardRef<BottomSheetModal, TrackScreenBo
     router.navigate("/collection/addCollection");
   }, [router]);
 
-  const handleEditCollection = useCallback(() => {
-    bottomSheetRef.current?.dismiss();
-    router.navigate({
-      pathname: "/collection/addCollection",
-      params: { collectionId: props.collectionId, isEditingAll: props.collectionId ? undefined : "true" },
-    });
-  }, [router, props.collectionId]);
-
   return (
-    <BottomSheet snapPoints={[230]} ref={bottomSheetRef}>
+    <BottomSheet snapPoints={[170]} ref={bottomSheetRef}>
       <ThemedView>
         <YStack style={styles.container}>
           <BottomSheetListItem
@@ -56,12 +48,6 @@ export const TrackScreenBottomSheet = forwardRef<BottomSheetModal, TrackScreenBo
             title="Add collection"
             left={<Entypo name="folder" size={20} color={colors.text} />}
             onPress={handleAddCollection}
-          />
-          <Separator containerBackgroundColor="transparent" />
-          <BottomSheetListItem
-            title="Edit current collection"
-            left={<MaterialIcons name="mode-edit" size={20} color={colors.text} />}
-            onPress={handleEditCollection}
           />
         </YStack>
       </ThemedView>

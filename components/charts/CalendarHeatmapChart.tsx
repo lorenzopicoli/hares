@@ -59,7 +59,7 @@ export function CalendarHeatmapChart(props: {
           shadowBlur: dayData?.value ? 7 : 0,
         },
         // If no value, we just have to set something out of range so the coloring is correct
-        value: [date, dayData?.value ?? Number.MAX_SAFE_INTEGER],
+        value: [date, dayData?.value ?? ""],
       });
       currentDate = addDays(currentDate, 1);
     }
@@ -70,11 +70,14 @@ export function CalendarHeatmapChart(props: {
   const chartData = useMemo(() => getVirtualData(), [getVirtualData]);
   const min = useMemo(() => Math.max(chartData.min ?? 0, 0), [chartData.min]);
   const max = useMemo(() => chartData.max ?? 0, [chartData.max]);
+  const hasLegend = useMemo(() => max !== min, [max, min]);
   const option: EChartsCoreOption = useMemo(
     () => ({
-      tooltip: {},
+      tooltip: {
+        valueFormatter: (value: [string, number | string]) => `${value[0]}${value[1] !== "" ? `: ${value[1]}` : ""}`,
+      },
       visualMap: {
-        show: max !== min,
+        show: hasLegend,
         min,
         max,
         type: "piecewise",
@@ -102,7 +105,7 @@ export function CalendarHeatmapChart(props: {
         data: chartData.data,
       },
     }),
-    [chartData.data, max, min, dateRange],
+    [chartData.data, max, min, hasLegend, dateRange],
   );
 
   // For some reason the chart doesn't render properly on first render, but forcing a re-render fixes it
@@ -133,7 +136,7 @@ export function CalendarHeatmapChart(props: {
           flex: 1,
           marginLeft: 40,
           marginRight: 40,
-          height: 270,
+          height: hasLegend ? 270 : 230,
         }}
       >
         <Chart option={option} />

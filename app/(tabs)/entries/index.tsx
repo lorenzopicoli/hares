@@ -65,7 +65,7 @@ export default function EntriesScreen() {
             contentContainerStyle={styles.listContainer}
             keyExtractor={(item) => item.id.toString()}
             showsVerticalScrollIndicator={false}
-            ItemSeparatorComponent={Separator}
+            ItemSeparatorComponent={() => <Separator overrideHorizontalMargin={0} />}
             onEndReached={handleOnEndReached}
             onEndReachedThreshold={0.8}
           />
@@ -86,7 +86,7 @@ const createStyles = (theme: ThemedColors) =>
       paddingVertical: Sizes.medium,
     },
     listItem: {
-      padding: Sizes.medium,
+      paddingVertical: Sizes.medium,
     },
     container: {
       paddingHorizontal: Sizes.medium,

@@ -4,7 +4,7 @@ import ThemedButton from "@/components/ThemedButton";
 import { ThemedSafeAreaView } from "@/components/ThemedView";
 import { Sizes } from "@/constants/Sizes";
 import type { NewCollectionTracker, Tracker } from "@/db/schema";
-import { useLocalSearchParams, useRouter } from "expo-router";
+import { useLocalSearchParams, useNavigation, useRouter } from "expo-router";
 import { ThemedText } from "@/components/ThemedText";
 import {
   NestedReorderableList,
@@ -81,6 +81,7 @@ export default function AddCollectionScreen() {
 
   const [isOutOfOrder, setIsOutOfOrder] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const navigation = useNavigation();
 
   const { upsertCollection } = useUpsertCollection();
   const { fetchCollection } = useLazyCollection();
@@ -129,6 +130,12 @@ export default function AddCollectionScreen() {
       setIsOutOfOrder(false);
     }
   }, [isOutOfOrder]);
+
+  useEffect(() => {
+    navigation.setOptions({
+      headerTitle: collectionId || isEditingAll ? "🐰 Edit collection" : "🐰 Add collection",
+    });
+  }, [collectionId, isEditingAll, navigation]);
 
   const onSubmit = async (data: FormInputs) => {
     const relationship: Omit<NewCollectionTracker, "collectionId">[] = data.trackers

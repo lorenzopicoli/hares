@@ -8,7 +8,7 @@ import useStyles from "@/hooks/useStyles";
 import { useNavigation, useRouter } from "expo-router";
 import SearchInput from "@/components/SearchInput";
 import { Sizes } from "@/constants/Sizes";
-import { Entypo } from "@expo/vector-icons";
+import { Entypo, MaterialIcons } from "@expo/vector-icons";
 import { useCollections } from "@/hooks/data/useCollections";
 import type { BottomSheetModal } from "@gorhom/bottom-sheet";
 import { TrackScreenBottomSheet } from "@/components/BottomSheets/TrackScreenBottomSheet";
@@ -17,6 +17,7 @@ import {
   type TrackerOptionsBottomSheetRef,
 } from "@/components/BottomSheets/TrackerOptionsBottomSheet";
 import { useSettings } from "@/components/SettingsProvieder";
+import { XStack } from "@/components/Stacks";
 
 type TabRoute = Route & {
   key: string;
@@ -80,17 +81,29 @@ export default function TrackScreen() {
     [handleTrackerSelection, handleTrackerLongPress, searchQuery],
   );
 
+  const collectionId = useMemo(() => (tabIndex !== 0 ? tabIndex : undefined), [tabIndex]);
+
+  const handleEdit = useCallback(() => {
+    router.navigate({
+      pathname: "/collection/addCollection",
+      params: { collectionId, isEditingAll: collectionId ? undefined : "true" },
+    });
+  }, [router, collectionId]);
+
   useEffect(() => {
     navigation.setOptions({
       headerRight: () => (
-        <View>
+        <XStack>
           <TouchableOpacity onPressIn={showScreenBottomSheet}>
             <Entypo name="plus" size={30} color={colors.text} />
           </TouchableOpacity>
-        </View>
+          <TouchableOpacity onPressIn={handleEdit}>
+            <MaterialIcons name="mode-edit" size={20} color={colors.text} />
+          </TouchableOpacity>
+        </XStack>
       ),
     });
-  }, [colors.text, navigation, showScreenBottomSheet]);
+  }, [colors.text, navigation, showScreenBottomSheet, handleEdit]);
 
   return (
     <View style={styles.container}>
@@ -105,7 +118,7 @@ export default function TrackScreen() {
         renderTabBar={TrackerTabBar}
       />
 
-      <TrackScreenBottomSheet collectionId={tabIndex !== 0 ? tabIndex : undefined} ref={screenBottomSheetRef} />
+      <TrackScreenBottomSheet collectionId={collectionId} ref={screenBottomSheetRef} />
       <TrackerOptionsBottomSheet ref={trackerOptionsBottomSheetRef} />
     </View>
   );

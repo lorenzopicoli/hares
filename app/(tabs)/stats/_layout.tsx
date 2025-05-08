@@ -9,7 +9,7 @@ export default function StatsRoot() {
         name="index"
         options={{ ...defaultStackNavigationStyling, headerShown: true, headerTitle: "🐰 Stats" }}
         initialParams={{
-          startDate: subMonths(new Date(), 1).toISOString(),
+          startDate: subMonths(new Date(), 3).toISOString(),
           endDate: new Date().toISOString(),
         }}
       />
