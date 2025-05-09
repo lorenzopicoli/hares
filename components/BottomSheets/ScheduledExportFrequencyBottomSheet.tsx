@@ -27,11 +27,17 @@ export const ScheduledExportFrequencyBottomSheet = forwardRef<
     <BottomSheet showHandle snapPoints={[200]} ref={bottomSheetRef}>
       <ThemedView>
         <YStack style={styles.container}>
-          <BottomSheetListItem title="Every day" onPress={() => props.onFrequencyChange(1)} />
+          <BottomSheetListItem title="Every 3 hours" onPress={() => props.onFrequencyChange(3)} />
           <Separator containerBackgroundColor="transparent" />
-          <BottomSheetListItem title="Every week" onPress={() => props.onFrequencyChange(7)} />
+          <BottomSheetListItem title="Every 6 hours" onPress={() => props.onFrequencyChange(6)} />
           <Separator containerBackgroundColor="transparent" />
-          <BottomSheetListItem title="Every month" onPress={() => props.onFrequencyChange(31)} />
+          <BottomSheetListItem title="Every 12 hours" onPress={() => props.onFrequencyChange(12)} />
+          <Separator containerBackgroundColor="transparent" />
+          <BottomSheetListItem title="Every day" onPress={() => props.onFrequencyChange(24)} />
+          <Separator containerBackgroundColor="transparent" />
+          <BottomSheetListItem title="Every week" onPress={() => props.onFrequencyChange(7 * 24)} />
+          <Separator containerBackgroundColor="transparent" />
+          <BottomSheetListItem title="Every month" onPress={() => props.onFrequencyChange(31 * 24)} />
           <Separator containerBackgroundColor="transparent" />
           <BottomSheetListItem title="Never" onPress={() => props.onFrequencyChange(null)} />
         </YStack>

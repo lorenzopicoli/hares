@@ -5,9 +5,6 @@ import * as FileSystem from "expo-file-system";
 import { exportDatabase } from "./useExportDatabase";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useCallback, useEffect, useState } from "react";
-import { drizzle } from "drizzle-orm/expo-sqlite";
-import { exportLogsTable } from "@/db/schema";
-import { eq } from "drizzle-orm";
 
 const SCHEDULED_EXPORT_STORAGE_KEY = "scheduledExportFolder";
 const SCHEDULED_EXPORT_FREQUENCY = "scheduledExportFrequency";
@@ -15,7 +12,7 @@ const SCHEDULED_EXPORT_FAILED_LOGS_KEY = "scheduledExportFailedLogs";
 const SCHEDULED_EXPORT_TASK_ID = "com.lorenzopicoli.hares.exporttask";
 
 export async function handleBackgroundExport(taskId: string, isTimeout: boolean) {
-  console.log("Starting BG task");
+  console.log("Starting BG task", taskId, isTimeout);
   if (isTimeout || taskId !== SCHEDULED_EXPORT_TASK_ID) {
     console.log("Timeout or invalid taskId", taskId);
     // This task has exceeded its allowed running-time.
@@ -25,21 +22,21 @@ export async function handleBackgroundExport(taskId: string, isTimeout: boolean)
 
   try {
     const newDbCon = SQLite.openDatabaseSync(DATABASE_NAME, { enableChangeListener: false });
-    const drizzleDb = drizzle(newDbCon, { schema: { exportLogsTable }, logger: false });
+    // const drizzleDb = drizzle(newDbCon, { schema: { exportLogsTable }, logger: false });
 
-    const logId = await drizzleDb
-      .insert(exportLogsTable)
-      .values({ createdAt: new Date() })
-      .returning({ id: exportLogsTable.id })
-      .then((l) => l?.[0]?.id);
+    // const logId = await drizzleDb
+    //   .insert(exportLogsTable)
+    //   .values({ createdAt: new Date() })
+    //   .returning({ id: exportLogsTable.id })
+    //   .then((l) => l?.[0]?.id);
 
-    if (!logId) {
-      throw new Error("Failed to insert in database");
-    }
+    // if (!logId) {
+    //   throw new Error("Failed to insert in database");
+    // }
 
     const destinationFolder = await AsyncStorage.getItem(SCHEDULED_EXPORT_STORAGE_KEY);
 
-    await drizzleDb.update(exportLogsTable).set({ destinationFolder }).where(eq(exportLogsTable.id, logId));
+    // await drizzleDb.update(exportLogsTable).set({ destinationFolder }).where(eq(exportLogsTable.id, logId));
     console.log("Destination folder is", destinationFolder);
     if (!destinationFolder) {
       BackgroundFetch.finish(taskId);
@@ -70,7 +67,7 @@ export async function handleBackgroundExport(taskId: string, isTimeout: boolean)
     console.log("DB copied to", destinationPath);
 
     await FileSystem.deleteAsync(backupPath, { idempotent: true });
-    await drizzleDb.update(exportLogsTable).set({ finishedAt: new Date() }).where(eq(exportLogsTable.id, logId));
+    // await drizzleDb.update(exportLogsTable).set({ finishedAt: new Date() }).where(eq(exportLogsTable.id, logId));
 
     console.log("Cleaned up local folder");
   } catch (err) {
@@ -122,9 +119,9 @@ export const useScheduledExport = () => {
   }, []);
 
   const setupScheduledExport = useCallback(
-    async (intervalDays: number) => {
+    async (frequencyInHours: number) => {
       await stopAllScheduledExports();
-      const intervalInMin = intervalDays * 24 * 60 + 15;
+      const intervalInMin = frequencyInHours * 60 + 15;
       await BackgroundFetch.configure(
         {
           minimumFetchInterval: Math.max(intervalInMin, 15),
@@ -141,9 +138,11 @@ export const useScheduledExport = () => {
         },
         async (taskId: string) => {
           await handleBackgroundExport(taskId, false);
+          BackgroundFetch.finish(taskId);
         },
         async (taskId: string) => {
           await handleBackgroundExport(taskId, true);
+          BackgroundFetch.finish(taskId);
         },
       );
 
@@ -156,18 +155,19 @@ export const useScheduledExport = () => {
         enableHeadless: true,
 
         requiredNetworkType: BackgroundFetch.NETWORK_TYPE_NONE,
-        delay: intervalInMin * 60 * 1000,
+        // delay: frequencyInHours * 60 * 60 * 1000,
+        delay: 50000,
       });
     },
     [stopAllScheduledExports],
   );
 
   const setExportFrequencyFun = useCallback(
-    async (frequency: number | null) => {
-      await AsyncStorage.setItem(SCHEDULED_EXPORT_FREQUENCY, String(frequency));
-      setExportFrequency(frequency);
-      if (frequency) {
-        setupScheduledExport(frequency);
+    async (frequencyInHours: number | null) => {
+      await AsyncStorage.setItem(SCHEDULED_EXPORT_FREQUENCY, String(frequencyInHours));
+      setExportFrequency(frequencyInHours);
+      if (frequencyInHours) {
+        setupScheduledExport(frequencyInHours);
       } else {
         stopAllScheduledExports();
       }

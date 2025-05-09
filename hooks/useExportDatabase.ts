@@ -6,8 +6,8 @@ import * as schema from "@/db/schema";
 import { useCallback } from "react";
 import type { SQLiteDatabase } from "expo-sqlite";
 
-export const exportDatabase = async (db: SQLiteDatabase, backupName: string) => {
-  await db.execAsync("PRAGMA wal_checkpoint(FULL)");
+export const exportDatabase = async (backupName: string, db?: SQLiteDatabase) => {
+  await db?.execAsync("PRAGMA wal_checkpoint(FULL)");
   const appPath = FileSystem.documentDirectory;
   const dbPath = `${appPath}SQLite/${DATABASE_NAME}`;
   const backupPath = `${appPath}SQLite/${backupName.replace(".db", "")}.sqlite`;
@@ -25,7 +25,7 @@ export const useExportDatabase = () => {
   const exportDatabaseSQLite = useCallback(
     async (backupName: string) => {
       try {
-        const backupPath = await exportDatabase(db.$client, backupName);
+        const backupPath = await exportDatabase(backupName, db.$client);
         if (await Sharing.isAvailableAsync()) {
           await Sharing.shareAsync(backupPath);
         } else {

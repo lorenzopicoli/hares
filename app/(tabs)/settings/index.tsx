@@ -26,6 +26,7 @@ import { useScheduledExport } from "@/hooks/useScheduledExport";
 import { ScheduledExportFrequencyBottomSheet } from "@/components/BottomSheets/ScheduledExportFrequencyBottomSheet";
 import { useRouter } from "expo-router";
 import { ThemedSwitch } from "@/components/ThemedSwitch";
+import { formatFrequency } from "@/utils/formatFrequency";
 
 export default function SettingsScreen() {
   const { reloadDb } = useDatabase();
@@ -186,7 +187,7 @@ export default function SettingsScreen() {
                 render: (
                   <ActionableListItem
                     title="Frequency"
-                    subtitle={exportFrequency ? `Every ${exportFrequency} days` : "Never"}
+                    subtitle={formatFrequency(exportFrequency ?? undefined)}
                     onPress={showExportFrequencySheet}
                   />
                 ),
