@@ -45,7 +45,7 @@ export async function handleBackgroundExport(taskId: string, isTimeout: boolean)
 
     console.log("DB connection established");
     const backupName = `hares-export-${new Date().toISOString()}`.replaceAll(":", "_").replaceAll(".", "_");
-    const backupPath = await exportDatabase(newDbCon, backupName);
+    const backupPath = await exportDatabase(backupName, newDbCon);
 
     console.log("DB Exported to", backupPath);
     const destinationPath = `${destinationFolder}/${backupName}.sqlite`;

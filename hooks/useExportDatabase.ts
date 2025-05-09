@@ -7,7 +7,9 @@ import { useCallback } from "react";
 import type { SQLiteDatabase } from "expo-sqlite";
 
 export const exportDatabase = async (backupName: string, db?: SQLiteDatabase) => {
-  await db?.execAsync("PRAGMA wal_checkpoint(FULL)");
+  try {
+    await db?.execAsync("PRAGMA wal_checkpoint(FULL)");
+  } catch (e) {}
   const appPath = FileSystem.documentDirectory;
   const dbPath = `${appPath}SQLite/${DATABASE_NAME}`;
   const backupPath = `${appPath}SQLite/${backupName.replace(".db", "")}.sqlite`;
