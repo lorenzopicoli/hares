@@ -1,5 +1,4 @@
 import { Colors } from "@/constants/Colors";
-import { useColorScheme } from "@/hooks/useColorScheme";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { createContext, useCallback, useContext, useEffect, useState, type PropsWithChildren } from "react";
 
@@ -14,17 +13,16 @@ type ThemeContextType = {
 const ThemeContext = createContext<ThemeContextType | null>(null);
 
 const ThemeProvider = ({ children }: PropsWithChildren) => {
-  const colorScheme = useColorScheme();
   const [theme, setTheme] = useState<"light" | "dark">("dark");
   const [colors, setColors] = useState(Colors[theme]);
 
   const readTheme = useCallback(async () => {
     const result = await AsyncStorage.getItem("theme");
 
-    const newTheme = result ? (result as "light" | "dark") : colorScheme === "light" ? "light" : "dark";
+    const newTheme = result ? (result as "light" | "dark") : "dark";
     setTheme(newTheme);
     setColors(Colors[newTheme]);
-  }, [colorScheme]);
+  }, []);
 
   const changeTheme = useCallback(
     async (theme: "dark" | "light") => {
