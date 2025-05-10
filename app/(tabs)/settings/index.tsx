@@ -9,7 +9,7 @@ import { useColors, type ThemedColors } from "@/components/ThemeProvider";
 import SectionList, { type ISection } from "@/components/SectionList";
 import ActionableListItem from "@/components/ActionableListItem";
 import TextListItem from "@/components/TextListItem";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import useStyles from "@/hooks/useStyles";
 import { BottomSheet, useBottomSheetBackHandler } from "@/components/BottomSheet";
 import type { BottomSheetModal } from "@gorhom/bottom-sheet";
@@ -26,6 +26,7 @@ import { useScheduledExport } from "@/hooks/useScheduledExport";
 import { ScheduledExportFrequencyBottomSheet } from "@/components/BottomSheets/ScheduledExportFrequencyBottomSheet";
 import { useRouter } from "expo-router";
 import { ThemedSwitch } from "@/components/ThemedSwitch";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function SettingsScreen() {
   const { reloadDb } = useDatabase();
@@ -47,6 +48,11 @@ export default function SettingsScreen() {
   const { handleSheetPositionChange: importSheetChange } = useBottomSheetBackHandler(importDbSheetRef);
   const { setExportFrequency, exportFrequency, currentExportFolder, requestFolderAccess, setupScheduledExport } =
     useScheduledExport();
+  const [lastBgTask, setLastBgTask] = useState("");
+
+  useEffect(() => {
+    AsyncStorage.getItem("bla").then((v) => setLastBgTask(v ?? "none"));
+  }, []);
 
   const showTrackerGridSettings = () => {
     trackerGridSettingsSheet.current?.present();
@@ -218,6 +224,10 @@ export default function SettingsScreen() {
         {
           key: "entries",
           render: <TextListItem title="Entries" right={<ThemedText>{entriesCount}</ThemedText>} />,
+        },
+        {
+          key: "bla",
+          render: <TextListItem title="Last BG task" right={<ThemedText>{lastBgTask}</ThemedText>} />,
         },
       ],
     },

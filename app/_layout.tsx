@@ -18,6 +18,7 @@ import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
 import { SettingsProvider } from "@/components/SettingsProvieder";
 import { useFonts } from "expo-font";
 import { Barlow_400Regular, Barlow_500Medium, Barlow_600SemiBold, Barlow_700Bold } from "@expo-google-fonts/barlow";
+import { addNotificationReceivedListener } from "expo-notifications";
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
@@ -100,6 +101,13 @@ function ThemedLayout() {
     }
     SystemUI.setBackgroundColorAsync(Colors[theme].background);
   }, [theme]);
+
+  React.useEffect(() => {
+    const subscription = addNotificationReceivedListener((notification) => {
+      console.log(notification);
+    });
+    return () => subscription.remove();
+  }, []);
 
   return (
     <ThemeProvider value={NavBarColors[theme]}>
