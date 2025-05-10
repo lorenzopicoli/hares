@@ -1,6 +1,6 @@
 import { Platform, StyleSheet } from "react-native";
 import { ThemedText } from "@/components/ThemedText";
-import { useDatabase } from "@/contexts/DatabaseContext";
+import { DB_FOLDER_KEY, useDatabase } from "@/contexts/DatabaseContext";
 import { useConfirmModal } from "@/hooks/useConfirmModal";
 import { Sizes } from "@/constants/Sizes";
 import { useCounts } from "@/hooks/data/useCounts";
@@ -26,9 +26,10 @@ import { useScheduledExport } from "@/hooks/useScheduledExport";
 import { ScheduledExportFrequencyBottomSheet } from "@/components/BottomSheets/ScheduledExportFrequencyBottomSheet";
 import { useRouter } from "expo-router";
 import { ThemedSwitch } from "@/components/ThemedSwitch";
+import Storage from "expo-sqlite/kv-store";
 
 export default function SettingsScreen() {
-  const { reloadDb } = useDatabase();
+  const { changeDatabaseFolder, reloadDb } = useDatabase();
   const { collectionsCount, trackersCount, entriesCount } = useCounts();
   const { confirm, ConfirmModal } = useConfirmModal();
   const { deleteDatabase } = useDeleteDatabase();
@@ -88,8 +89,15 @@ export default function SettingsScreen() {
     await deleteDatabase();
   };
 
+  console.log(Storage.getItemSync(DB_FOLDER_KEY));
   const handleScheduledExportFolder = async () => {
-    requestFolderAccess();
+    const uri = await requestFolderAccess();
+
+    console.log("URI", uri);
+    if (uri) {
+      console.log("Changing", uri);
+      await changeDatabaseFolder(uri);
+    }
   };
 
   const handleThemeChange = () => {
@@ -149,6 +157,19 @@ export default function SettingsScreen() {
         {
           key: "import-data",
           render: <ActionableListItem title="Import Data" onPress={showImportDbSheet} />,
+        },
+        {
+          key: "database-folder",
+          render: (
+            <ActionableListItem
+              title="Database folder"
+              subtitle={decodeURIComponent(
+                currentExportFolder?.replace("content://com.android.externalstorage.documents/tree/primary%3A", "") ??
+                  "Default folder",
+              )}
+              onPress={handleScheduledExportFolder}
+            />
+          ),
         },
         {
           key: "delete-data",

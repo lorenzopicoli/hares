@@ -113,7 +113,7 @@ export const useScheduledExport = () => {
 
     await AsyncStorage.setItem(SCHEDULED_EXPORT_STORAGE_KEY, uri);
     setCurrentExportFolder(uri);
-    return true;
+    return uri;
   }, []);
 
   const stopAllScheduledExports = useCallback(async () => {

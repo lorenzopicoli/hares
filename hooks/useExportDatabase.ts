@@ -1,16 +1,27 @@
-import { useDatabase, DATABASE_NAME } from "@/contexts/DatabaseContext";
+import { useDatabase, DATABASE_NAME, DB_FOLDER_KEY } from "@/contexts/DatabaseContext";
 import { Alert } from "react-native";
 import * as FileSystem from "expo-file-system";
 import * as Sharing from "expo-sharing";
 import * as schema from "@/db/schema";
 import { useCallback } from "react";
 import type { SQLiteDatabase } from "expo-sqlite";
+import Storage from "expo-sqlite/kv-store";
 
-export const exportDatabase = async (db: SQLiteDatabase, backupName: string) => {
-  await db.execAsync("PRAGMA wal_checkpoint(FULL)");
-  const appPath = FileSystem.documentDirectory;
-  const dbPath = `${appPath}SQLite/${DATABASE_NAME}`;
-  const backupPath = `${appPath}SQLite/${backupName.replace(".db", "")}.sqlite`;
+export const exportDatabase = async (opts: {
+  db?: SQLiteDatabase;
+  backupName: string;
+  backupFolder?: string;
+  extension?: ".db" | ".sqlite";
+}) => {
+  await opts.db?.execAsync("PRAGMA wal_checkpoint(FULL)");
+  const dbFolder = await Storage.getItemAsync(DB_FOLDER_KEY);
+  const dbPath = `${dbFolder}/${DATABASE_NAME}`;
+  const backupFolder = opts.backupFolder ?? dbFolder;
+  const filename =
+    opts.extension && opts.extension === ".db"
+      ? `${opts.backupName.replace(".db", "")}.db`
+      : `${opts.backupName.replace(".db", "")}.sqlite`;
+  const backupPath = `${backupFolder}/${filename}`;
 
   await FileSystem.copyAsync({
     from: dbPath,
@@ -20,12 +31,45 @@ export const exportDatabase = async (db: SQLiteDatabase, backupName: string) => 
   return backupPath;
 };
 
+export async function copyDbToFolder(conn: SQLiteDatabase, destinationFolder: string) {
+  try {
+    const backupName = "hares-backup.db";
+    const backupPath = await exportDatabase({ db: conn, backupName, extension: ".db" });
+
+    const destinationPath = `${destinationFolder}/${DATABASE_NAME}`;
+    const { exists } = await FileSystem.getInfoAsync(backupPath);
+    if (!exists) {
+      console.log("Failed to find backup");
+      throw new Error("");
+    }
+    const contentsString = await FileSystem.readAsStringAsync(backupPath, {
+      encoding: "base64",
+    });
+
+    const destinationFileUri = await FileSystem.StorageAccessFramework.createFileAsync(
+      destinationFolder,
+      DATABASE_NAME,
+      "application/x-sqlite3",
+    );
+    await FileSystem.StorageAccessFramework.writeAsStringAsync(destinationFileUri, contentsString, {
+      encoding: "base64",
+    });
+    console.log("DB copied to", destinationPath);
+
+    await FileSystem.deleteAsync(backupPath, { idempotent: true });
+
+    console.log("Cleaned up local folder");
+  } catch (err) {
+    console.error("Failed to backup", err);
+  }
+}
+
 export const useExportDatabase = () => {
   const { db } = useDatabase();
   const exportDatabaseSQLite = useCallback(
     async (backupName: string) => {
       try {
-        const backupPath = await exportDatabase(db.$client, backupName);
+        const backupPath = await exportDatabase({ db: db.$client, backupName });
         if (await Sharing.isAvailableAsync()) {
           await Sharing.shareAsync(backupPath);
         } else {

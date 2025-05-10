@@ -7,6 +7,9 @@ import migrations from "@/drizzle/migrations";
 import { ThemedText } from "@/components/ThemedText";
 import LoadingDatabase from "@/components/LoadingDatabase";
 import * as SQLite from "expo-sqlite";
+import Storage from "expo-sqlite/kv-store";
+import { copyDbToFolder } from "@/hooks/useExportDatabase";
+import * as FileSystem from "expo-file-system";
 
 type DrizzleDb = ExpoSQLiteDatabase<typeof schema> & {
   $client: SQLiteDatabase;
@@ -15,14 +18,17 @@ type DrizzleDb = ExpoSQLiteDatabase<typeof schema> & {
 type DatabaseContextType = {
   db?: DrizzleDb;
   reloadDb: () => void;
+  changeDatabaseFolder: (folderPath: string) => void;
 };
 
 export const DatabaseContext = createContext<DatabaseContextType | null>(null);
 export const DATABASE_NAME = "hares.db";
+export const DB_FOLDER_KEY = "hares-db-folder";
 
 export const DatabaseProvider = ({ children, onLoad }: PropsWithChildren & { onLoad?: () => void }) => {
   const [error, setError] = useState<string>();
   const [calledLoaded, setCalledLoaded] = useState<boolean>(false);
+
   const [db, setDb] = useState<
     ExpoSQLiteDatabase<typeof schema> & {
       $client: SQLiteDatabase;
@@ -42,16 +48,47 @@ export const DatabaseProvider = ({ children, onLoad }: PropsWithChildren & { onL
         }
       }
       setDb(undefined);
-      const newDbCon = SQLite.openDatabaseSync(DATABASE_NAME, { enableChangeListener: true });
+      let dbFolder = await Storage.getItemAsync(DB_FOLDER_KEY);
+      if (!dbFolder) {
+        dbFolder = `${FileSystem.documentDirectory}SQLite`;
+        await Storage.setItemAsync(DB_FOLDER_KEY, dbFolder);
+      }
+      console.log("db", dbFolder, DATABASE_NAME);
+      const newDbCon = SQLite.openDatabaseSync(DATABASE_NAME, { enableChangeListener: true }, dbFolder);
       const newDb = drizzle(newDbCon, { schema, logger: false });
       await migrate(newDb, migrations).catch((e) => {
         setError(JSON.stringify(e));
       });
       setDb(newDb);
     } catch (e) {
+      console.log(e);
       setError(JSON.stringify(e));
     }
   }, [db]);
+
+  const changeDatabaseFolder = useCallback(
+    async (folderPath: string) => {
+      console.log("Changing");
+      if (!db?.$client) {
+        console.log("No client Changing");
+        return;
+      }
+
+      console.log("Export");
+      try {
+        await copyDbToFolder(db.$client, folderPath);
+        console.log("update");
+        await Storage.setItemAsync(DB_FOLDER_KEY, folderPath);
+      } catch (e) {
+        console.log(e);
+        throw e;
+      }
+
+      console.log("reload");
+      await internalReload();
+    },
+    [db?.$client, internalReload],
+  );
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
   useEffect(() => {
@@ -79,7 +116,7 @@ export const DatabaseProvider = ({ children, onLoad }: PropsWithChildren & { onL
 
   return (
     <>
-      <DatabaseContext.Provider value={{ reloadDb, db: db as NonNullable<typeof db> }}>
+      <DatabaseContext.Provider value={{ changeDatabaseFolder, reloadDb, db: db as NonNullable<typeof db> }}>
         {!db ? <LoadingDatabase /> : children}
       </DatabaseContext.Provider>
     </>
@@ -89,6 +126,7 @@ export const DatabaseProvider = ({ children, onLoad }: PropsWithChildren & { onL
 interface DatabaseType {
   db: DrizzleDb;
   reloadDb: () => void;
+  changeDatabaseFolder: (folderPath: string) => void;
 }
 
 export const useDatabase = (): DatabaseType => {
@@ -107,5 +145,6 @@ export const useDatabase = (): DatabaseType => {
   return {
     db,
     reloadDb: store.reloadDb,
+    changeDatabaseFolder: store.changeDatabaseFolder,
   };
 };
