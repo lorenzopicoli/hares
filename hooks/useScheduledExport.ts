@@ -1,4 +1,3 @@
-import BackgroundFetch from "react-native-background-fetch";
 import * as SQLite from "expo-sqlite";
 import { DATABASE_NAME } from "@/contexts/DatabaseContext";
 import * as FileSystem from "expo-file-system";
@@ -16,12 +15,6 @@ const SCHEDULED_EXPORT_TASK_ID = "com.lorenzopicoli.hares.exporttask";
 
 export async function handleBackgroundExport(taskId: string, isTimeout: boolean) {
   console.log("Starting BG task");
-  if (isTimeout || taskId !== SCHEDULED_EXPORT_TASK_ID) {
-    console.log("Timeout or invalid taskId", taskId);
-    // This task has exceeded its allowed running-time.
-    BackgroundFetch.finish(taskId);
-    return;
-  }
 
   try {
     const newDbCon = SQLite.openDatabaseSync(DATABASE_NAME, { enableChangeListener: false });
@@ -42,7 +35,6 @@ export async function handleBackgroundExport(taskId: string, isTimeout: boolean)
     await drizzleDb.update(exportLogsTable).set({ destinationFolder }).where(eq(exportLogsTable.id, logId));
     console.log("Destination folder is", destinationFolder);
     if (!destinationFolder) {
-      BackgroundFetch.finish(taskId);
       return;
     }
 
@@ -86,8 +78,6 @@ export async function handleBackgroundExport(taskId: string, isTimeout: boolean)
       console.error("Failed to log error", e);
     }
   }
-
-  BackgroundFetch.finish(taskId);
 }
 
 export const useScheduledExport = () => {
@@ -116,48 +106,12 @@ export const useScheduledExport = () => {
     return true;
   }, []);
 
-  const stopAllScheduledExports = useCallback(async () => {
-    await BackgroundFetch.stop();
-    await BackgroundFetch.stop(SCHEDULED_EXPORT_TASK_ID);
-  }, []);
+  const stopAllScheduledExports = useCallback(async () => {}, []);
 
   const setupScheduledExport = useCallback(
     async (intervalDays: number) => {
       await stopAllScheduledExports();
       const intervalInMin = intervalDays * 24 * 60 + 15;
-      await BackgroundFetch.configure(
-        {
-          minimumFetchInterval: Math.max(intervalInMin, 15),
-          stopOnTerminate: false,
-          enableHeadless: true,
-          startOnBoot: true,
-          // Android options
-          forceAlarmManager: false,
-          requiredNetworkType: BackgroundFetch.NETWORK_TYPE_NONE,
-          requiresCharging: false,
-          requiresDeviceIdle: false,
-          requiresBatteryNotLow: false,
-          requiresStorageNotLow: false,
-        },
-        async (taskId: string) => {
-          await handleBackgroundExport(taskId, false);
-        },
-        async (taskId: string) => {
-          await handleBackgroundExport(taskId, true);
-        },
-      );
-
-      BackgroundFetch.scheduleTask({
-        taskId: SCHEDULED_EXPORT_TASK_ID,
-        forceAlarmManager: true,
-        stopOnTerminate: false,
-        startOnBoot: true,
-        periodic: true,
-        enableHeadless: true,
-
-        requiredNetworkType: BackgroundFetch.NETWORK_TYPE_NONE,
-        delay: intervalInMin * 60 * 1000,
-      });
     },
     [stopAllScheduledExports],
   );

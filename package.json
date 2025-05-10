@@ -52,7 +52,6 @@
     "react-dom": "18.3.1",
     "react-hook-form": "^7.55.0",
     "react-native": "0.76.9",
-    "react-native-background-fetch": "^4.2.8",
     "react-native-gesture-handler": "~2.25.0",
     "react-native-pager-view": "6.5.1",
     "react-native-reanimated": "~3.17.5",
@@ -63,7 +62,9 @@
     "react-native-tab-view": "^4.0.5",
     "react-native-ui-datepicker": "^3.1.2",
     "react-native-web": "~0.19.13",
-    "react-native-webview": "13.12.5"
+    "react-native-webview": "13.12.5",
+    "expo-notifications": "~0.29.14",
+    "expo-device": "~7.0.3"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",
