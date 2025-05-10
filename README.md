@@ -1,6 +1,10 @@
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/92ac2249-d21b-48b8-90d5-65f19d559fd8" width="350" />
+</p>
+
 # Future
 
-## Scheduled export
+## Automated Backup
 
 The only big feature missing in for this to work exactly as I want it to is the ability to ingest the data into my own database.
 For that I need a way to automatically export or backup the data. I've come to terms that this type of feature is really hard on iOS without a server, but for Android I've tried to implement the following (ordered from what I would like the most to the least):
