@@ -3,7 +3,7 @@ import useStyles from "@/hooks/useStyles";
 import { StyleSheet, Modal, Pressable, View } from "react-native";
 import ThemedButton from "./ThemedButton";
 import { ThemedView } from "./ThemedView";
-import type { ThemedColors } from "./ThemeProvider";
+import type { ThemedColors } from "@/contexts/ThemeContext";
 import type { PropsWithChildren } from "react";
 
 interface Props {

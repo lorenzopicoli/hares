@@ -1,6 +1,6 @@
 import React, { useMemo, useState, type PropsWithChildren } from "react";
 import { Pressable, StyleSheet, View, type StyleProp, type ViewStyle } from "react-native";
-import type { ThemedColors } from "./ThemeProvider";
+import type { ThemedColors } from "@/contexts/ThemeContext";
 import useStyles from "@/hooks/useStyles";
 import { ThemedText } from "./ThemedText";
 import { Sizes } from "@/constants/Sizes";

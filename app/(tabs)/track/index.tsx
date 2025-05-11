@@ -3,7 +3,7 @@ import { StyleSheet, TouchableOpacity, View } from "react-native";
 import { type NavigationState, type Route, type SceneRendererProps, TabBar, TabView } from "react-native-tab-view";
 import type { Tracker } from "@/db/schema";
 import TrackerGridView from "@/components/TrackerGridView";
-import { useColors, type ThemedColors } from "@/components/ThemeProvider";
+import { useColors, type ThemedColors } from "@/contexts/ThemeContext";
 import useStyles from "@/hooks/useStyles";
 import { useNavigation, useRouter } from "expo-router";
 import SearchInput from "@/components/SearchInput";
@@ -16,9 +16,9 @@ import {
   TrackerOptionsBottomSheet,
   type TrackerOptionsBottomSheetRef,
 } from "@/components/BottomSheets/TrackerOptionsBottomSheet";
-import { useSettings } from "@/components/SettingsProvieder";
 import { XStack } from "@/components/Stacks";
 import { Fonts } from "@/constants/Colors";
+import { useSettings } from "@/contexts/SettingsContext";
 
 type TabRoute = Route & {
   key: string;

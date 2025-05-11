@@ -1,5 +1,5 @@
 import { BackHandler, Pressable as RNPressable, StyleSheet, type NativeEventSubscription } from "react-native";
-import type { ThemedColors } from "@/components/ThemeProvider";
+import type { ThemedColors } from "@/contexts/ThemeContext";
 import { forwardRef, useCallback, useImperativeHandle, useRef, type ReactNode } from "react";
 import {
   BottomSheetModal,

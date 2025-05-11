@@ -3,7 +3,7 @@ import { Separator } from "@/components/Separator";
 import ThemedButton from "@/components/ThemedButton";
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedSafeAreaView, ThemedView } from "@/components/ThemedView";
-import type { ThemedColors } from "@/components/ThemeProvider";
+import type { ThemedColors } from "@/contexts/ThemeContext";
 import { Sizes } from "@/constants/Sizes";
 import { useEntryTextList } from "@/hooks/data/useEntryTextList";
 import useStyles from "@/hooks/useStyles";

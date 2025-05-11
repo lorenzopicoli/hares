@@ -1,6 +1,6 @@
 import useStyles from "@/hooks/useStyles";
 import { ThemedText } from "./ThemedText";
-import type { ThemedColors } from "./ThemeProvider";
+import type { ThemedColors } from "@/contexts/ThemeContext";
 import { StyleSheet } from "react-native";
 import { Sizes } from "@/constants/Sizes";
 

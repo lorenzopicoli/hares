@@ -1,4 +1,4 @@
-import { useColors, type ThemedColors } from "../ThemeProvider";
+import { useColors, type ThemedColors } from "@/contexts/ThemeContext";
 import useStyles from "@/hooks/useStyles";
 import { ThemedView } from "../ThemedView";
 import { forwardRef, useCallback, useImperativeHandle, useRef, useState } from "react";

@@ -1,5 +1,5 @@
 import useStyles from "@/hooks/useStyles";
-import { useColors, type ThemedColors } from "./ThemeProvider";
+import { useColors, type ThemedColors } from "@/contexts/ThemeContext";
 import { Sizes } from "@/constants/Sizes";
 import type { PropsWithChildren, ReactNode } from "react";
 import { XStack, YStack } from "./Stacks";

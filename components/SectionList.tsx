@@ -9,7 +9,7 @@ import {
 } from "react-native";
 import { Separator } from "./Separator";
 import { XStack } from "./Stacks";
-import { useColors, type ThemedColors } from "./ThemeProvider";
+import { useColors, type ThemedColors } from "@/contexts/ThemeContext";
 import { Sizes } from "@/constants/Sizes";
 import useStyles from "@/hooks/useStyles";
 

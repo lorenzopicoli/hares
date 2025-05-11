@@ -1,6 +1,6 @@
 import { Tabs } from "expo-router";
 
-import { useColors } from "@/components/ThemeProvider";
+import { useColors } from "@/contexts/ThemeContext";
 import { HapticPressable } from "@/components/HapticPressable";
 import { MaterialIcons } from "@expo/vector-icons";
 import { Fonts } from "@/constants/Colors";

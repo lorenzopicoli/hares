@@ -12,7 +12,7 @@ import {
   useReorderableDrag,
   type ReorderableListReorderEvent,
 } from "react-native-reorderable-list";
-import { useColors, type ThemedColors } from "@/components/ThemeProvider";
+import { useColors, type ThemedColors } from "@/contexts/ThemeContext";
 import useStyles from "@/hooks/useStyles";
 import { Separator } from "@/components/Separator";
 import { Spacing } from "@/components/Spacing";

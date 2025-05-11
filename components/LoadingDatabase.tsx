@@ -1,6 +1,6 @@
 import { ThemedText } from "./ThemedText";
 import { ThemedView } from "./ThemedView";
-import { type ThemedColors, useColors } from "./ThemeProvider";
+import { type ThemedColors, useColors } from "@/contexts/ThemeContext";
 import { ActivityIndicator, StyleSheet } from "react-native";
 
 export default function LoadingDatabase() {

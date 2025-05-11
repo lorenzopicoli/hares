@@ -1,4 +1,4 @@
-import type { ThemedColors } from "../ThemeProvider";
+import type { ThemedColors } from "@/contexts/ThemeContext";
 import { ThemedView } from "../ThemedView";
 import { forwardRef, useImperativeHandle, useRef } from "react";
 import type { BottomSheetModal } from "@gorhom/bottom-sheet";

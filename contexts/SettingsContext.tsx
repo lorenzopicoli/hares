@@ -1,7 +1,7 @@
+import { ThemedText } from "@/components/ThemedText";
 import type { NewSettings, Settings } from "@/db/schema";
 import { useSettingsDatabase } from "@/hooks/data/useSettings";
 import { createContext, useContext, type PropsWithChildren } from "react";
-import { ThemedText } from "./ThemedText";
 
 type SettingsContextType = {
   settings: Settings;

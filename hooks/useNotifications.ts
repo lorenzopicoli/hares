@@ -12,6 +12,7 @@ import {
 } from "expo-notifications";
 import { useCallback, useState } from "react";
 import { Platform } from "react-native";
+import type * as Notifications from "expo-notifications";
 
 export const EXPORT_NOTIFICATION_CHANNEL = "Export Reminders";
 export const TRACKER_NOTIFICATION_CHANNEL = "Tracker Reminders";
@@ -26,6 +27,8 @@ setNotificationHandler({
 
 export const useNotifications = () => {
   const [existingNotifications, setExistingNotifications] = useState<NotificationRequest[]>();
+
+  const [notification, setNotification] = useState<Notifications.Notification | undefined>(undefined);
 
   const ensureNotificationPermission = useCallback(async () => {
     if (Platform.OS === "android") {
@@ -78,8 +81,11 @@ export const useNotifications = () => {
     async (notificationTrigger?: Omit<NotificationTriggerInput, "channelId">) => {
       await scheduleNotificationAsync({
         content: {
-          title: "Reminder to export your data",
-          body: "NOW!",
+          title: "Click to backup your Hares data",
+          body: "",
+          data: {
+            type: "export",
+          },
         },
         trigger: notificationTrigger ? { ...notificationTrigger, channelId: EXPORT_NOTIFICATION_CHANNEL } : null,
       });

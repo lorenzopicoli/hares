@@ -4,35 +4,15 @@ import * as FileSystem from "expo-file-system";
 import { exportDatabase } from "./useExportDatabase";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useCallback, useEffect, useState } from "react";
-import { drizzle } from "drizzle-orm/expo-sqlite";
-import { exportLogsTable } from "@/db/schema";
-import { eq } from "drizzle-orm";
 
 const SCHEDULED_EXPORT_STORAGE_KEY = "scheduledExportFolder";
-const SCHEDULED_EXPORT_FREQUENCY = "scheduledExportFrequency";
-const SCHEDULED_EXPORT_FAILED_LOGS_KEY = "scheduledExportFailedLogs";
-const SCHEDULED_EXPORT_TASK_ID = "com.lorenzopicoli.hares.exporttask";
 
-export async function handleBackgroundExport(taskId: string, isTimeout: boolean) {
-  console.log("Starting BG task");
-
+export async function handleBackgroundExport() {
   try {
     const newDbCon = SQLite.openDatabaseSync(DATABASE_NAME, { enableChangeListener: false });
-    const drizzleDb = drizzle(newDbCon, { schema: { exportLogsTable }, logger: false });
-
-    const logId = await drizzleDb
-      .insert(exportLogsTable)
-      .values({ createdAt: new Date() })
-      .returning({ id: exportLogsTable.id })
-      .then((l) => l?.[0]?.id);
-
-    if (!logId) {
-      throw new Error("Failed to insert in database");
-    }
 
     const destinationFolder = await AsyncStorage.getItem(SCHEDULED_EXPORT_STORAGE_KEY);
 
-    await drizzleDb.update(exportLogsTable).set({ destinationFolder }).where(eq(exportLogsTable.id, logId));
     console.log("Destination folder is", destinationFolder);
     if (!destinationFolder) {
       return;
@@ -62,31 +42,20 @@ export async function handleBackgroundExport(taskId: string, isTimeout: boolean)
     console.log("DB copied to", destinationPath);
 
     await FileSystem.deleteAsync(backupPath, { idempotent: true });
-    await drizzleDb.update(exportLogsTable).set({ finishedAt: new Date() }).where(eq(exportLogsTable.id, logId));
 
     console.log("Cleaned up local folder");
+    return destinationFolder;
   } catch (err) {
     console.error("Failed to backup", err);
-    try {
-      const prevFailedLogs = await AsyncStorage.getItem(SCHEDULED_EXPORT_FAILED_LOGS_KEY);
-      const failedLogs = JSON.parse(prevFailedLogs ?? "[]");
-      await AsyncStorage.setItem(
-        SCHEDULED_EXPORT_FAILED_LOGS_KEY,
-        JSON.stringify([...failedLogs, { date: new Date().toISOString(), error: String(err) }]),
-      );
-    } catch (e) {
-      console.error("Failed to log error", e);
-    }
+    alert(`Filed to export your database: ${JSON.stringify(err)}`);
   }
 }
 
 export const useScheduledExport = () => {
   const [currentExportFolder, setCurrentExportFolder] = useState<string | null>();
-  const [exportFrequency, setExportFrequency] = useState<number | null>();
 
   const init = async () => {
     setCurrentExportFolder(await AsyncStorage.getItem(SCHEDULED_EXPORT_STORAGE_KEY));
-    setExportFrequency(await AsyncStorage.getItem(SCHEDULED_EXPORT_FREQUENCY).then((v) => (v && +v ? +v : null)));
   };
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
@@ -106,34 +75,8 @@ export const useScheduledExport = () => {
     return true;
   }, []);
 
-  const stopAllScheduledExports = useCallback(async () => {}, []);
-
-  const setupScheduledExport = useCallback(
-    async (intervalDays: number) => {
-      await stopAllScheduledExports();
-      const intervalInMin = intervalDays * 24 * 60 + 15;
-    },
-    [stopAllScheduledExports],
-  );
-
-  const setExportFrequencyFun = useCallback(
-    async (frequency: number | null) => {
-      await AsyncStorage.setItem(SCHEDULED_EXPORT_FREQUENCY, String(frequency));
-      setExportFrequency(frequency);
-      if (frequency) {
-        setupScheduledExport(frequency);
-      } else {
-        stopAllScheduledExports();
-      }
-    },
-    [setupScheduledExport, stopAllScheduledExports],
-  );
-
   return {
-    setExportFrequency: setExportFrequencyFun,
-    exportFrequency,
     currentExportFolder,
     requestFolderAccess,
-    setupScheduledExport,
   };
 };

@@ -1,0 +1,64 @@
+import { createContext, useCallback, useEffect, useRef, useState, type PropsWithChildren } from "react";
+import * as Notifications from "expo-notifications";
+import { handleBackgroundExport } from "@/hooks/useScheduledExport";
+import Toast from "react-native-toast-message";
+
+type NotificationsContext = {};
+
+export const NotificationsContext = createContext<NotificationsContext | null>(null);
+
+export const NotificationsProvider = ({ children }: PropsWithChildren) => {
+  const lastNotification = Notifications.useLastNotificationResponse();
+  const responseListener = useRef<Notifications.EventSubscription>();
+  const [handledInitialNotification, setHandledInitialNotification] = useState(false);
+
+  const handleNewNotificationAction = useCallback(async (notification: Notifications.NotificationResponse) => {
+    try {
+      switch (notification.notification.request.content?.data?.type) {
+        case "export": {
+          const destinationFolder = await handleBackgroundExport();
+          Toast.show({
+            type: "success",
+            text1: "Database backup completed successfully",
+            text2: destinationFolder,
+            position: "bottom",
+          });
+          break;
+        }
+
+        case "tracker":
+          break;
+
+        default:
+          break;
+      }
+    } catch (e) {
+      console.log(e);
+      alert("Failed to handle notification");
+    }
+
+    await Notifications.clearLastNotificationResponseAsync();
+  }, []);
+
+  useEffect(() => {
+    if (lastNotification && !handledInitialNotification) {
+      handleNewNotificationAction(lastNotification);
+    }
+
+    if (lastNotification !== undefined) {
+      setHandledInitialNotification(true);
+    }
+  }, [lastNotification, handledInitialNotification, handleNewNotificationAction]);
+
+  useEffect(() => {
+    responseListener.current = Notifications.addNotificationResponseReceivedListener((response) => {
+      handleNewNotificationAction(response);
+    });
+
+    return () => {
+      responseListener.current && Notifications.removeNotificationSubscription(responseListener.current);
+    };
+  }, [handleNewNotificationAction]);
+
+  return <NotificationsContext.Provider value={{}}>{children}</NotificationsContext.Provider>;
+};

@@ -132,12 +132,18 @@ export const settingsTable = sqliteTable("settings", {
 export type Settings = typeof settingsTable.$inferSelect;
 export type NewSettings = typeof settingsTable.$inferInsert;
 
-export const exportLogsTable = sqliteTable("export_logs", {
+export const notifications = sqliteTable("notifications", {
   id: int().primaryKey({ autoIncrement: true }),
-  createdAt: integer({ mode: "timestamp" }).$defaultFn(() => new Date()),
-  finishedAt: integer({ mode: "timestamp" }),
-  destinationFolder: text(),
+  trackerId: int("tracker_id")
+    .notNull()
+    .references(() => trackersTable.id),
+  isExport: integer("is_export", { mode: "boolean" }).notNull().default(false),
+  timeIntervalInSeconds: integer("time_interval_seconds"),
+  day: integer(),
+  weekday: integer(),
+  hour: integer(),
+  minute: integer(),
 });
 
-export type ExportLog = typeof exportLogsTable.$inferSelect;
-export type NewExportLog = typeof exportLogsTable.$inferInsert;
+export type Notification = typeof notifications.$inferSelect;
+export type NewNotification = typeof notifications.$inferInsert;
