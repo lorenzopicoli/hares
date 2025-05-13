@@ -11,6 +11,8 @@ import { FormThemedToggleButtons } from "@/components/ThemedToggleButtons";
 import { useLazyTracker } from "@/hooks/data/useTracker";
 import { useMemo } from "react";
 import { useUpsertTracker } from "@/hooks/data/useUpsertTracker";
+import ActionableListItem from "@/components/ActionableListItem";
+import SectionList from "@/components/SectionList";
 
 interface FormInputs {
   name: string;
@@ -144,8 +146,25 @@ export default function AddTrackerScreen() {
             />
           </View>
         ) : null}
-      </ThemedScrollView>
 
+        <SectionList
+          sections={[
+            {
+              data: [
+                {
+                  key: "notifications",
+                  render: (
+                    <ActionableListItem
+                      title="Setup notifications"
+                      onPress={() => router.navigate("/notifications/setupNotification")}
+                    />
+                  ),
+                },
+              ],
+            },
+          ]}
+        />
+      </ThemedScrollView>
       <View style={styles.submitButtonContainer}>
         <ThemedButton
           fullWidth

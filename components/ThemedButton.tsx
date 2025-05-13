@@ -99,7 +99,7 @@ const createStyles = (theme: ThemedColors) =>
       width: "100%",
     },
     disabled: {
-      backgroundColor: theme.darkTint,
+      backgroundColor: theme.input.backgroundDisabled,
     },
     text: {
       //   color: theme.text,

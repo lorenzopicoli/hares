@@ -2,6 +2,7 @@ import { createContext, useCallback, useEffect, useRef, useState, type PropsWith
 import * as Notifications from "expo-notifications";
 import { handleBackgroundExport } from "@/hooks/useScheduledExport";
 import Toast from "react-native-toast-message";
+import { useRouter } from "expo-router";
 
 type NotificationsContext = {};
 
@@ -11,34 +12,40 @@ export const NotificationsProvider = ({ children }: PropsWithChildren) => {
   const lastNotification = Notifications.useLastNotificationResponse();
   const responseListener = useRef<Notifications.EventSubscription>();
   const [handledInitialNotification, setHandledInitialNotification] = useState(false);
+  const router = useRouter();
 
-  const handleNewNotificationAction = useCallback(async (notification: Notifications.NotificationResponse) => {
-    try {
-      switch (notification.notification.request.content?.data?.type) {
-        case "export": {
-          const destinationFolder = await handleBackgroundExport();
-          Toast.show({
-            type: "success",
-            text1: "Database backup completed successfully",
-            text2: destinationFolder,
-            position: "bottom",
-          });
-          break;
+  const handleNewNotificationAction = useCallback(
+    async (notification: Notifications.NotificationResponse) => {
+      try {
+        const data = notification.notification.request.content?.data;
+        switch (data?.type) {
+          case "export": {
+            const destinationFolder = await handleBackgroundExport();
+            Toast.show({
+              type: "success",
+              text1: "Database backup completed successfully",
+              text2: destinationFolder,
+              position: "bottom",
+            });
+            break;
+          }
+
+          case "tracker":
+            router.navigate({ pathname: "/entry/addEntry", params: { trackerId: data.trackerId } });
+            break;
+
+          default:
+            break;
         }
-
-        case "tracker":
-          break;
-
-        default:
-          break;
+      } catch (e) {
+        console.log(e);
+        alert("Failed to handle notification");
       }
-    } catch (e) {
-      console.log(e);
-      alert("Failed to handle notification");
-    }
 
-    await Notifications.clearLastNotificationResponseAsync();
-  }, []);
+      await Notifications.clearLastNotificationResponseAsync();
+    },
+    [router.navigate],
+  );
 
   useEffect(() => {
     if (lastNotification && !handledInitialNotification) {
