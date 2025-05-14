@@ -25,6 +25,7 @@ import ThemedInputLabel from "@/components/ThemedInputLabel";
 import { useLazyCollection } from "@/hooks/data/useCollection";
 import SearchInput from "@/components/SearchInput";
 import { useReorderTrackers } from "@/hooks/data/useReorderTrackers";
+import { YStack } from "@/components/Stacks";
 
 LogBox.ignoreLogs(["VirtualizedLists should never be nested inside plain ScrollViews"]);
 
@@ -230,34 +231,40 @@ export default function AddCollectionScreen() {
   return (
     <ThemedSafeAreaView>
       <ScrollViewContainer showsVerticalScrollIndicator={false} style={styles.scrollView}>
-        <FormThemedInput
-          form={{
-            control,
-            name: "name",
-            rules: {
-              required: {
-                message: "Name is required",
-                value: !isEditingAll,
+        <YStack gap={Sizes.large}>
+          <FormThemedInput
+            form={{
+              control,
+              name: "name",
+              rules: {
+                required: {
+                  message: "Name is required",
+                  value: !isEditingAll,
+                },
               },
-            },
-          }}
-          editable={!isEditingAll}
-          label="Collection name"
-          autoCapitalize="sentences"
-        />
+            }}
+            editable={!isEditingAll}
+            label="Collection name"
+            autoCapitalize="sentences"
+          />
 
-        <ThemedInputLabel label={isEditingAll ? "Reorder trackers" : "Select trackers for this collection"} />
+          <YStack style={styles.listSection} gap={0}>
+            <ThemedInputLabel label={isEditingAll ? "Reorder trackers" : "Select trackers for this collection"} />
 
-        {!isEditingAll ? <SearchInput value={searchQuery} placeholder="Search..." onChange={setSearchQuery} /> : null}
-        <NestedReorderableList
-          style={styles.reorderableList}
-          data={filteredTrackers}
-          renderItem={renderItem}
-          keyExtractor={(i) => String(i.tracker.id)}
-          onReorder={handleTrackerReorder}
-          ItemSeparatorComponent={() => <Separator overrideHorizontalMargin={0} />}
-        />
-        <Spacing size="medium" />
+            {!isEditingAll ? (
+              <SearchInput value={searchQuery} placeholder="Search..." onChange={setSearchQuery} />
+            ) : null}
+            <NestedReorderableList
+              style={styles.reorderableList}
+              data={filteredTrackers}
+              renderItem={renderItem}
+              keyExtractor={(i) => String(i.tracker.id)}
+              onReorder={handleTrackerReorder}
+              ItemSeparatorComponent={() => <Separator overrideHorizontalMargin={0} />}
+            />
+          </YStack>
+          <Spacing size="medium" />
+        </YStack>
       </ScrollViewContainer>
       <View style={styles.submitButtonContainer}>
         <ThemedButton
@@ -292,9 +299,14 @@ const createStyles = (theme: ThemedColors) =>
     },
     reorderableList: {
       overflow: "visible",
+      width: "100%",
+      marginTop: -Sizes.medium,
     },
     submitButtonContainer: {
       paddingHorizontal: Sizes.medium,
       marginBottom: Sizes.medium,
+    },
+    listSection: {
+      width: "100%",
     },
   });

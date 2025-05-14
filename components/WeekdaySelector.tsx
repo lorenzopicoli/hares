@@ -81,8 +81,6 @@ const createStyles = (theme: ThemedColors) =>
       flexDirection: "row",
       justifyContent: "space-between",
       alignItems: "center",
-      paddingVertical: Sizes.small,
-      paddingHorizontal: Sizes.xSmall,
     },
     dayCircle: {
       width: 40,

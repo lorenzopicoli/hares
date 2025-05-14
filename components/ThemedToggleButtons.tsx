@@ -131,9 +131,7 @@ function ThemedToggleButtons<V>(props: ThemedToggleButtonsProps<V>) {
 
 const createStyles = (theme: ThemedColors) =>
   StyleSheet.create({
-    container: {
-      marginBottom: 16,
-    },
+    container: {},
     grid: {
       flex: 4,
       marginHorizontal: "auto",

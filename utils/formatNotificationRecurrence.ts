@@ -9,7 +9,6 @@ export enum NotificationType {
 export interface NotificationRecurrence {
   type: NotificationType;
   time: Date;
-  dayPeriod?: number;
   daysOfWeek?: number[];
   dayOfMonth?: number;
 }
@@ -19,14 +18,7 @@ export function formatNotificationSchedule(inputs: NotificationRecurrence): stri
 
   switch (inputs.type) {
     case NotificationType.EveryXDays:
-      if (!inputs.dayPeriod || inputs.dayPeriod < 1) {
-        return "";
-      }
-
-      if (inputs.dayPeriod === 1) {
-        return `You'll be notified daily at ${timeString}`;
-      }
-      return `You'll be notified every ${inputs.dayPeriod} days at ${timeString}`;
+      return `You'll be notified daily at ${timeString}`;
 
     case NotificationType.DaysOfWeek: {
       if (inputs.daysOfWeek === undefined) {
@@ -65,7 +57,6 @@ export function formatNotificationSchedule(inputs: NotificationRecurrence): stri
         return "Invalid day of month selected";
       }
 
-      // Add appropriate suffix to day number (1st, 2nd, 3rd, etc.)
       const dayWithSuffix = addOrdinalSuffix(inputs.dayOfMonth);
 
       return `You'll be notified on the ${dayWithSuffix} day of each month at ${timeString}`;
@@ -76,11 +67,6 @@ export function formatNotificationSchedule(inputs: NotificationRecurrence): stri
   }
 }
 
-/**
- * Add ordinal suffix to a number (1st, 2nd, 3rd, etc.)
- * @param day The day number
- * @returns The day with appropriate suffix
- */
 function addOrdinalSuffix(day: number): string {
   if (day >= 11 && day <= 13) {
     return `${day}th`;
@@ -97,23 +83,3 @@ function addOrdinalSuffix(day: number): string {
       return `${day}th`;
   }
 }
-
-// Examples of usage:
-/*
-const examples = [
-  { type: NotificationType.DAILY, time: new Date('2023-01-01T08:30:00') },
-  { type: NotificationType.PERIODIC, time: new Date('2023-01-01T12:00:00'), dayPeriod: 3 },
-  { type: NotificationType.WEEKLY, time: new Date('2023-01-01T18:15:00'), dayOfWeek: 1 },
-  { type: NotificationType.MONTHLY, time: new Date('2023-01-01T09:00:00'), dayOfMonth: 15 },
-];
-
-examples.forEach(example => {
-  console.log(formatNotificationSchedule(example));
-});
-*/
-
-// Output:
-// You'll be notified daily at 8:30 AM
-// You'll be notified every 3 days at 12:00 PM
-// You'll be notified every Monday at 6:15 PM
-// You'll be notified on the 15th day of each month at 9:00 AM

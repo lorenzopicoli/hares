@@ -1,52 +1,57 @@
 import { StyleSheet } from "react-native";
 import { ThemedSafeAreaView, ThemedView } from "@/components/ThemedView";
-import type { ThemedColors } from "@/contexts/ThemeContext";
+import { useColors, type ThemedColors } from "@/contexts/ThemeContext";
 import useStyles from "@/hooks/useStyles";
-import { useDefaultStyles } from "react-native-ui-datepicker";
 import { FormThemedToggleButtons } from "@/components/ThemedToggleButtons";
-import { useForm, type UseFormWatch } from "react-hook-form";
-import { XStack, YStack } from "@/components/Stacks";
-import ThemedScrollView from "@/components/ThemedScrollView";
+import { Controller, useForm, type FormState, type UseFormWatch } from "react-hook-form";
+import { YStack } from "@/components/Stacks";
 import { Sizes } from "@/constants/Sizes";
-import FormDateTimePicker from "@/components/FormDateTimePicker";
 import ThemedButton from "@/components/ThemedButton";
-import { useRouter } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import { ThemedText } from "@/components/ThemedText";
 import { FormThemedInput } from "@/components/ThemedInput";
 import FormWeekdaySelector from "@/components/WeekdaySelector";
-import { Separator } from "@/components/Separator";
-import ThemedInputLabel from "@/components/ThemedInputLabel";
 import {
   formatNotificationSchedule,
   NotificationType,
   type NotificationRecurrence,
 } from "@/utils/formatNotificationRecurrence";
+import type { ISection } from "@/components/SectionList";
+import SectionList from "@/components/SectionList";
+import { useCallback, useRef } from "react";
+import type { BottomSheetModal } from "@gorhom/bottom-sheet";
+import { TimeSelectionBottomSheet } from "@/components/BottomSheets/TimeSelectionBottomSheet";
+import ActionableListItem from "@/components/ActionableListItem";
+import { format } from "date-fns";
+import TextListItem from "@/components/TextListItem";
+import { Separator } from "@/components/Separator";
 
-function ScheduleSummary(props: { watch: UseFormWatch<NotificationRecurrence> }) {
-  const [type, time, dayPeriod, daysOfWeek, dayOfMonth] = props.watch([
-    "type",
-    "time",
-    "dayPeriod",
-    "daysOfWeek",
-    "dayOfMonth",
-  ]);
+function ScheduleSummary(props: {
+  formState: FormState<NotificationRecurrence>;
+  watch: UseFormWatch<NotificationRecurrence>;
+}) {
+  const [type, time, daysOfWeek, dayOfMonth] = props.watch(["type", "time", "daysOfWeek", "dayOfMonth"]);
   return (
-    <ThemedText style={{ fontSize: 20 }}>
-      {formatNotificationSchedule({
-        type,
-        time,
-        dayPeriod,
-        daysOfWeek,
-        dayOfMonth,
-      })}
+    <ThemedText style={{ textOverflow: "wrap" }}>
+      {props.formState.isValid
+        ? formatNotificationSchedule({
+            type,
+            time,
+            daysOfWeek,
+            dayOfMonth,
+          })
+        : "Missing information"}
     </ThemedText>
   );
 }
 
 export default function SetupNotificationScreen() {
   const router = useRouter();
+  const { colors } = useColors();
   const { styles } = useStyles(createStyles);
-  const datePickerDefaultStyles = useDefaultStyles();
+  const timeSelectionBottomSheet = useRef<BottomSheetModal>(null);
+
+  const { notificationId, dismissTo } = useLocalSearchParams<{ notificationId?: string; dismissTo: string }>();
 
   const { control, watch, formState, handleSubmit } = useForm<NotificationRecurrence>({
     defaultValues: {
@@ -56,148 +61,129 @@ export default function SetupNotificationScreen() {
   });
 
   const type = watch("type");
-  const dayPeriod = watch("dayPeriod");
 
   const onSubmit = async (data: NotificationRecurrence) => {
-    router.dismiss();
+    router.dismissTo({
+      // biome-ignore lint/suspicious/noExplicitAny: <explanation>
+      pathname: dismissTo as any,
+      params: {
+        notificationSettings: JSON.stringify(data),
+      },
+    });
   };
-  return (
-    <ThemedSafeAreaView>
-      <ThemedScrollView keyboardShouldPersistTaps="never">
-        <YStack gap={Sizes.large} alignItems="center" style={styles.container}>
-          <ThemedView style={styles.fullWidth}>
-            <FormThemedToggleButtons
-              label="Recurrence type"
-              buttonContainerStyle={{ height: Sizes.buttonHeight }}
-              form={{
-                control,
-                name: "type",
-                rules: {
-                  required: {
-                    message: "A value is required",
-                    value: true,
-                  },
-                },
-              }}
-              options={[
-                { label: "Every X days", value: NotificationType.EveryXDays },
-                { label: "Weekly", value: NotificationType.DaysOfWeek },
-                { label: "Monthly", value: NotificationType.DaysOfMonth },
-              ]}
-              columns={3}
-            />
-          </ThemedView>
+  const showTimeSelectionBottomSheet = useCallback(() => {
+    timeSelectionBottomSheet.current?.present();
+  }, []);
 
-          <Separator overrideHorizontalMargin={0} />
-          {type === NotificationType.EveryXDays && (
-            <YStack style={styles.fullWidth} alignItems="flex-start">
-              <ThemedInputLabel label="Repeat every" />
-              <XStack alignItems="center" style={styles.fullWidth}>
-                <FormThemedInput
-                  containerStyle={{ width: 50 }}
-                  form={{
-                    control,
-                    name: "dayPeriod",
-                    rules: {
-                      required: {
-                        message: "A value greater than 1 is required",
-                        value: true,
-                      },
-                      min: {
-                        message: "A value greater than 1 is required",
-                        value: 1,
-                      },
-                    },
-                  }}
-                  keyboardType="numeric"
-                />
-                <ThemedText>{(dayPeriod ?? 0) > 1 ? "days" : "day"}</ThemedText>
-              </XStack>
-            </YStack>
-          )}
-
-          {type === NotificationType.DaysOfWeek && (
-            <YStack alignItems="center" style={styles.fullWidth}>
-              <FormWeekdaySelector
-                label="Repeats on"
+  const sections: ISection[] = [
+    {
+      //   title: <ThemedText type="title">Recurrence</ThemedText>,
+      data: [
+        {
+          key: "type",
+          render: (
+            <ThemedView style={styles.itemContainer}>
+              <FormThemedToggleButtons
+                buttonContainerStyle={{ height: Sizes.buttonHeight }}
                 form={{
                   control,
-                  name: "daysOfWeek",
+                  name: "type",
                   rules: {
                     required: {
-                      message: "At least one day is required",
+                      message: "A value is required",
                       value: true,
                     },
                   },
                 }}
-              />
-            </YStack>
-          )}
-
-          {type === NotificationType.DaysOfMonth && (
-            <YStack style={styles.fullWidth} alignItems="flex-start">
-              <ThemedInputLabel label="Repeats on" />
-              <XStack alignItems="center" style={styles.fullWidth}>
-                <FormThemedInput
-                  containerStyle={{ width: 50 }}
-                  form={{
-                    control,
-                    name: "dayOfMonth",
-                    rules: {
-                      required: {
-                        message: "A value between 1 and 31 is required",
-                        value: true,
-                      },
-                      max: {
-                        message: "A value between 1 and 31 is required",
-                        value: 31,
-                      },
-                      min: {
-                        message: "A value between 1 and 31 is required",
-                        value: 1,
-                      },
-                    },
-                  }}
-                  keyboardType="numeric"
-                />
-              </XStack>
-            </YStack>
-          )}
-
-          <Separator overrideHorizontalMargin={0} />
-          <YStack gap={0} alignItems="center" style={styles.fullWidth}>
-            <ThemedView style={styles.fullWidth}>
-              <ThemedInputLabel label="Time of the notification" />
-              <FormDateTimePicker
-                form={{
-                  control,
-                  name: "time",
-                  rules: {
-                    required: true,
-                  },
-                }}
-                mode="single"
-                initialView="time"
-                timePicker
-                hideHeader
-                disableMonthPicker
-                disableYearPicker
-                style={{ marginTop: -20 }}
-                styles={{
-                  ...datePickerDefaultStyles,
-                }}
+                options={[
+                  { label: "Never", value: null },
+                  { label: "Every day", value: NotificationType.EveryXDays },
+                  { label: "Weekly", value: NotificationType.DaysOfWeek },
+                  { label: "Monthly", value: NotificationType.DaysOfMonth },
+                ]}
+                columns={2}
               />
             </ThemedView>
-          </YStack>
-        </YStack>
-      </ThemedScrollView>
+          ),
+        },
+        ...(type === NotificationType.DaysOfWeek
+          ? [
+              {
+                key: "daysOfWeek",
+                render: (
+                  <ThemedView style={styles.itemContainer}>
+                    <FormWeekdaySelector
+                      label="Repeats on"
+                      form={{
+                        control,
+                        name: "daysOfWeek",
+                        rules: {
+                          required: {
+                            message: "At least one day is required",
+                            value: true,
+                          },
+                        },
+                      }}
+                    />
+                  </ThemedView>
+                ),
+              },
+            ]
+          : []),
+        ...(type === NotificationType.DaysOfMonth
+          ? [
+              {
+                key: "dayOfMonth",
+                render: (
+                  <ThemedView style={styles.itemContainer}>
+                    <FormThemedInput
+                      label="Day of the month"
+                      keyboardType="numeric"
+                      form={{
+                        control,
+                        name: "dayOfMonth",
+                        rules: { required: { message: "A value is required", value: true } },
+                      }}
+                    />
+                  </ThemedView>
+                ),
+              },
+            ]
+          : []),
+        {
+          key: "time",
+          render: (
+            <>
+              <Separator containerBackgroundColor={colors.secondaryBackground} />
+              <ActionableListItem
+                title="Notification time"
+                subtitle={format(watch("time"), "HH:mm")}
+                onPress={showTimeSelectionBottomSheet}
+                height={Sizes.list.large}
+              />
+            </>
+          ),
+        },
+      ],
+    },
+    {
+      title: <ThemedText type="title">Summary</ThemedText>,
+      data: [
+        {
+          key: "summary",
+          render: <TextListItem dynamicHeight title={<ScheduleSummary formState={formState} watch={watch} />} />,
+        },
+      ],
+    },
+  ];
+  return (
+    <ThemedSafeAreaView>
+      <SectionList
+        ItemSeparatorComponent={() => null}
+        contentContainerStyle={styles.listContentContainer}
+        sections={sections}
+      />
       <YStack style={styles.submitButtonContainer}>
-        {formState.isValid ? (
-          <>
-            <Separator overrideHorizontalMargin={0} />
-            <ScheduleSummary watch={watch} />
-          </>
-        ) : null}
         <ThemedButton
           fullWidth
           title="Save notification"
@@ -205,6 +191,13 @@ export default function SetupNotificationScreen() {
           onPress={handleSubmit(onSubmit)}
         />
       </YStack>
+      <Controller
+        control={control}
+        name="time"
+        render={({ field: { onChange, value } }) => (
+          <TimeSelectionBottomSheet onChange={(d) => onChange(d.date)} date={value} ref={timeSelectionBottomSheet} />
+        )}
+      />
     </ThemedSafeAreaView>
   );
 }
@@ -215,17 +208,15 @@ const createStyles = (theme: ThemedColors) =>
       flex: 1,
       paddingVertical: Sizes.medium,
     },
-    fullWidth: {
-      width: "100%",
-    },
-    textCenter: {
-      textAlign: "center",
-    },
-    summaryLabel: {
-      fontSize: 20,
-    },
     submitButtonContainer: {
       paddingHorizontal: Sizes.medium,
       marginBottom: Sizes.medium,
+    },
+    itemContainer: {
+      padding: Sizes.medium,
+      backgroundColor: theme.secondaryBackground,
+    },
+    listContentContainer: {
+      paddingHorizontal: Sizes.medium,
     },
   });

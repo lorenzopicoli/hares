@@ -83,7 +83,7 @@ export default function ThemedInput(props: ThemedInputProps) {
 const createStyles = (theme: ThemedColors) =>
   StyleSheet.create({
     container: {
-      marginBottom: 16,
+      width: "100%",
     },
     inputContainer: {
       flexDirection: "row",

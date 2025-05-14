@@ -6,11 +6,11 @@ import useStyles from "@/hooks/useStyles";
 import { ThemedText } from "./ThemedText";
 import type { ReactNode } from "react";
 
-export default function TextListItem(props: { title: string; right?: ReactNode }) {
+export default function TextListItem(props: { title: string | ReactNode; right?: ReactNode; dynamicHeight?: boolean }) {
   const { styles } = useStyles(createStyles);
   return (
-    <XStack style={styles.container} justifyContent="space-between">
-      <ThemedText>{props.title}</ThemedText>
+    <XStack style={[styles.container, !props.dynamicHeight && styles.height]} justifyContent="space-between">
+      {typeof props.title === "string" ? <ThemedText>{props.title}</ThemedText> : props.title}
 
       {props.right ? props.right : null}
     </XStack>
@@ -20,7 +20,9 @@ export default function TextListItem(props: { title: string; right?: ReactNode }
 const createStyles = (theme: ThemedColors) =>
   StyleSheet.create({
     container: {
-      height: Sizes.list.medium,
       padding: Sizes.medium,
+    },
+    height: {
+      height: Sizes.list.medium,
     },
   });

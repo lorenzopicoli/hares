@@ -83,6 +83,7 @@ const createStyles = (theme: ThemedColors) =>
     },
     itemContainer: {
       backgroundColor: theme.secondaryBackground,
+      overflow: "hidden",
       //   height: Sizes.list.medium,
     },
     roundedTop: {
@@ -95,7 +96,7 @@ const createStyles = (theme: ThemedColors) =>
     },
     sectionHeader: {
       paddingLeft: Sizes.small,
-      paddingBottom: Sizes.medium,
+      paddingBottom: Sizes.small,
       paddingTop: Sizes.xLarge,
     },
   });

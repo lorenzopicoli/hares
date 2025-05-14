@@ -138,11 +138,11 @@ export const notifications = sqliteTable("notifications", {
     .notNull()
     .references(() => trackersTable.id),
   isExport: integer("is_export", { mode: "boolean" }).notNull().default(false),
-  timeIntervalInSeconds: integer("time_interval_seconds"),
-  day: integer(),
-  weekday: integer(),
-  hour: integer(),
-  minute: integer(),
+  dayPeriod: integer("day_period"),
+  daysOfWeek: text("days_of_week"),
+  dayOfMonth: integer("day_of_month"),
+  minute: integer("minute"),
+  hour: integer("hour"),
 });
 
 export type Notification = typeof notifications.$inferSelect;

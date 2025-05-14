@@ -244,7 +244,7 @@ export default function AddEntryScreen() {
 
         <Spacing size="xSmall" />
         {lastEntries.length > 0 ? (
-          <Card title="Latest entries">
+          <Card title="Latest entries" headerHorizontalPadding={Sizes.medium}>
             {lastEntries.map((entry, i) => (
               <View key={entry.id} style={{ paddingHorizontal: Sizes.medium }}>
                 <EntriesListRow entry={entry} hideTrackerName style={styles.listItem} />

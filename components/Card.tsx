@@ -12,6 +12,7 @@ interface CardProps extends PropsWithChildren {
   right?: ReactNode;
   onFilterPress?: () => void;
   onHeaderPress?: () => void;
+  headerHorizontalPadding?: number;
 }
 
 export default function Card(props: CardProps) {
@@ -19,7 +20,11 @@ export default function Card(props: CardProps) {
   const { colors } = useColors();
   return (
     <YStack gap={0} alignItems="stretch" style={styles.card}>
-      <YStack style={styles.topSection} gap={Sizes.medium} alignItems="center">
+      <YStack
+        style={[styles.topSection, { paddingHorizontal: props.headerHorizontalPadding ?? Sizes.large }]}
+        gap={Sizes.medium}
+        alignItems="center"
+      >
         <TouchableHighlight underlayColor="none" style={styles.headerPress} onPress={props?.onHeaderPress}>
           <XStack>
             <ThemedText style={styles.title} type="title">
@@ -52,9 +57,7 @@ const createStyles = (theme: ThemedColors) =>
 
       elevation: 4,
     },
-    topSection: {
-      paddingHorizontal: Sizes.large,
-    },
+    topSection: {},
     title: {
       flex: 1,
     },

@@ -1,9 +1,8 @@
-import ThemedScrollView from "@/components/ThemedScrollView";
 import { FormThemedInput } from "@/components/ThemedInput";
 import { useForm } from "react-hook-form";
 import { Platform, StyleSheet, View } from "react-native";
 import ThemedButton from "@/components/ThemedButton";
-import { ThemedSafeAreaView } from "@/components/ThemedView";
+import { ThemedSafeAreaView, ThemedView } from "@/components/ThemedView";
 import { Sizes } from "@/constants/Sizes";
 import { TrackerType } from "@/db/schema";
 import { useLocalSearchParams, useRouter } from "expo-router";
@@ -12,7 +11,14 @@ import { useLazyTracker } from "@/hooks/data/useTracker";
 import { useMemo } from "react";
 import { useUpsertTracker } from "@/hooks/data/useUpsertTracker";
 import ActionableListItem from "@/components/ActionableListItem";
-import SectionList from "@/components/SectionList";
+import SectionList, { type ISection } from "@/components/SectionList";
+import useStyles from "@/hooks/useStyles";
+import { XStack } from "@/components/Stacks";
+import { ThemedText } from "@/components/ThemedText";
+import { useColors, type ThemedColors } from "@/contexts/ThemeContext";
+import TextListItem from "@/components/TextListItem";
+import { Separator } from "@/components/Separator";
+import { formatNotificationSchedule } from "@/utils/formatNotificationRecurrence";
 
 interface FormInputs {
   name: string;
@@ -25,8 +31,17 @@ interface FormInputs {
 }
 
 export default function AddTrackerScreen() {
+  const { styles } = useStyles(createStyles);
   const router = useRouter();
-  const { trackerId: trackerIdParam } = useLocalSearchParams<{ trackerId?: string }>();
+  const { colors } = useColors();
+  const { trackerId: trackerIdParam, notificationSettings: notificationSettingsParam } = useLocalSearchParams<{
+    trackerId?: string;
+    notificationSettings?: string;
+  }>();
+  const notificationSettings = useMemo(
+    () => (notificationSettingsParam ? JSON.parse(notificationSettingsParam) : undefined),
+    [notificationSettingsParam],
+  );
   const trackerId = useMemo(() => (trackerIdParam ? +(trackerIdParam ?? -1) : undefined), [trackerIdParam]);
   const { fetchTracker } = useLazyTracker();
   const { upsertTracker } = useUpsertTracker();
@@ -71,100 +86,129 @@ export default function AddTrackerScreen() {
     router.dismiss();
   };
 
+  const sections: ISection[] = [
+    {
+      data: [
+        {
+          key: "name",
+          render: (
+            <ThemedView style={[styles.detailsItemContainer, { marginTop: Sizes.small }]}>
+              <FormThemedInput form={{ control, name: "name" }} label="Tracker name" />
+            </ThemedView>
+          ),
+        },
+        {
+          key: "description",
+          render: (
+            <ThemedView style={styles.detailsItemContainer}>
+              <FormThemedInput form={{ control, name: "description" }} label="Description/Question (optional)" />
+            </ThemedView>
+          ),
+        },
+        {
+          key: "prefix-suffix",
+          render: (
+            <XStack style={[styles.valueTypeItemContainer, { marginBottom: Sizes.small }]} gap={Sizes.small}>
+              <View style={styles.flex1}>
+                <FormThemedInput form={{ control, name: "prefix" }} label="Prefix (optional)" />
+              </View>
+              <View style={styles.flex1}>
+                <FormThemedInput form={{ control, name: "suffix" }} label="Suffix (optional)" />
+              </View>
+            </XStack>
+          ),
+        },
+      ],
+    },
+    {
+      title: <ThemedText type="title">Entry type</ThemedText>,
+      data: [
+        {
+          key: "type",
+          render: (
+            <ThemedView style={styles.valueTypeItemContainer}>
+              <FormThemedToggleButtons
+                form={{
+                  control,
+                  name: "type",
+                  rules: {
+                    required: {
+                      message: "Type is required",
+                      value: true,
+                    },
+                  },
+                }}
+                columns={2}
+                options={typeOptions}
+              />
+            </ThemedView>
+          ),
+        },
+        ...(type === TrackerType.Scale
+          ? [
+              {
+                key: "range",
+                render: (
+                  <XStack style={[styles.valueTypeItemContainer, { marginBottom: Sizes.small }]} gap={Sizes.small}>
+                    <View style={styles.flex1}>
+                      <FormThemedInput form={{ control, name: "rangeMin" }} label="Range min" />
+                    </View>
+                    <View style={styles.flex1}>
+                      <FormThemedInput form={{ control, name: "rangeMax" }} label="Range max" />
+                    </View>
+                  </XStack>
+                ),
+              },
+            ]
+          : []),
+      ],
+    },
+
+    {
+      title: <ThemedText type="title">Notifications</ThemedText>,
+      data: [
+        {
+          key: "setup-notifications",
+          render: (
+            <View>
+              <ActionableListItem
+                title="Set up notifications"
+                onPress={() =>
+                  router.navigate({
+                    pathname: "/notifications/setupNotification",
+                    params: {
+                      dismissTo: "/tracker/addTracker",
+                      //   notificationSettings: JSON.stringify(notificationSettings),
+                    },
+                  })
+                }
+              />
+              <Separator containerBackgroundColor={colors.secondaryBackground} />
+            </View>
+          ),
+        },
+        {
+          key: "notifications-enabled",
+          render: (
+            <TextListItem
+              dynamicHeight
+              title={
+                notificationSettings ? formatNotificationSchedule(notificationSettings) : "No notifications enabled"
+              }
+            />
+          ),
+        },
+      ],
+    },
+  ];
   return (
     <ThemedSafeAreaView>
-      <ThemedScrollView keyboardShouldPersistTaps={Platform.OS === "android" ? "always" : undefined}>
-        <FormThemedInput
-          form={{
-            control,
-            name: "name",
-            rules: {
-              required: {
-                message: "Name is required",
-                value: true,
-              },
-            },
-          }}
-          autoCapitalize="sentences"
-          label="Tracker name"
-        />
-        <FormThemedInput
-          form={{ control, name: "description" }}
-          autoCapitalize="sentences"
-          label="Description/Question (optional)"
-        />
-        <View style={styles.sideBySide}>
-          <FormThemedInput containerStyle={styles.flex1} label="Prefix (optional)" form={{ control, name: "prefix" }} />
-          <FormThemedInput containerStyle={styles.flex1} label="Suffix (optional)" form={{ control, name: "suffix" }} />
-        </View>
-        <FormThemedToggleButtons
-          form={{
-            control,
-            name: "type",
-            rules: {
-              required: {
-                message: "Type is required",
-                value: true,
-              },
-            },
-          }}
-          label="Value type"
-          columns={2}
-          options={typeOptions}
-        />
-        {type === TrackerType.Scale ? (
-          <View style={styles.sideBySide}>
-            <FormThemedInput
-              form={{
-                control,
-                name: "rangeMin",
-                rules: {
-                  required: {
-                    message: "A minimum value is required for the range type",
-                    value: true,
-                  },
-                },
-              }}
-              containerStyle={styles.flex1}
-              label="Range min"
-              keyboardType="numeric"
-            />
-            <FormThemedInput
-              form={{
-                control,
-                name: "rangeMax",
-                rules: {
-                  required: {
-                    message: "A maximum value is required for the range type",
-                    value: true,
-                  },
-                },
-              }}
-              containerStyle={styles.flex1}
-              label="Range max"
-              keyboardType="numeric"
-            />
-          </View>
-        ) : null}
-
-        <SectionList
-          sections={[
-            {
-              data: [
-                {
-                  key: "notifications",
-                  render: (
-                    <ActionableListItem
-                      title="Setup notifications"
-                      onPress={() => router.navigate("/notifications/setupNotification")}
-                    />
-                  ),
-                },
-              ],
-            },
-          ]}
-        />
-      </ThemedScrollView>
+      <SectionList
+        keyboardShouldPersistTaps={Platform.OS === "android" ? "always" : undefined}
+        contentContainerStyle={styles.listContentContainer}
+        ItemSeparatorComponent={() => null}
+        sections={sections}
+      />
       <View style={styles.submitButtonContainer}>
         <ThemedButton
           fullWidth
@@ -176,16 +220,27 @@ export default function AddTrackerScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  submitButtonContainer: {
-    paddingHorizontal: Sizes.medium,
-    marginBottom: Sizes.medium,
-  },
-  sideBySide: {
-    flexDirection: "row",
-    gap: Sizes.small,
-  },
-  flex1: {
-    flex: 1,
-  },
-});
+const createStyles = (theme: ThemedColors) =>
+  StyleSheet.create({
+    submitButtonContainer: {
+      paddingHorizontal: Sizes.medium,
+      marginBottom: Sizes.medium,
+    },
+    flex1: {
+      flex: 1,
+    },
+    detailsItemContainer: {
+      paddingHorizontal: Sizes.medium,
+      paddingVertical: Sizes.small,
+      backgroundColor: theme.secondaryBackground,
+    },
+    valueTypeItemContainer: {
+      paddingHorizontal: Sizes.medium,
+      paddingVertical: Sizes.medium,
+      backgroundColor: theme.secondaryBackground,
+    },
+    listContentContainer: {
+      paddingBottom: Sizes.large,
+      paddingHorizontal: Sizes.medium,
+    },
+  });
