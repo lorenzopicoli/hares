@@ -102,6 +102,12 @@ export type TrackerEntry = typeof entriesTable.$inferSelect & {
 };
 export type NewTrackerEntry = typeof entriesTable.$inferInsert;
 
+export const trackersRelations = relations(trackersTable, ({ many }) => ({
+  entries: many(entriesTable),
+  collections: many(collectionsTrackersTable),
+  notifications: many(notificationsTable),
+}));
+
 export const textListEntriesTable = sqliteTable("text_list_entries", {
   id: int().primaryKey({ autoIncrement: true }),
   trackerId: int("tracker_id")
@@ -147,6 +153,7 @@ export interface NotificationRecurrence {
 
 export const notificationsTable = sqliteTable("notifications", {
   id: int().primaryKey({ autoIncrement: true }),
+  createdAt: integer({ mode: "timestamp" }).$defaultFn(() => new Date()),
   trackerId: int("tracker_id")
     .notNull()
     .references(() => trackersTable.id),
@@ -163,3 +170,10 @@ export const notificationsTable = sqliteTable("notifications", {
 
 export type Notification = typeof notificationsTable.$inferSelect;
 export type NewNotification = typeof notificationsTable.$inferInsert;
+
+export const notificationsRelations = relations(notificationsTable, ({ many, one }) => ({
+  tracker: one(trackersTable, {
+    fields: [notificationsTable.trackerId],
+    references: [trackersTable.id],
+  }),
+}));

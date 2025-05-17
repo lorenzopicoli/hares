@@ -92,6 +92,13 @@
       "when": 1747447847640,
       "tag": "0012_high_grey_gargoyle",
       "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "6",
+      "when": 1747501105047,
+      "tag": "0013_illegal_sunspot",
+      "breakpoints": true
     }
   ]
 }

@@ -10,17 +10,22 @@ const WEEKDAYS = ["S", "M", "T", "W", "T", "F", "S"];
 
 type WeekdaySelectorProps = {
   label?: string;
-  selectedDays: boolean[];
-  onChange: (selectedDays: boolean[]) => void;
+  selectedDays: number[];
+  onChange: (selectedDays: number[]) => void;
 };
 
 export function WeekdaySelector({ selectedDays, label, onChange }: WeekdaySelectorProps) {
   const { styles } = useStyles(createStyles);
   const toggleDay = (index: number) => {
-    const newSelectedDays = [...selectedDays];
-    newSelectedDays[index] = !newSelectedDays[index];
-    onChange(newSelectedDays);
+    const oneBasedIndex = index + 1;
+    if (selectedDays.includes(oneBasedIndex)) {
+      onChange(selectedDays.filter((day) => day !== oneBasedIndex));
+    } else {
+      onChange([...selectedDays, oneBasedIndex]);
+    }
   };
+
+  const booleanSelectedDays = WEEKDAYS.map((_, index) => selectedDays.includes(index + 1));
 
   return (
     <View>
@@ -30,10 +35,10 @@ export function WeekdaySelector({ selectedDays, label, onChange }: WeekdaySelect
           <TouchableOpacity
             // biome-ignore lint/suspicious/noArrayIndexKey: <explanation>
             key={index}
-            style={[styles.dayCircle, selectedDays[index] ? styles.selected : styles.unselected]}
+            style={[styles.dayCircle, booleanSelectedDays[index] ? styles.selected : styles.unselected]}
             onPress={() => toggleDay(index)}
           >
-            <Text style={[styles.dayText, selectedDays[index] ? styles.selectedText : styles.unselectedText]}>
+            <Text style={[styles.dayText, booleanSelectedDays[index] ? styles.selectedText : styles.unselectedText]}>
               {day}
             </Text>
           </TouchableOpacity>
@@ -59,7 +64,7 @@ export default function FormWeekdaySelector<T extends FieldValues, K extends Pat
     <Controller
       {...form}
       render={({ field: { onChange, value } }) => {
-        const selectedDays = Array.isArray(value) ? value : Array(7).fill(false);
+        const selectedDays = Array.isArray(value) ? value : [];
 
         return (
           <WeekdaySelector

@@ -51,6 +51,14 @@ function RootStack() {
         name="stats/selectStatTracker"
         options={{ ...defaultStackNavigationStyling, headerShown: true, headerTitle: "🐰 Select tracker" }}
       />
+      <Stack.Screen
+        name="notifications/setupNotification"
+        options={{ ...defaultStackNavigationStyling, headerShown: true, headerTitle: "🐰 Setup notification" }}
+      />
+      <Stack.Screen
+        name="notifications/manageNotifications"
+        options={{ ...defaultStackNavigationStyling, headerShown: true, headerTitle: "🐰 Manage notifications" }}
+      />
       <Stack.Screen name="+not-found" />
     </Stack>
   );
