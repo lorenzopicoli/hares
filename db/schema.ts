@@ -132,18 +132,34 @@ export const settingsTable = sqliteTable("settings", {
 export type Settings = typeof settingsTable.$inferSelect;
 export type NewSettings = typeof settingsTable.$inferInsert;
 
-export const notifications = sqliteTable("notifications", {
+export enum NotificationType {
+  EveryDay = "EveryDay",
+  DaysOfWeek = "DaysOfWeek",
+  DaysOfMonth = "DaysOfMonth",
+}
+
+export interface NotificationRecurrence {
+  type: NotificationType;
+  time: Date;
+  daysOfWeek?: number[];
+  dayOfMonth?: number;
+}
+
+export const notificationsTable = sqliteTable("notifications", {
   id: int().primaryKey({ autoIncrement: true }),
   trackerId: int("tracker_id")
     .notNull()
     .references(() => trackersTable.id),
   isExport: integer("is_export", { mode: "boolean" }).notNull().default(false),
-  dayPeriod: integer("day_period"),
+  /**
+   * Comma separated integers representing the day of the week
+   */
   daysOfWeek: text("days_of_week"),
-  dayOfMonth: integer("day_of_month"),
+  daysOfMonth: integer("days_of_month"),
   minute: integer("minute"),
   hour: integer("hour"),
+  deviceNotificationId: text("device_notification_id"),
 });
 
-export type Notification = typeof notifications.$inferSelect;
-export type NewNotification = typeof notifications.$inferInsert;
+export type Notification = typeof notificationsTable.$inferSelect;
+export type NewNotification = typeof notificationsTable.$inferInsert;

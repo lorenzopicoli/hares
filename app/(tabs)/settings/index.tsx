@@ -24,7 +24,7 @@ import { useScheduledExport } from "@/hooks/useScheduledExport";
 import { useRouter } from "expo-router";
 import { ThemedSwitch } from "@/components/ThemedSwitch";
 import { useNotifications } from "@/hooks/useNotifications";
-import { SchedulableTriggerInputTypes } from "expo-notifications";
+import { getAllScheduledNotificationsAsync } from "expo-notifications";
 import { useSettings } from "@/contexts/SettingsContext";
 import { useColors, type ThemedColors } from "@/contexts/ThemeContext";
 import { formatSAFUri } from "@/utils/formatSAFUri";
@@ -162,12 +162,8 @@ export default function SettingsScreen() {
           render: (
             <ActionableListItem
               title="Trigger export"
-              onPress={() => {
-                scheduleExportNotification({
-                  type: SchedulableTriggerInputTypes.TIME_INTERVAL,
-                  repeats: false,
-                  seconds: 5,
-                });
+              onPress={async () => {
+                console.log(JSON.stringify(await getAllScheduledNotificationsAsync(), null, 2));
               }}
             />
           ),

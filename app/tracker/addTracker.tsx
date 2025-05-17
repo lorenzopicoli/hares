@@ -4,7 +4,7 @@ import { Platform, StyleSheet, View } from "react-native";
 import ThemedButton from "@/components/ThemedButton";
 import { ThemedSafeAreaView, ThemedView } from "@/components/ThemedView";
 import { Sizes } from "@/constants/Sizes";
-import { TrackerType } from "@/db/schema";
+import { TrackerType, type NotificationRecurrence } from "@/db/schema";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { FormThemedToggleButtons } from "@/components/ThemedToggleButtons";
 import { useLazyTracker } from "@/hooks/data/useTracker";
@@ -19,6 +19,7 @@ import { useColors, type ThemedColors } from "@/contexts/ThemeContext";
 import TextListItem from "@/components/TextListItem";
 import { Separator } from "@/components/Separator";
 import { formatNotificationSchedule } from "@/utils/formatNotificationRecurrence";
+import { useUpsertNotification } from "@/hooks/data/useUpsertNotification";
 
 interface FormInputs {
   name: string;
@@ -39,12 +40,13 @@ export default function AddTrackerScreen() {
     notificationSettings?: string;
   }>();
   const notificationSettings = useMemo(
-    () => (notificationSettingsParam ? JSON.parse(notificationSettingsParam) : undefined),
+    () => (notificationSettingsParam ? (JSON.parse(notificationSettingsParam) as NotificationRecurrence) : undefined),
     [notificationSettingsParam],
   );
   const trackerId = useMemo(() => (trackerIdParam ? +(trackerIdParam ?? -1) : undefined), [trackerIdParam]);
   const { fetchTracker } = useLazyTracker();
   const { upsertTracker } = useUpsertTracker();
+  const { upsertTrackerNotification } = useUpsertNotification();
   const typeOptions = [
     { value: TrackerType.Number, label: "Number" },
     { value: TrackerType.Scale, label: "Range" },
@@ -82,7 +84,11 @@ export default function AddTrackerScreen() {
   const type = watch("type");
 
   const onSubmit = async (data: FormInputs) => {
-    await upsertTracker(data, trackerId);
+    const newTrackerId = await upsertTracker(data, trackerId);
+    const { tracker } = await fetchTracker(newTrackerId);
+    if (notificationSettings && tracker) {
+      await upsertTrackerNotification(notificationSettings, tracker);
+    }
     router.dismiss();
   };
 
@@ -178,7 +184,6 @@ export default function AddTrackerScreen() {
                     pathname: "/notifications/setupNotification",
                     params: {
                       dismissTo: "/tracker/addTracker",
-                      //   notificationSettings: JSON.stringify(notificationSettings),
                     },
                   })
                 }

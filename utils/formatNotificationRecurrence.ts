@@ -1,23 +1,11 @@
+import { NotificationType, type NotificationRecurrence } from "@/db/schema";
 import { format } from "date-fns";
-
-export enum NotificationType {
-  EveryXDays = "EveryXDays",
-  DaysOfWeek = "DaysOfWeek",
-  DaysOfMonth = "DaysOfMonth",
-}
-
-export interface NotificationRecurrence {
-  type: NotificationType;
-  time: Date;
-  daysOfWeek?: number[];
-  dayOfMonth?: number;
-}
 
 export function formatNotificationSchedule(inputs: NotificationRecurrence): string {
   const timeString = format(inputs.time, "h:mm a");
 
   switch (inputs.type) {
-    case NotificationType.EveryXDays:
+    case NotificationType.EveryDay:
       return `You'll be notified daily at ${timeString}`;
 
     case NotificationType.DaysOfWeek: {

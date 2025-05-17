@@ -65,7 +65,7 @@ export const useNotifications = () => {
 
   const scheduleTrackerNotification = useCallback(
     async (title: string, body: string, notificationTrigger?: Omit<NotificationTriggerInput, "channelId">) => {
-      await scheduleNotificationAsync({
+      const notificationId = await scheduleNotificationAsync({
         content: {
           title,
           body,
@@ -73,13 +73,14 @@ export const useNotifications = () => {
         trigger: notificationTrigger ? { ...notificationTrigger, channelId: TRACKER_NOTIFICATION_CHANNEL } : null,
       });
       await updateExistingNotifications();
+      return notificationId;
     },
     [updateExistingNotifications],
   );
 
   const scheduleExportNotification = useCallback(
     async (notificationTrigger?: Omit<NotificationTriggerInput, "channelId">) => {
-      await scheduleNotificationAsync({
+      const notificationId = await scheduleNotificationAsync({
         content: {
           title: "Click to backup your Hares data",
           body: "",
@@ -90,6 +91,7 @@ export const useNotifications = () => {
         trigger: notificationTrigger ? { ...notificationTrigger, channelId: EXPORT_NOTIFICATION_CHANNEL } : null,
       });
       await updateExistingNotifications();
+      return notificationId;
     },
     [updateExistingNotifications],
   );

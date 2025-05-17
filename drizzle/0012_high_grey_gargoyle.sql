@@ -1,0 +1,1 @@
+ALTER TABLE `notifications` ADD `device_notification_id` text;

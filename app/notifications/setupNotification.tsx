@@ -11,11 +11,7 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import { ThemedText } from "@/components/ThemedText";
 import { FormThemedInput } from "@/components/ThemedInput";
 import FormWeekdaySelector from "@/components/WeekdaySelector";
-import {
-  formatNotificationSchedule,
-  NotificationType,
-  type NotificationRecurrence,
-} from "@/utils/formatNotificationRecurrence";
+import { formatNotificationSchedule } from "@/utils/formatNotificationRecurrence";
 import type { ISection } from "@/components/SectionList";
 import SectionList from "@/components/SectionList";
 import { useCallback, useRef } from "react";
@@ -25,6 +21,7 @@ import ActionableListItem from "@/components/ActionableListItem";
 import { format } from "date-fns";
 import TextListItem from "@/components/TextListItem";
 import { Separator } from "@/components/Separator";
+import { NotificationType, type NotificationRecurrence } from "@/db/schema";
 
 function ScheduleSummary(props: {
   formState: FormState<NotificationRecurrence>;
@@ -55,7 +52,7 @@ export default function SetupNotificationScreen() {
 
   const { control, watch, formState, handleSubmit } = useForm<NotificationRecurrence>({
     defaultValues: {
-      type: NotificationType.EveryXDays,
+      type: NotificationType.EveryDay,
       time: new Date(),
     },
   });
@@ -97,7 +94,7 @@ export default function SetupNotificationScreen() {
                 }}
                 options={[
                   { label: "Never", value: null },
-                  { label: "Every day", value: NotificationType.EveryXDays },
+                  { label: "Every day", value: NotificationType.EveryDay },
                   { label: "Weekly", value: NotificationType.DaysOfWeek },
                   { label: "Monthly", value: NotificationType.DaysOfMonth },
                 ]}
