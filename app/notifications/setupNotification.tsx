@@ -48,7 +48,11 @@ export default function SetupNotificationScreen() {
   const { styles } = useStyles(createStyles);
   const timeSelectionBottomSheet = useRef<BottomSheetModal>(null);
 
-  const { notificationId, dismissTo } = useLocalSearchParams<{ notificationId?: string; dismissTo: string }>();
+  const { notificationId, dismissTo, passthroughParams } = useLocalSearchParams<{
+    notificationId?: string;
+    dismissTo: string;
+    passthroughParams?: string;
+  }>();
 
   const { control, watch, formState, handleSubmit } = useForm<NotificationRecurrence>({
     defaultValues: {
@@ -65,6 +69,7 @@ export default function SetupNotificationScreen() {
       pathname: dismissTo as any,
       params: {
         notificationSettings: JSON.stringify(data),
+        ...(passthroughParams ? JSON.parse(passthroughParams) : {}),
       },
     });
   };

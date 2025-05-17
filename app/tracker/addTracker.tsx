@@ -184,6 +184,9 @@ export default function AddTrackerScreen() {
                     pathname: "/notifications/setupNotification",
                     params: {
                       dismissTo: "/tracker/addTracker",
+                      passthroughParams: JSON.stringify({
+                        trackerId,
+                      }),
                     },
                   })
                 }
