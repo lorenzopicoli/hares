@@ -195,7 +195,7 @@ export const NavBarColors: Record<string, Theme> = {
     dark: true,
     colors: {
       primary: tintColorDark,
-      background: "#1e223a",
+      background: Colors.dark.background,
       card: Colors.dark.background,
       text: Colors.dark.text,
       border: "#3a3e52",

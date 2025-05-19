@@ -61,7 +61,7 @@ function TrackerGridView(props: Props) {
             subTitle={
               <ThemedText style={styles.emptyStateSubtitle}>
                 Add a tracker by opening the top-right menu (
-                <Entypo name="dots-three-vertical" size={16} color={colors.text} />)
+                <Entypo name="plus" size={16} color={colors.text} />)
               </ThemedText>
             }
           />
