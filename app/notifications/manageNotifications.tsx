@@ -15,6 +15,7 @@ import {
   type NotificationRequest,
   type SchedulableNotificationTriggerInput,
 } from "expo-notifications";
+import { useRouter } from "expo-router";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { FlatList, StyleSheet, TouchableOpacity } from "react-native";
 
@@ -25,9 +26,14 @@ type NotificationWithNextTriggerDate = Notification & { tracker: Tracker } & {
 function NotificationRow(props: { notification: NotificationWithNextTriggerDate }) {
   const { notification } = props;
   const { styles } = useStyles(createStyles);
+  const router = useRouter();
+
+  const handleNotificationTap = useCallback(() => {
+    router.navigate({ pathname: "/tracker/addTracker", params: { trackerId: notification.trackerId } });
+  }, [router, notification.trackerId]);
 
   return (
-    <TouchableOpacity style={styles.itemContainer} onPress={() => {}}>
+    <TouchableOpacity style={styles.itemContainer} onPress={handleNotificationTap}>
       <YStack>
         <ThemedText type="title">{notification.tracker.name}</ThemedText>
         <ThemedText>{formatNotificationSchedule(databaseNotificationToRecurrence(notification), true)}</ThemedText>
