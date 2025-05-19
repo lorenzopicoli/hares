@@ -168,8 +168,12 @@ export const notificationsTable = sqliteTable("notifications", {
   deviceNotificationId: text("device_notification_id"),
 });
 
-export type Notification = typeof notificationsTable.$inferSelect;
+export type UnprocessedNotification = typeof notificationsTable.$inferSelect;
 export type NewNotification = typeof notificationsTable.$inferInsert;
+export type Notification = Omit<typeof notificationsTable.$inferSelect, "deviceNotificationId" | "daysOfWeek"> & {
+  daysOfWeek: number[] | null;
+  deviceNotificationId: string[] | null;
+};
 
 export const notificationsRelations = relations(notificationsTable, ({ many, one }) => ({
   tracker: one(trackersTable, {

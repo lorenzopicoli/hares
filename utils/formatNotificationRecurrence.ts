@@ -11,7 +11,7 @@ export function databaseNotificationToRecurrence(notification: Notification): No
   return {
     type,
     time: parse(`${notification.hour}:${notification.minute}`, "HH:mm", new Date()),
-    daysOfWeek: notification.daysOfWeek?.split(",").map(Number),
+    daysOfWeek: notification.daysOfWeek ?? undefined,
     dayOfMonth: notification.daysOfMonth ?? undefined,
   };
 }

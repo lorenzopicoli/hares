@@ -71,20 +71,36 @@ export default function ManageNotificationsScreen() {
     setDeviceNotifications(newDeviceNotifications);
   }, []);
 
+  // A notification might be linked to multiple device notifications. For example,
+  // if the user selects Monday, Tuesday and Wednesday at 1pm
+  // If today is Sunday, we should show Monday 1pm as the next trigger date, even if
+  // the database notification links to multiple device notifications (one for each day)
   const notificationsWithNextTriggerDate = useMemo(() => {
-    return notifications.map((notification) => ({
-      ...notification,
-      nextTriggerDate: deviceNotifications.find(
-        (deviceNotification) => deviceNotification.identifier === notification.deviceNotificationId,
-      )?.nextTriggerDate,
-    }));
+    return notifications.map((notification) => {
+      const matchingDeviceNotifications = deviceNotifications.filter(
+        (deviceNotification) => (notification.deviceNotificationId?.indexOf(deviceNotification.identifier) ?? -1) > -1,
+      );
+
+      const nextTriggerDate = matchingDeviceNotifications.reduce(
+        (earliest, current) => {
+          if (!current.nextTriggerDate) return earliest;
+          if (!earliest) return current.nextTriggerDate;
+          return new Date(current.nextTriggerDate) > new Date(earliest) ? earliest : current.nextTriggerDate;
+        },
+        undefined as Date | undefined,
+      );
+
+      return {
+        ...notification,
+        nextTriggerDate: nextTriggerDate,
+      };
+    });
   }, [notifications, deviceNotifications]);
 
   useEffect(() => {
     updateDeviceNotifications();
   }, [updateDeviceNotifications]);
 
-  console.log(JSON.stringify(deviceNotifications, null, 2));
   return (
     <ThemedView style={styles.container}>
       <FlatList
