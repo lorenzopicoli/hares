@@ -1,69 +1,62 @@
 import { useDatabase } from "@/contexts/DatabaseContext";
-import {
-  notificationsTable,
-  NotificationType,
-  type NewNotification,
-  type NotificationRecurrence,
-  type Tracker,
-} from "@/db/schema";
+import { notificationsTable, type DatabaseNewNotification, type Tracker } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { useCallback } from "react";
 import { useNotifications } from "../useNotifications";
-import { format } from "date-fns";
-import { getDateTime } from "@/utils/getDateTime";
 import { SchedulableTriggerInputTypes, type NotificationTriggerInput } from "expo-notifications";
+import type { SetupNotificationResult } from "@/app/notifications/setupNotification";
+import { useClearTrackerNotifications } from "./useClearTrackerNotifications";
 
-const getNotificationTrigger = (data: NotificationRecurrence): Omit<NotificationTriggerInput, "channelId">[] => {
-  const { min, hour } = getDateTime(data.time) ?? { min: 0, hour: 0 };
-  switch (data.type) {
-    case NotificationType.EveryDay:
-      return [
-        {
-          type: SchedulableTriggerInputTypes.DAILY,
-          minute: min,
-          hour: hour,
-        },
-      ];
-    case NotificationType.DaysOfWeek:
-      if (!data.daysOfWeek) {
-        return [];
-      }
-      return data.daysOfWeek?.map((day) => ({
-        type: SchedulableTriggerInputTypes.WEEKLY,
-        weekday: day,
-        minute: min,
-        hour: hour,
-      }));
-    case NotificationType.DaysOfMonth:
-      return [
-        {
-          type: SchedulableTriggerInputTypes.MONTHLY,
-          day: data.dayOfMonth ?? 0,
-          minute: min,
-          hour: hour,
-        },
-      ];
+const getNotificationTrigger = (data: SetupNotificationResult): Omit<NotificationTriggerInput, "channelId">[] => {
+  if (data.daysOfWeek && data.daysOfWeek.length > 0) {
+    return data.daysOfWeek?.map((day) => ({
+      type: SchedulableTriggerInputTypes.WEEKLY,
+      weekday: day,
+      minute: data.minute,
+      hour: data.hour,
+    }));
   }
+
+  if (data.daysOfMonth) {
+    return [
+      {
+        type: SchedulableTriggerInputTypes.MONTHLY,
+        day: data.daysOfMonth ?? 0,
+        minute: data.minute,
+        hour: data.hour,
+      },
+    ];
+  }
+
+  return [
+    {
+      type: SchedulableTriggerInputTypes.DAILY,
+      minute: data.minute,
+      hour: data.hour,
+    },
+  ];
 };
 
 export function useUpsertNotification() {
   const { db } = useDatabase();
   const { scheduleTrackerNotification } = useNotifications();
+  const { clearTrackerNotifications } = useClearTrackerNotifications();
 
   const upsertTrackerNotification = useCallback(
-    async (data: NotificationRecurrence, tracker: Tracker, existingId?: number) => {
+    async (data: SetupNotificationResult, tracker: Tracker, existingId?: number) => {
       const schedule = getNotificationTrigger(data);
       const notificationIds: string[] = [];
+
+      clearTrackerNotifications(tracker);
+
       for (const trigger of schedule) {
         const notificationId = await scheduleTrackerNotification(tracker.name, "Tracker notification", trigger);
         notificationIds.push(notificationId);
       }
 
-      const notification: NewNotification = {
-        minute: Number.parseInt(format(data.time, "mm")),
-        hour: Number.parseInt(format(data.time, "HH")),
+      const notification: DatabaseNewNotification = {
+        ...data,
         daysOfWeek: data.daysOfWeek?.join(","),
-        daysOfMonth: data.dayOfMonth,
         trackerId: tracker.id,
         deviceNotificationId: notificationIds.join(","),
         isExport: false,
@@ -93,7 +86,7 @@ export function useUpsertNotification() {
 
       return savedNotificationId;
     },
-    [db, scheduleTrackerNotification],
+    [db, clearTrackerNotifications, scheduleTrackerNotification],
   );
 
   return { upsertTrackerNotification };

@@ -11,33 +11,55 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import { ThemedText } from "@/components/ThemedText";
 import { FormThemedInput } from "@/components/ThemedInput";
 import FormWeekdaySelector from "@/components/WeekdaySelector";
-import { formatNotificationSchedule } from "@/utils/formatNotificationRecurrence";
 import type { ISection } from "@/components/SectionList";
 import SectionList from "@/components/SectionList";
-import { useCallback, useRef } from "react";
+import { useCallback, useMemo, useRef } from "react";
 import type { BottomSheetModal } from "@gorhom/bottom-sheet";
 import { TimeSelectionBottomSheet } from "@/components/BottomSheets/TimeSelectionBottomSheet";
 import ActionableListItem from "@/components/ActionableListItem";
-import { format } from "date-fns";
+import { format, parse } from "date-fns";
 import TextListItem from "@/components/TextListItem";
 import { Separator } from "@/components/Separator";
-import { NotificationType, type NotificationRecurrence } from "@/db/schema";
+import type { NewNotification } from "@/db/schema";
+import { getDateTime } from "@/utils/getDateTime";
+import { formatNotificationsSchedule } from "@/utils/formatNotificationRecurrence";
+
+export enum NotificationType {
+  EveryDay = "EveryDay",
+  DaysOfWeek = "DaysOfWeek",
+  DaysOfMonth = "DaysOfMonth",
+}
+
+export interface NotificationFormInputs {
+  type?: NotificationType | null;
+  time: Date;
+  daysOfWeek?: number[];
+  dayOfMonth?: number;
+}
+
+export type SetupNotificationResult = Omit<NewNotification, "trackerId" | "isExport" | "deviceNotificationId">;
 
 function ScheduleSummary(props: {
-  formState: FormState<NotificationRecurrence>;
-  watch: UseFormWatch<NotificationRecurrence>;
+  formState: FormState<NotificationFormInputs>;
+  watch: UseFormWatch<NotificationFormInputs>;
 }) {
   const [type, time, daysOfWeek, dayOfMonth] = props.watch(["type", "time", "daysOfWeek", "dayOfMonth"]);
+
+  const dateTime = useMemo(() => {
+    return getDateTime(time);
+  }, [time]);
   return (
     <ThemedText style={{ textOverflow: "wrap" }}>
-      {props.formState.isValid
-        ? formatNotificationSchedule({
-            type,
-            time,
-            daysOfWeek,
-            dayOfMonth,
-          })
-        : "Missing information"}
+      {type === null
+        ? "You won't be notified"
+        : props.formState.isValid
+          ? formatNotificationsSchedule({
+              hour: dateTime.hour,
+              minute: dateTime.min,
+              daysOfWeek: daysOfWeek ?? null,
+              daysOfMonth: dayOfMonth,
+            })
+          : "Missing information"}
     </ThemedText>
   );
 }
@@ -48,27 +70,58 @@ export default function SetupNotificationScreen() {
   const { styles } = useStyles(createStyles);
   const timeSelectionBottomSheet = useRef<BottomSheetModal>(null);
 
-  const { notificationId, dismissTo, passthroughParams } = useLocalSearchParams<{
-    notificationId?: string;
+  const {
+    dismissTo,
+    passthroughParams,
+    initialFormValues: initialFormValuesParams,
+  } = useLocalSearchParams<{
     dismissTo: string;
     passthroughParams?: string;
+    initialFormValues?: string;
   }>();
 
-  const { control, watch, formState, handleSubmit } = useForm<NotificationRecurrence>({
-    defaultValues: {
-      type: NotificationType.EveryDay,
-      time: new Date(),
-    },
+  const initialFormValues: NotificationFormInputs = useMemo(() => {
+    if (!initialFormValuesParams) {
+      return { type: null, time: new Date() };
+    }
+    const parsed = JSON.parse(initialFormValuesParams) as SetupNotificationResult;
+
+    const timeDate = parse(`${parsed.hour}:${parsed.minute}`, "HH:mm", new Date());
+    return {
+      type: parsed.daysOfWeek
+        ? NotificationType.DaysOfWeek
+        : parsed.daysOfMonth
+          ? NotificationType.DaysOfMonth
+          : NotificationType.EveryDay,
+      time: timeDate,
+      daysOfWeek: parsed.daysOfWeek ?? undefined,
+      dayOfMonth: parsed.daysOfMonth ?? undefined,
+    };
+  }, [initialFormValuesParams]);
+
+  const { control, watch, formState, handleSubmit } = useForm<NotificationFormInputs>({
+    defaultValues: initialFormValues ? initialFormValues : undefined,
   });
 
   const type = watch("type");
 
-  const onSubmit = async (data: NotificationRecurrence) => {
+  const onSubmit = async (data: NotificationFormInputs) => {
+    const timeInfo = getDateTime(data.time);
+    const notification: SetupNotificationResult | null =
+      data.type === null
+        ? null
+        : {
+            daysOfWeek: data.daysOfWeek ?? null,
+            daysOfMonth: data.dayOfMonth,
+            minute: timeInfo.min,
+            hour: timeInfo.hour,
+          };
+
     router.dismissTo({
       // biome-ignore lint/suspicious/noExplicitAny: <explanation>
       pathname: dismissTo as any,
       params: {
-        notificationSettings: JSON.stringify(data),
+        notificationSettings: notification ? JSON.stringify(notification) : "never",
         ...(passthroughParams ? JSON.parse(passthroughParams) : {}),
       },
     });
@@ -79,7 +132,6 @@ export default function SetupNotificationScreen() {
 
   const sections: ISection[] = [
     {
-      //   title: <ThemedText type="title">Recurrence</ThemedText>,
       data: [
         {
           key: "type",
@@ -90,12 +142,6 @@ export default function SetupNotificationScreen() {
                 form={{
                   control,
                   name: "type",
-                  rules: {
-                    required: {
-                      message: "A value is required",
-                      value: true,
-                    },
-                  },
                 }}
                 options={[
                   { label: "Never", value: null },
@@ -152,20 +198,24 @@ export default function SetupNotificationScreen() {
               },
             ]
           : []),
-        {
-          key: "time",
-          render: (
-            <>
-              <Separator containerBackgroundColor={colors.secondaryBackground} />
-              <ActionableListItem
-                title="Notification time"
-                subtitle={format(watch("time"), "HH:mm")}
-                onPress={showTimeSelectionBottomSheet}
-                height={Sizes.list.large}
-              />
-            </>
-          ),
-        },
+        ...(type !== null
+          ? [
+              {
+                key: "time",
+                render: (
+                  <>
+                    <Separator containerBackgroundColor={colors.secondaryBackground} />
+                    <ActionableListItem
+                      title="Notification time"
+                      subtitle={format(watch("time"), "HH:mm")}
+                      onPress={showTimeSelectionBottomSheet}
+                      height={Sizes.list.large}
+                    />
+                  </>
+                ),
+              },
+            ]
+          : []),
       ],
     },
     {

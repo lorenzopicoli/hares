@@ -8,7 +8,7 @@ import { useDeleteDatabase } from "@/hooks/useDeleteDatabase";
 import SectionList, { type ISection } from "@/components/SectionList";
 import ActionableListItem from "@/components/ActionableListItem";
 import TextListItem from "@/components/TextListItem";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import useStyles from "@/hooks/useStyles";
 import { BottomSheet, useBottomSheetBackHandler } from "@/components/BottomSheet";
 import type { BottomSheetModal } from "@gorhom/bottom-sheet";
@@ -27,6 +27,7 @@ import { useNotifications } from "@/hooks/useNotifications";
 import { useSettings } from "@/contexts/SettingsContext";
 import { useColors, type ThemedColors } from "@/contexts/ThemeContext";
 import { formatSAFUri } from "@/utils/formatSAFUri";
+import { getAllScheduledNotificationsAsync } from "expo-notifications";
 
 export default function SettingsScreen() {
   const { reloadDb } = useDatabase();
@@ -42,12 +43,16 @@ export default function SettingsScreen() {
   const { ensureNotificationPermission, scheduleExportNotification, scheduleTrackerNotification } = useNotifications();
 
   const trackerGridSettingsSheet = useRef<BottomSheetModal>(null);
-  const scheduledExportFrequencySheet = useRef<BottomSheetModal>(null);
   const exportDbSheetRef = useRef<BottomSheetModal>(null);
   const importDbSheetRef = useRef<BottomSheetModal>(null);
   const { handleSheetPositionChange: exportSheetChange } = useBottomSheetBackHandler(exportDbSheetRef);
   const { handleSheetPositionChange: importSheetChange } = useBottomSheetBackHandler(importDbSheetRef);
   const { currentExportFolder, requestFolderAccess } = useScheduledExport();
+  const [notificationsCount, setNotificationsCount] = useState(0);
+
+  useEffect(() => {
+    getAllScheduledNotificationsAsync().then((n) => setNotificationsCount(n.length));
+  }, []);
 
   const showTrackerGridSettings = () => {
     trackerGridSettingsSheet.current?.present();
@@ -153,17 +158,17 @@ export default function SettingsScreen() {
       title: <ThemedText type="title">Notifications</ThemedText>,
       data: [
         {
-          key: "permi",
-          render: <ActionableListItem title="Ensure permissions" onPress={ensureNotificationPermission} />,
-        },
-        {
-          key: "trigger",
+          key: "manage-notifications",
           render: (
             <ActionableListItem
               title="Manage notifications"
               onPress={() => router.navigate("/notifications/manageNotifications")}
             />
           ),
+        },
+        {
+          key: "ensure-notifications",
+          render: <ActionableListItem title="Validate permissions" onPress={ensureNotificationPermission} />,
         },
       ],
     },
@@ -177,6 +182,16 @@ export default function SettingsScreen() {
               title="Destination folder"
               subtitle={formatSAFUri(currentExportFolder ?? undefined, "No folder selected")}
               onPress={handleScheduledExportFolder}
+            />
+          ),
+        },
+        {
+          key: "setup-export-reminder",
+          render: (
+            <ActionableListItem
+              title="Setup export notification"
+              // subtitle={formatSAFUri(currentExportFolder ?? undefined, "No folder selected")}
+              // onPress={handleScheduledExportFolder}
             />
           ),
         },
@@ -196,6 +211,10 @@ export default function SettingsScreen() {
         {
           key: "entries",
           render: <TextListItem title="Entries" right={<ThemedText>{entriesCount}</ThemedText>} />,
+        },
+        {
+          key: "notifications-count",
+          render: <TextListItem title="Active notifications" right={<ThemedText>{notificationsCount}</ThemedText>} />,
         },
       ],
     },

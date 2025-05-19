@@ -138,19 +138,6 @@ export const settingsTable = sqliteTable("settings", {
 export type Settings = typeof settingsTable.$inferSelect;
 export type NewSettings = typeof settingsTable.$inferInsert;
 
-export enum NotificationType {
-  EveryDay = "EveryDay",
-  DaysOfWeek = "DaysOfWeek",
-  DaysOfMonth = "DaysOfMonth",
-}
-
-export interface NotificationRecurrence {
-  type: NotificationType;
-  time: Date;
-  daysOfWeek?: number[];
-  dayOfMonth?: number;
-}
-
 export const notificationsTable = sqliteTable("notifications", {
   id: int().primaryKey({ autoIncrement: true }),
   createdAt: integer({ mode: "timestamp" }).$defaultFn(() => new Date()),
@@ -169,8 +156,13 @@ export const notificationsTable = sqliteTable("notifications", {
 });
 
 export type UnprocessedNotification = typeof notificationsTable.$inferSelect;
-export type NewNotification = typeof notificationsTable.$inferInsert;
+export type DatabaseNewNotification = typeof notificationsTable.$inferInsert;
+
 export type Notification = Omit<typeof notificationsTable.$inferSelect, "deviceNotificationId" | "daysOfWeek"> & {
+  daysOfWeek: number[] | null;
+  deviceNotificationId: string[] | null;
+};
+export type NewNotification = Omit<typeof notificationsTable.$inferInsert, "deviceNotificationId" | "daysOfWeek"> & {
   daysOfWeek: number[] | null;
   deviceNotificationId: string[] | null;
 };

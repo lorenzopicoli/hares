@@ -4,11 +4,11 @@ import { Platform, StyleSheet, View } from "react-native";
 import ThemedButton from "@/components/ThemedButton";
 import { ThemedSafeAreaView, ThemedView } from "@/components/ThemedView";
 import { Sizes } from "@/constants/Sizes";
-import { TrackerType, type NotificationRecurrence } from "@/db/schema";
+import { TrackerType } from "@/db/schema";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { FormThemedToggleButtons } from "@/components/ThemedToggleButtons";
 import { useLazyTracker } from "@/hooks/data/useTracker";
-import { useMemo } from "react";
+import { useCallback, useMemo } from "react";
 import { useUpsertTracker } from "@/hooks/data/useUpsertTracker";
 import ActionableListItem from "@/components/ActionableListItem";
 import SectionList, { type ISection } from "@/components/SectionList";
@@ -18,8 +18,11 @@ import { ThemedText } from "@/components/ThemedText";
 import { useColors, type ThemedColors } from "@/contexts/ThemeContext";
 import TextListItem from "@/components/TextListItem";
 import { Separator } from "@/components/Separator";
-import { formatNotificationSchedule } from "@/utils/formatNotificationRecurrence";
 import { useUpsertNotification } from "@/hooks/data/useUpsertNotification";
+import { useDatabaseNotifications } from "@/hooks/data/useDatabaseNotifications";
+import type { SetupNotificationResult } from "../notifications/setupNotification";
+import { formatNotificationsSchedule } from "@/utils/formatNotificationRecurrence";
+import { useClearTrackerNotifications } from "@/hooks/data/useClearTrackerNotifications";
 
 interface FormInputs {
   name: string;
@@ -39,14 +42,22 @@ export default function AddTrackerScreen() {
     trackerId?: string;
     notificationSettings?: string;
   }>();
-  const notificationSettings = useMemo(
-    () => (notificationSettingsParam ? (JSON.parse(notificationSettingsParam) as NotificationRecurrence) : undefined),
-    [notificationSettingsParam],
-  );
   const trackerId = useMemo(() => (trackerIdParam ? +(trackerIdParam ?? -1) : undefined), [trackerIdParam]);
   const { fetchTracker } = useLazyTracker();
   const { upsertTracker } = useUpsertTracker();
   const { upsertTrackerNotification } = useUpsertNotification();
+  const { clearTrackerNotifications } = useClearTrackerNotifications();
+  const { notifications } = useDatabaseNotifications({ isExport: false, trackerId: trackerId ?? -1 });
+  const notificationSettings = useMemo(() => {
+    if (notificationSettingsParam === "never") {
+      return null;
+    }
+
+    return notificationSettingsParam
+      ? (JSON.parse(notificationSettingsParam) as SetupNotificationResult)
+      : (notifications?.[0] ?? null);
+  }, [notificationSettingsParam, notifications]);
+
   const typeOptions = [
     { value: TrackerType.Number, label: "Number" },
     { value: TrackerType.Scale, label: "Range" },
@@ -86,11 +97,28 @@ export default function AddTrackerScreen() {
   const onSubmit = async (data: FormInputs) => {
     const newTrackerId = await upsertTracker(data, trackerId);
     const { tracker } = await fetchTracker(newTrackerId);
-    if (notificationSettings && tracker) {
-      await upsertTrackerNotification(notificationSettings, tracker);
+    if (tracker) {
+      if (notificationSettings) {
+        await upsertTrackerNotification(notificationSettings, tracker);
+      } else {
+        await clearTrackerNotifications(tracker);
+      }
     }
     router.dismiss();
   };
+
+  const handleSetupNotificationPress = useCallback(() => {
+    router.navigate({
+      pathname: "/notifications/setupNotification",
+      params: {
+        dismissTo: "/tracker/addTracker",
+        passthroughParams: JSON.stringify({
+          trackerId,
+        }),
+        initialFormValues: notificationSettings ? JSON.stringify(notificationSettings) : undefined,
+      },
+    });
+  }, [router, trackerId, notificationSettings]);
 
   const sections: ISection[] = [
     {
@@ -178,18 +206,8 @@ export default function AddTrackerScreen() {
           render: (
             <View>
               <ActionableListItem
-                title="Set up notifications"
-                onPress={() =>
-                  router.navigate({
-                    pathname: "/notifications/setupNotification",
-                    params: {
-                      dismissTo: "/tracker/addTracker",
-                      passthroughParams: JSON.stringify({
-                        trackerId,
-                      }),
-                    },
-                  })
-                }
+                title={notificationSettings ? "Change notifications settings" : "Set up notifications"}
+                onPress={handleSetupNotificationPress}
               />
               <Separator containerBackgroundColor={colors.secondaryBackground} />
             </View>
@@ -201,7 +219,7 @@ export default function AddTrackerScreen() {
             <TextListItem
               dynamicHeight
               title={
-                notificationSettings ? formatNotificationSchedule(notificationSettings) : "No notifications enabled"
+                notificationSettings ? formatNotificationsSchedule(notificationSettings) : "No notifications enabled"
               }
             />
           ),

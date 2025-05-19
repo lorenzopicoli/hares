@@ -7,7 +7,7 @@ import { useColors, type ThemedColors } from "@/contexts/ThemeContext";
 import type { Notification, Tracker } from "@/db/schema";
 import { useDatabaseNotifications } from "@/hooks/data/useDatabaseNotifications";
 import useStyles from "@/hooks/useStyles";
-import { databaseNotificationToRecurrence, formatNotificationSchedule } from "@/utils/formatNotificationRecurrence";
+import { formatNotificationsSchedule } from "@/utils/formatNotificationRecurrence";
 import { format } from "date-fns";
 import {
   getAllScheduledNotificationsAsync,
@@ -36,7 +36,7 @@ function NotificationRow(props: { notification: NotificationWithNextTriggerDate 
     <TouchableOpacity style={styles.itemContainer} onPress={handleNotificationTap}>
       <YStack>
         <ThemedText type="title">{notification.tracker.name}</ThemedText>
-        <ThemedText>{formatNotificationSchedule(databaseNotificationToRecurrence(notification), true)}</ThemedText>
+        <ThemedText>{formatNotificationsSchedule(notification, true)}</ThemedText>
         {notification.nextTriggerDate ? (
           <ThemedText type="subtitle">
             Next reminder: {format(notification.nextTriggerDate, "MMM d, yyyy hh:mm a")}
@@ -73,7 +73,6 @@ export default function ManageNotificationsScreen() {
       }
     }
 
-    console.log(JSON.stringify(newDeviceNotifications, null, 2));
     setDeviceNotifications(newDeviceNotifications);
   }, []);
 

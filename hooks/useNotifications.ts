@@ -27,7 +27,6 @@ setNotificationHandler({
 
 export const useNotifications = () => {
   const [existingNotifications, setExistingNotifications] = useState<NotificationRequest[]>();
-
   const [notification, setNotification] = useState<Notifications.Notification | undefined>(undefined);
 
   const ensureNotificationPermission = useCallback(async () => {
@@ -65,6 +64,7 @@ export const useNotifications = () => {
 
   const scheduleTrackerNotification = useCallback(
     async (title: string, body: string, notificationTrigger?: Omit<NotificationTriggerInput, "channelId">) => {
+      ensureNotificationPermission();
       const notificationId = await scheduleNotificationAsync({
         content: {
           title,
@@ -75,11 +75,12 @@ export const useNotifications = () => {
       await updateExistingNotifications();
       return notificationId;
     },
-    [updateExistingNotifications],
+    [updateExistingNotifications, ensureNotificationPermission],
   );
 
   const scheduleExportNotification = useCallback(
     async (notificationTrigger?: Omit<NotificationTriggerInput, "channelId">) => {
+      ensureNotificationPermission();
       const notificationId = await scheduleNotificationAsync({
         content: {
           title: "Click to backup your Hares data",
@@ -93,7 +94,7 @@ export const useNotifications = () => {
       await updateExistingNotifications();
       return notificationId;
     },
-    [updateExistingNotifications],
+    [updateExistingNotifications, ensureNotificationPermission],
   );
 
   return { ensureNotificationPermission, scheduleTrackerNotification, scheduleExportNotification };
