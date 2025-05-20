@@ -117,8 +117,8 @@ export default function SetupNotificationScreen() {
       data.type === null
         ? null
         : {
-            daysOfWeek: data.daysOfWeek ?? null,
-            daysOfMonth: data.dayOfMonth,
+            daysOfWeek: data.type === NotificationType.DaysOfWeek ? (data.daysOfWeek ?? null) : null,
+            daysOfMonth: data.type === NotificationType.DaysOfMonth ? data.dayOfMonth : null,
             minute: timeInfo.min,
             hour: timeInfo.hour,
           };
