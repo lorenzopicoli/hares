@@ -39,7 +39,6 @@ const createStyles = (theme: ThemedColors) =>
   StyleSheet.create({
     container: {
       padding: Sizes.medium,
-      height: Sizes.list.medium,
     },
     xStack: {
       flex: 1,

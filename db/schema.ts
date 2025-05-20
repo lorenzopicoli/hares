@@ -141,9 +141,7 @@ export type NewSettings = typeof settingsTable.$inferInsert;
 export const notificationsTable = sqliteTable("notifications", {
   id: int().primaryKey({ autoIncrement: true }),
   createdAt: integer({ mode: "timestamp" }).$defaultFn(() => new Date()),
-  trackerId: int("tracker_id")
-    .notNull()
-    .references(() => trackersTable.id),
+  trackerId: int("tracker_id").references(() => trackersTable.id),
   isExport: integer("is_export", { mode: "boolean" }).notNull().default(false),
   /**
    * Comma separated integers representing the day of the week

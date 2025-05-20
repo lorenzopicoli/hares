@@ -30,3 +30,27 @@ export function useClearTrackerNotifications() {
 
   return { clearTrackerNotifications };
 }
+
+export function useClearExportNotifications() {
+  const { db } = useDatabase();
+
+  const clearExportNotifications = useCallback(async () => {
+    const previousNotifications = await db
+      .select()
+      .from(notificationsTable)
+      .where(eq(notificationsTable.isExport, true));
+
+    // Cancel all scheduled notifications for this tracker
+    for (const prev of previousNotifications) {
+      const localIds = prev.deviceNotificationId?.split(",") ?? [];
+      for (const localId of localIds) {
+        await cancelScheduledNotificationAsync(localId);
+      }
+    }
+
+    // Remove all database notifications before we recreate them
+    await db.delete(notificationsTable).where(eq(notificationsTable.isExport, true));
+  }, [db]);
+
+  return { clearExportNotifications };
+}

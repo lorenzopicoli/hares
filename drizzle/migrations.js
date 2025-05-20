@@ -15,6 +15,7 @@ import m0010 from './0010_married_winter_soldier.sql';
 import m0011 from './0011_known_shocker.sql';
 import m0012 from './0012_high_grey_gargoyle.sql';
 import m0013 from './0013_illegal_sunspot.sql';
+import m0014 from './0014_sticky_tusk.sql';
 
   export default {
     journal,
@@ -32,7 +33,8 @@ m0009,
 m0010,
 m0011,
 m0012,
-m0013
+m0013,
+m0014
     }
   }
   

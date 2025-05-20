@@ -22,7 +22,7 @@ import { useUpsertNotification } from "@/hooks/data/useUpsertNotification";
 import { useDatabaseNotifications } from "@/hooks/data/useDatabaseNotifications";
 import type { SetupNotificationResult } from "../notifications/setupNotification";
 import { formatNotificationsSchedule } from "@/utils/formatNotificationRecurrence";
-import { useClearTrackerNotifications } from "@/hooks/data/useClearTrackerNotifications";
+import { useClearTrackerNotifications } from "@/hooks/data/useClearNotifications";
 
 interface FormInputs {
   name: string;

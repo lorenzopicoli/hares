@@ -23,6 +23,8 @@ import { Separator } from "@/components/Separator";
 import type { NewNotification } from "@/db/schema";
 import { getDateTime } from "@/utils/getDateTime";
 import { formatNotificationsSchedule } from "@/utils/formatNotificationRecurrence";
+import { useUpsertNotification } from "@/hooks/data/useUpsertNotification";
+import { useClearExportNotifications } from "@/hooks/data/useClearNotifications";
 
 export enum NotificationType {
   EveryDay = "EveryDay",
@@ -68,16 +70,20 @@ export default function SetupNotificationScreen() {
   const router = useRouter();
   const { colors } = useColors();
   const { styles } = useStyles(createStyles);
+  const { upsertExportNotification } = useUpsertNotification();
+  const { clearExportNotifications } = useClearExportNotifications();
   const timeSelectionBottomSheet = useRef<BottomSheetModal>(null);
 
   const {
     dismissTo,
     passthroughParams,
+    saveExport,
     initialFormValues: initialFormValuesParams,
   } = useLocalSearchParams<{
     dismissTo: string;
     passthroughParams?: string;
     initialFormValues?: string;
+    saveExport?: string;
   }>();
 
   const initialFormValues: NotificationFormInputs = useMemo(() => {
@@ -116,6 +122,14 @@ export default function SetupNotificationScreen() {
             minute: timeInfo.min,
             hour: timeInfo.hour,
           };
+
+    if (saveExport) {
+      if (notification) {
+        await upsertExportNotification(notification);
+      } else {
+        await clearExportNotifications();
+      }
+    }
 
     router.dismissTo({
       // biome-ignore lint/suspicious/noExplicitAny: <explanation>

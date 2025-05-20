@@ -19,7 +19,8 @@ import { useRouter } from "expo-router";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { FlatList, StyleSheet, TouchableOpacity } from "react-native";
 
-type NotificationWithNextTriggerDate = Notification & { tracker: Tracker } & {
+// Tracker is technically null, but in reality it shouldn't happen
+type NotificationWithNextTriggerDate = Notification & { tracker: Tracker | null } & {
   nextTriggerDate?: Date;
 };
 
@@ -35,7 +36,7 @@ function NotificationRow(props: { notification: NotificationWithNextTriggerDate 
   return (
     <TouchableOpacity style={styles.itemContainer} onPress={handleNotificationTap}>
       <YStack>
-        <ThemedText type="title">{notification.tracker.name}</ThemedText>
+        <ThemedText type="title">{notification.tracker?.name}</ThemedText>
         <ThemedText>{formatNotificationsSchedule(notification, true)}</ThemedText>
         {notification.nextTriggerDate ? (
           <ThemedText type="subtitle">

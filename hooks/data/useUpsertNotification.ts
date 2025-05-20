@@ -1,11 +1,10 @@
 import { useDatabase } from "@/contexts/DatabaseContext";
 import { notificationsTable, type DatabaseNewNotification, type Tracker } from "@/db/schema";
-import { eq } from "drizzle-orm";
 import { useCallback } from "react";
 import { useNotifications } from "../useNotifications";
 import { SchedulableTriggerInputTypes, type NotificationTriggerInput } from "expo-notifications";
 import type { SetupNotificationResult } from "@/app/notifications/setupNotification";
-import { useClearTrackerNotifications } from "./useClearTrackerNotifications";
+import { useClearExportNotifications, useClearTrackerNotifications } from "./useClearNotifications";
 
 const getNotificationTrigger = (data: SetupNotificationResult): Omit<NotificationTriggerInput, "channelId">[] => {
   if (data.daysOfWeek && data.daysOfWeek.length > 0) {
@@ -39,11 +38,12 @@ const getNotificationTrigger = (data: SetupNotificationResult): Omit<Notificatio
 
 export function useUpsertNotification() {
   const { db } = useDatabase();
-  const { scheduleTrackerNotification } = useNotifications();
+  const { scheduleTrackerNotification, scheduleExportNotification } = useNotifications();
   const { clearTrackerNotifications } = useClearTrackerNotifications();
+  const { clearExportNotifications } = useClearExportNotifications();
 
   const upsertTrackerNotification = useCallback(
-    async (data: SetupNotificationResult, tracker: Tracker, existingId?: number) => {
+    async (data: SetupNotificationResult, tracker: Tracker) => {
       const schedule = getNotificationTrigger(data);
       const notificationIds: string[] = [];
 
@@ -62,32 +62,54 @@ export function useUpsertNotification() {
         isExport: false,
       };
 
-      const { savedNotificationId } = existingId
-        ? await db
-            .update(notificationsTable)
-            .set(notification)
-            .where(eq(notificationsTable.id, existingId))
-            .then(() => ({
-              savedNotificationId: existingId,
-            }))
-            .catch((err) => {
-              console.log("Failed to update notification", err);
-              throw err;
-            })
-        : await db
-            .insert(notificationsTable)
-            .values(notification)
-            .returning({ savedNotificationId: notificationsTable.id })
-            .then((values) => values[0])
-            .catch((err) => {
-              console.log("Failed to save notification", err);
-              throw err;
-            });
+      const { savedNotificationId } = await db
+        .insert(notificationsTable)
+        .values(notification)
+        .returning({ savedNotificationId: notificationsTable.id })
+        .then((values) => values[0])
+        .catch((err) => {
+          console.log("Failed to save notification", err);
+          throw err;
+        });
 
       return savedNotificationId;
     },
     [db, clearTrackerNotifications, scheduleTrackerNotification],
   );
 
-  return { upsertTrackerNotification };
+  const upsertExportNotification = useCallback(
+    async (data: SetupNotificationResult) => {
+      const schedule = getNotificationTrigger(data);
+      const notificationIds: string[] = [];
+
+      clearExportNotifications();
+
+      for (const trigger of schedule) {
+        const notificationId = await scheduleExportNotification(trigger);
+        notificationIds.push(notificationId);
+      }
+
+      const notification: DatabaseNewNotification = {
+        ...data,
+        daysOfWeek: data.daysOfWeek?.join(","),
+        deviceNotificationId: notificationIds.join(","),
+        isExport: true,
+      };
+
+      const { savedNotificationId } = await db
+        .insert(notificationsTable)
+        .values(notification)
+        .returning({ savedNotificationId: notificationsTable.id })
+        .then((values) => values[0])
+        .catch((err) => {
+          console.log("Failed to save notification", err);
+          throw err;
+        });
+
+      return savedNotificationId;
+    },
+    [db, clearExportNotifications, scheduleExportNotification],
+  );
+
+  return { upsertTrackerNotification, upsertExportNotification };
 }

@@ -8,7 +8,7 @@ import { useDeleteDatabase } from "@/hooks/useDeleteDatabase";
 import SectionList, { type ISection } from "@/components/SectionList";
 import ActionableListItem from "@/components/ActionableListItem";
 import TextListItem from "@/components/TextListItem";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import useStyles from "@/hooks/useStyles";
 import { BottomSheet, useBottomSheetBackHandler } from "@/components/BottomSheet";
 import type { BottomSheetModal } from "@gorhom/bottom-sheet";
@@ -28,6 +28,9 @@ import { useSettings } from "@/contexts/SettingsContext";
 import { useColors, type ThemedColors } from "@/contexts/ThemeContext";
 import { formatSAFUri } from "@/utils/formatSAFUri";
 import { getAllScheduledNotificationsAsync } from "expo-notifications";
+import { useDatabaseNotifications } from "@/hooks/data/useDatabaseNotifications";
+import { formatNotificationsSchedule } from "@/utils/formatNotificationRecurrence";
+import InfoListItem from "@/components/InfoListItem";
 
 export default function SettingsScreen() {
   const { reloadDb } = useDatabase();
@@ -40,7 +43,8 @@ export default function SettingsScreen() {
   const [localShowAllCollection, setLocalShowAllCollection] = useState(settings.showAllCollection);
   const { styles } = useStyles(createStyles);
   const router = useRouter();
-  const { ensureNotificationPermission, scheduleExportNotification, scheduleTrackerNotification } = useNotifications();
+  const { ensureNotificationPermission, scheduleExportNotification } = useNotifications();
+  const { notifications: exportNotifications } = useDatabaseNotifications({ isExport: true });
 
   const trackerGridSettingsSheet = useRef<BottomSheetModal>(null);
   const exportDbSheetRef = useRef<BottomSheetModal>(null);
@@ -84,6 +88,18 @@ export default function SettingsScreen() {
   const handleScheduledExportFolder = async () => {
     requestFolderAccess();
   };
+
+  const handleSetupExportNotification = useCallback(async () => {
+    router.navigate({
+      pathname: "/notifications/setupNotification",
+      params: {
+        dismissTo: "/settings",
+        saveExport: "true",
+        initialFormValues:
+          exportNotifications && exportNotifications.length > 0 ? JSON.stringify(exportNotifications[0]) : undefined,
+      },
+    });
+  }, [router, exportNotifications]);
 
   const handleThemeChange = () => {
     setLocalTheme(localTheme === "dark" ? "light" : "dark");
@@ -176,12 +192,10 @@ export default function SettingsScreen() {
       title: <ThemedText type="title">Scheduled Exports</ThemedText>,
       data: [
         {
-          key: "export-folder",
+          key: "schedule-export-info",
           render: (
-            <ActionableListItem
-              title="Destination folder"
-              subtitle={formatSAFUri(currentExportFolder ?? undefined, "No folder selected")}
-              onPress={handleScheduledExportFolder}
+            <InfoListItem
+              title={`Automatic scheduled exports aren't supported yet.\n\nFor now, you can get notified regularly — just click the notification to export a SQLite backup to your folder`}
             />
           ),
         },
@@ -190,8 +204,22 @@ export default function SettingsScreen() {
           render: (
             <ActionableListItem
               title="Setup export notification"
-              // subtitle={formatSAFUri(currentExportFolder ?? undefined, "No folder selected")}
-              // onPress={handleScheduledExportFolder}
+              subtitle={
+                exportNotifications && exportNotifications.length > 0
+                  ? formatNotificationsSchedule(exportNotifications[0])
+                  : undefined
+              }
+              onPress={handleSetupExportNotification}
+            />
+          ),
+        },
+        {
+          key: "export-folder",
+          render: (
+            <ActionableListItem
+              title="Destination folder"
+              subtitle={formatSAFUri(currentExportFolder ?? undefined, "No folder selected")}
+              onPress={handleScheduledExportFolder}
             />
           ),
         },
