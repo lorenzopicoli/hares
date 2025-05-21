@@ -11,7 +11,7 @@ import { Sizes } from "@/constants/Sizes";
 import type { StatsDateRange } from "../BottomSheets/StatsScreenOptionsBottomSheet";
 import type { BottomSheetModal } from "@gorhom/bottom-sheet";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-import { useColors, type ThemedColors } from "../ThemeProvider";
+import { useColors, type ThemedColors } from "@/contexts/ThemeContext";
 import useStyles from "@/hooks/useStyles";
 import { NumberChartOptionsBottomSheet } from "../BottomSheets/NumberChartOptionsBottomSheet";
 import Card from "../Card";

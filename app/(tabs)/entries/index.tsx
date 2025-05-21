@@ -4,7 +4,7 @@ import { Separator } from "@/components/Separator";
 import { ThemedView } from "@/components/ThemedView";
 import type { TrackerEntry } from "@/db/schema";
 import { useCallback, useEffect, useRef, useState } from "react";
-import type { ThemedColors } from "@/components/ThemeProvider";
+import type { ThemedColors } from "@/contexts/ThemeContext";
 import EntriesListRow from "@/components/EntriesList/EntriesListRow";
 import useStyles from "@/hooks/useStyles";
 import { Sizes } from "@/constants/Sizes";

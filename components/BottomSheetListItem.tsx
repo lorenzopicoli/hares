@@ -1,6 +1,6 @@
 import { StyleSheet, TouchableOpacity } from "react-native";
 import { XStack } from "./Stacks";
-import type { ThemedColors } from "./ThemeProvider";
+import type { ThemedColors } from "@/contexts/ThemeContext";
 import useStyles from "@/hooks/useStyles";
 import { ThemedText } from "./ThemedText";
 import { Entypo } from "@expo/vector-icons";

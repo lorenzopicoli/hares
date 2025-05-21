@@ -1,7 +1,7 @@
 import React from "react";
 import { StyleSheet, TouchableOpacity, View, type StyleProp, type ViewStyle } from "react-native";
 import { ThemedText } from "./ThemedText";
-import { useColors } from "./ThemeProvider";
+import { useColors } from "@/contexts/ThemeContext";
 import { Sizes } from "@/constants/Sizes";
 import { Feather } from "@expo/vector-icons";
 

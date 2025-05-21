@@ -11,7 +11,7 @@ import useStyles from "@/hooks/useStyles";
 import { EntryCountLineChart, NumberTrackersLineChart } from "@/components/charts/LineCharts";
 import { XStack, YStack } from "@/components/Stacks";
 import { Platform, Pressable, StyleSheet, TouchableOpacity, View } from "react-native";
-import { useColors, type ThemedColors } from "@/components/ThemeProvider";
+import { useColors, type ThemedColors } from "@/contexts/ThemeContext";
 import { Sizes } from "@/constants/Sizes";
 import { CalendarHeatmapChart } from "@/components/charts/CalendarHeatmapChart";
 import type { BottomSheetModal } from "@gorhom/bottom-sheet";

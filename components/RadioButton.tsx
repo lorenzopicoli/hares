@@ -1,7 +1,7 @@
 import React from "react";
 import { StyleSheet, TouchableOpacity, View } from "react-native";
 import useStyles from "@/hooks/useStyles";
-import type { ThemedColors } from "./ThemeProvider";
+import type { ThemedColors } from "@/contexts/ThemeContext";
 
 interface RadioButtonProps {
   checked: boolean;

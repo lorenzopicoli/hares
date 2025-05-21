@@ -1,5 +1,5 @@
 import { KeyboardAvoidingView, Platform, SafeAreaView, View, type ViewProps } from "react-native";
-import { useColors } from "./ThemeProvider";
+import { useColors } from "@/contexts/ThemeContext";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export type ThemedViewProps = ViewProps & {

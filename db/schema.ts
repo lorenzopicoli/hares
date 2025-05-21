@@ -102,6 +102,12 @@ export type TrackerEntry = typeof entriesTable.$inferSelect & {
 };
 export type NewTrackerEntry = typeof entriesTable.$inferInsert;
 
+export const trackersRelations = relations(trackersTable, ({ many }) => ({
+  entries: many(entriesTable),
+  collections: many(collectionsTrackersTable),
+  notifications: many(notificationsTable),
+}));
+
 export const textListEntriesTable = sqliteTable("text_list_entries", {
   id: int().primaryKey({ autoIncrement: true }),
   trackerId: int("tracker_id")
@@ -132,12 +138,36 @@ export const settingsTable = sqliteTable("settings", {
 export type Settings = typeof settingsTable.$inferSelect;
 export type NewSettings = typeof settingsTable.$inferInsert;
 
-export const exportLogsTable = sqliteTable("export_logs", {
+export const notificationsTable = sqliteTable("notifications", {
   id: int().primaryKey({ autoIncrement: true }),
   createdAt: integer({ mode: "timestamp" }).$defaultFn(() => new Date()),
-  finishedAt: integer({ mode: "timestamp" }),
-  destinationFolder: text(),
+  trackerId: int("tracker_id").references(() => trackersTable.id),
+  isExport: integer("is_export", { mode: "boolean" }).notNull().default(false),
+  /**
+   * Comma separated integers representing the day of the week
+   */
+  daysOfWeek: text("days_of_week"),
+  daysOfMonth: integer("days_of_month"),
+  minute: integer("minute"),
+  hour: integer("hour"),
+  deviceNotificationId: text("device_notification_id"),
 });
 
-export type ExportLog = typeof exportLogsTable.$inferSelect;
-export type NewExportLog = typeof exportLogsTable.$inferInsert;
+export type UnprocessedNotification = typeof notificationsTable.$inferSelect;
+export type DatabaseNewNotification = typeof notificationsTable.$inferInsert;
+
+export type Notification = Omit<typeof notificationsTable.$inferSelect, "deviceNotificationId" | "daysOfWeek"> & {
+  daysOfWeek: number[] | null;
+  deviceNotificationId: string[] | null;
+};
+export type NewNotification = Omit<typeof notificationsTable.$inferInsert, "deviceNotificationId" | "daysOfWeek"> & {
+  daysOfWeek: number[] | null;
+  deviceNotificationId: string[] | null;
+};
+
+export const notificationsRelations = relations(notificationsTable, ({ many, one }) => ({
+  tracker: one(trackersTable, {
+    fields: [notificationsTable.trackerId],
+    references: [trackersTable.id],
+  }),
+}));

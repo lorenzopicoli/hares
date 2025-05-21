@@ -1,5 +1,5 @@
 import { StyleSheet, type SwitchProps, Switch } from "react-native";
-import { useColors, type ThemedColors } from "./ThemeProvider";
+import { useColors, type ThemedColors } from "@/contexts/ThemeContext";
 
 export type ThemedSwitchProps = SwitchProps & {};
 

@@ -7,7 +7,7 @@ import { Sizes } from "@/constants/Sizes";
 import { TouchableOpacity, View, StyleSheet } from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import type { BottomSheetModal } from "@gorhom/bottom-sheet";
-import { useColors, type ThemedColors } from "../ThemeProvider";
+import { useColors, type ThemedColors } from "@/contexts/ThemeContext";
 import useStyles from "@/hooks/useStyles";
 import { RankingChartOptionsBottomSheet } from "../BottomSheets/RankingChartOptionsBottomSheet";
 import type { StatsDateRange } from "../BottomSheets/StatsScreenOptionsBottomSheet";

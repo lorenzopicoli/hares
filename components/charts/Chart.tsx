@@ -4,7 +4,7 @@ import { View, type LayoutChangeEvent } from "react-native";
 import * as echarts from "echarts/core";
 
 import "@/constants/EchartsColors";
-import { useColors } from "../ThemeProvider";
+import { useColors } from "@/contexts/ThemeContext";
 
 export type ChartRef = {
   getEchartsInstance: () => echarts.ECharts | undefined;

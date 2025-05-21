@@ -1,15 +1,14 @@
-import { Platform, StyleSheet } from "react-native";
+import { StyleSheet } from "react-native";
 import { ThemedText } from "@/components/ThemedText";
 import { useDatabase } from "@/contexts/DatabaseContext";
 import { useConfirmModal } from "@/hooks/useConfirmModal";
 import { Sizes } from "@/constants/Sizes";
 import { useCounts } from "@/hooks/data/useCounts";
 import { useDeleteDatabase } from "@/hooks/useDeleteDatabase";
-import { useColors, type ThemedColors } from "@/components/ThemeProvider";
 import SectionList, { type ISection } from "@/components/SectionList";
 import ActionableListItem from "@/components/ActionableListItem";
 import TextListItem from "@/components/TextListItem";
-import { useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import useStyles from "@/hooks/useStyles";
 import { BottomSheet, useBottomSheetBackHandler } from "@/components/BottomSheet";
 import type { BottomSheetModal } from "@gorhom/bottom-sheet";
@@ -20,12 +19,18 @@ import ImportDatabaseBottomSheet, {
   IMPORT_DATABASE_BOTTOM_SHEET_HEIGHT,
 } from "@/components/BottomSheets/ImportDatabaseBottomSheet";
 import { ThemedView } from "@/components/ThemedView";
-import { useSettings } from "@/components/SettingsProvieder";
 import { TrackerGridSettingsBottomSheet } from "@/components/BottomSheets/TrackerGridSettingsBottomSheet";
 import { useScheduledExport } from "@/hooks/useScheduledExport";
-import { ScheduledExportFrequencyBottomSheet } from "@/components/BottomSheets/ScheduledExportFrequencyBottomSheet";
 import { useRouter } from "expo-router";
 import { ThemedSwitch } from "@/components/ThemedSwitch";
+import { useNotifications } from "@/hooks/useNotifications";
+import { useSettings } from "@/contexts/SettingsContext";
+import { useColors, type ThemedColors } from "@/contexts/ThemeContext";
+import { formatSAFUri } from "@/utils/formatSAFUri";
+import { getAllScheduledNotificationsAsync } from "expo-notifications";
+import { useDatabaseNotifications } from "@/hooks/data/useDatabaseNotifications";
+import { formatNotificationsSchedule } from "@/utils/formatNotificationRecurrence";
+import InfoListItem from "@/components/InfoListItem";
 
 export default function SettingsScreen() {
   const { reloadDb } = useDatabase();
@@ -38,15 +43,20 @@ export default function SettingsScreen() {
   const [localShowAllCollection, setLocalShowAllCollection] = useState(settings.showAllCollection);
   const { styles } = useStyles(createStyles);
   const router = useRouter();
+  const { ensureNotificationPermission, scheduleExportNotification } = useNotifications();
+  const { notifications: exportNotifications } = useDatabaseNotifications({ isExport: true });
 
   const trackerGridSettingsSheet = useRef<BottomSheetModal>(null);
-  const scheduledExportFrequencySheet = useRef<BottomSheetModal>(null);
   const exportDbSheetRef = useRef<BottomSheetModal>(null);
   const importDbSheetRef = useRef<BottomSheetModal>(null);
   const { handleSheetPositionChange: exportSheetChange } = useBottomSheetBackHandler(exportDbSheetRef);
   const { handleSheetPositionChange: importSheetChange } = useBottomSheetBackHandler(importDbSheetRef);
-  const { setExportFrequency, exportFrequency, currentExportFolder, requestFolderAccess, setupScheduledExport } =
-    useScheduledExport();
+  const { currentExportFolder, requestFolderAccess } = useScheduledExport();
+  const [notificationsCount, setNotificationsCount] = useState(0);
+
+  useEffect(() => {
+    getAllScheduledNotificationsAsync().then((n) => setNotificationsCount(n.length));
+  }, []);
 
   const showTrackerGridSettings = () => {
     trackerGridSettingsSheet.current?.present();
@@ -58,19 +68,6 @@ export default function SettingsScreen() {
 
   const showImportDbSheet = () => {
     importDbSheetRef.current?.present();
-  };
-
-  const showExportFrequencySheet = () => {
-    scheduledExportFrequencySheet.current?.present();
-  };
-
-  const handleChangeExportFrequency = (frequency: number | null) => {
-    setExportFrequency(frequency);
-    scheduledExportFrequencySheet.current?.dismiss();
-  };
-
-  const handleShowExportLogs = () => {
-    router.navigate({ pathname: "/settings/exportLogs" });
   };
 
   const handleDeleteData = async () => {
@@ -91,6 +88,18 @@ export default function SettingsScreen() {
   const handleScheduledExportFolder = async () => {
     requestFolderAccess();
   };
+
+  const handleSetupExportNotification = useCallback(async () => {
+    router.navigate({
+      pathname: "/notifications/setupNotification",
+      params: {
+        dismissTo: "/settings",
+        saveExport: "true",
+        initialFormValues:
+          exportNotifications && exportNotifications.length > 0 ? JSON.stringify(exportNotifications[0]) : undefined,
+      },
+    });
+  }, [router, exportNotifications]);
 
   const handleThemeChange = () => {
     setLocalTheme(localTheme === "dark" ? "light" : "dark");
@@ -162,47 +171,59 @@ export default function SettingsScreen() {
       ],
     },
     {
+      title: <ThemedText type="title">Notifications</ThemedText>,
+      data: [
+        {
+          key: "manage-notifications",
+          render: (
+            <ActionableListItem
+              title="Manage notifications"
+              onPress={() => router.navigate("/notifications/manageNotifications")}
+            />
+          ),
+        },
+        {
+          key: "ensure-notifications",
+          render: <ActionableListItem title="Validate permissions" onPress={ensureNotificationPermission} />,
+        },
+      ],
+    },
+    {
       title: <ThemedText type="title">Scheduled Exports</ThemedText>,
-      data:
-        Platform.OS === "android"
-          ? [
-              {
-                key: "export-folder",
-                render: (
-                  <ActionableListItem
-                    title="Destination folder"
-                    subtitle={decodeURIComponent(
-                      currentExportFolder?.replace(
-                        "content://com.android.externalstorage.documents/tree/primary%3A",
-                        "",
-                      ) ?? "No folder selected",
-                    )}
-                    onPress={handleScheduledExportFolder}
-                  />
-                ),
-              },
-              {
-                key: "export-frequency",
-                render: (
-                  <ActionableListItem
-                    title="Frequency"
-                    subtitle={exportFrequency ? `Every ${exportFrequency} days` : "Never"}
-                    onPress={showExportFrequencySheet}
-                  />
-                ),
-              },
-              {
-                key: "export-logs",
-                render: <ActionableListItem title="Logs" onPress={handleShowExportLogs} />,
-              },
-            ]
-          : [
-              {
-                key: "export-unavailable",
-
-                render: <TextListItem title="Scheduled export is unavailable on iOS." />,
-              },
-            ],
+      data: [
+        {
+          key: "schedule-export-info",
+          render: (
+            <InfoListItem
+              title={`Automatic scheduled exports aren't supported yet.\n\nFor now, you can get notified regularly — just click the notification to export a SQLite backup to your folder`}
+            />
+          ),
+        },
+        {
+          key: "setup-export-reminder",
+          render: (
+            <ActionableListItem
+              title="Setup export notification"
+              subtitle={
+                exportNotifications && exportNotifications.length > 0
+                  ? formatNotificationsSchedule(exportNotifications[0])
+                  : undefined
+              }
+              onPress={handleSetupExportNotification}
+            />
+          ),
+        },
+        {
+          key: "export-folder",
+          render: (
+            <ActionableListItem
+              title="Destination folder"
+              subtitle={formatSAFUri(currentExportFolder ?? undefined, "No folder selected")}
+              onPress={handleScheduledExportFolder}
+            />
+          ),
+        },
+      ],
     },
     {
       title: <ThemedText type="title">Usage</ThemedText>,
@@ -218,6 +239,10 @@ export default function SettingsScreen() {
         {
           key: "entries",
           render: <TextListItem title="Entries" right={<ThemedText>{entriesCount}</ThemedText>} />,
+        },
+        {
+          key: "notifications-count",
+          render: <TextListItem title="Active notifications" right={<ThemedText>{notificationsCount}</ThemedText>} />,
         },
       ],
     },
@@ -238,10 +263,6 @@ export default function SettingsScreen() {
         ref={trackerGridSettingsSheet}
         initialNCols={settings.trackersGridColsNumber}
         onChangeNCols={handleChangeNCols}
-      />
-      <ScheduledExportFrequencyBottomSheet
-        ref={scheduledExportFrequencySheet}
-        onFrequencyChange={handleChangeExportFrequency}
       />
       <BottomSheet
         snapPoints={[EXPORT_DATABASE_BOTTOM_SHEET_HEIGHT]}

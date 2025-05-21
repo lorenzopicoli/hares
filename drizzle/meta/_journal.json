@@ -78,6 +78,34 @@
       "when": 1746410471277,
       "tag": "0010_married_winter_soldier",
       "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "6",
+      "when": 1747447298744,
+      "tag": "0011_known_shocker",
+      "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "6",
+      "when": 1747447847640,
+      "tag": "0012_high_grey_gargoyle",
+      "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "6",
+      "when": 1747501105047,
+      "tag": "0013_illegal_sunspot",
+      "breakpoints": true
+    },
+    {
+      "idx": 14,
+      "version": "6",
+      "when": 1747702193518,
+      "tag": "0014_sticky_tusk",
+      "breakpoints": true
     }
   ]
 }

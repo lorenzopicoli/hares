@@ -1,4 +1,4 @@
-import { useColors, type ThemedColors } from "@/components/ThemeProvider";
+import { useColors, type ThemedColors } from "@/contexts/ThemeContext";
 import { useMemo } from "react";
 import type { StyleSheet } from "react-native";
 

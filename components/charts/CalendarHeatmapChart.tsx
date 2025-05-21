@@ -9,7 +9,7 @@ import { StyleSheet, TouchableOpacity, View } from "react-native";
 import type { StatsDateRange } from "../BottomSheets/StatsScreenOptionsBottomSheet";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import type { BottomSheetModal } from "@gorhom/bottom-sheet";
-import { useColors, type ThemedColors } from "../ThemeProvider";
+import { useColors, type ThemedColors } from "@/contexts/ThemeContext";
 import { Sizes } from "@/constants/Sizes";
 import useStyles from "@/hooks/useStyles";
 import { NumberChartOptionsBottomSheet } from "../BottomSheets/NumberChartOptionsBottomSheet";

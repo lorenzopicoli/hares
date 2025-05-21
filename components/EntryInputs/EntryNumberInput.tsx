@@ -3,7 +3,7 @@ import useStyles from "@/hooks/useStyles";
 import { useRef, useState } from "react";
 import { StyleSheet, View, TextInput, type TextInputProps, type StyleProp, type ViewStyle } from "react-native";
 import ThemedButton from "../ThemedButton";
-import type { ThemedColors } from "../ThemeProvider";
+import type { ThemedColors } from "@/contexts/ThemeContext";
 import { type FieldValues, type Path, type ControllerProps, Controller } from "react-hook-form";
 import InputErrorLabel from "../InputErrorLabel";
 import { Pressable } from "react-native-gesture-handler";

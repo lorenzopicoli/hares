@@ -5,13 +5,13 @@ import { FlatList, Platform, StyleSheet, Text, View } from "react-native";
 import { HapticPressable } from "./HapticPressable";
 import { Sizes } from "@/constants/Sizes";
 import useStyles from "@/hooks/useStyles";
-import { useColors, type ThemedColors } from "./ThemeProvider";
+import { useColors, type ThemedColors } from "@/contexts/ThemeContext";
 import { ThemedView } from "./ThemedView";
-import { useSettings } from "./SettingsProvieder";
 import EmptyState from "./EmptyState";
 import { ThemedText } from "./ThemedText";
 import { Entypo } from "@expo/vector-icons";
 import { Fonts } from "@/constants/Colors";
+import { useSettings } from "@/contexts/SettingsContext";
 
 interface Props {
   searchQuery?: string;
@@ -61,7 +61,7 @@ function TrackerGridView(props: Props) {
             subTitle={
               <ThemedText style={styles.emptyStateSubtitle}>
                 Add a tracker by opening the top-right menu (
-                <Entypo name="dots-three-vertical" size={16} color={colors.text} />)
+                <Entypo name="plus" size={16} color={colors.text} />)
               </ThemedText>
             }
           />

@@ -1,6 +1,6 @@
 import React from "react";
 import { StyleSheet, TouchableOpacity, type StyleProp, type TextStyle, type ViewStyle } from "react-native";
-import type { ThemedColors } from "./ThemeProvider";
+import type { ThemedColors } from "@/contexts/ThemeContext";
 import useStyles from "@/hooks/useStyles";
 import { Sizes } from "@/constants/Sizes";
 import { ThemedText } from "./ThemedText";
@@ -99,7 +99,7 @@ const createStyles = (theme: ThemedColors) =>
       width: "100%",
     },
     disabled: {
-      backgroundColor: theme.darkTint,
+      backgroundColor: theme.input.backgroundDisabled,
     },
     text: {
       //   color: theme.text,

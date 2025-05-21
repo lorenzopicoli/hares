@@ -9,7 +9,7 @@ import {
 } from "react-native";
 import { Separator } from "./Separator";
 import { XStack } from "./Stacks";
-import { useColors, type ThemedColors } from "./ThemeProvider";
+import { useColors, type ThemedColors } from "@/contexts/ThemeContext";
 import { Sizes } from "@/constants/Sizes";
 import useStyles from "@/hooks/useStyles";
 
@@ -83,6 +83,7 @@ const createStyles = (theme: ThemedColors) =>
     },
     itemContainer: {
       backgroundColor: theme.secondaryBackground,
+      overflow: "hidden",
       //   height: Sizes.list.medium,
     },
     roundedTop: {
@@ -95,7 +96,7 @@ const createStyles = (theme: ThemedColors) =>
     },
     sectionHeader: {
       paddingLeft: Sizes.small,
-      paddingBottom: Sizes.medium,
+      paddingBottom: Sizes.small,
       paddingTop: Sizes.xLarge,
     },
   });

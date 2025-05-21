@@ -4,7 +4,7 @@ import { Separator } from "@/components/Separator";
 import { ThemedSafeAreaView, ThemedView } from "@/components/ThemedView";
 import type { Tracker } from "@/db/schema";
 import { useState } from "react";
-import type { ThemedColors } from "@/components/ThemeProvider";
+import type { ThemedColors } from "@/contexts/ThemeContext";
 import useStyles from "@/hooks/useStyles";
 import { Sizes } from "@/constants/Sizes";
 import { useTrackers } from "@/hooks/data/useTrackers";
@@ -32,7 +32,7 @@ export default function SelectStatTrackerScreen() {
     <ThemedSafeAreaView>
       <ThemedView>
         <View style={styles.searchContainer}>
-          <SearchInput value={searchQuery} onChange={setSearchQuery} placeholder="Search..." />
+          <SearchInput autoFocus value={searchQuery} onChange={setSearchQuery} placeholder="Search..." />
         </View>
         <ThemedView style={styles.listContainer}>
           <FlatList

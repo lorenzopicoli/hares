@@ -1,6 +1,6 @@
 import { StyleSheet, TouchableOpacity, View, type StyleProp, type ViewStyle } from "react-native";
 import { ThemedText } from "../ThemedText";
-import type { ThemedColors } from "../ThemeProvider";
+import type { ThemedColors } from "@/contexts/ThemeContext";
 import type { TrackerEntry } from "@/db/schema";
 import useStyles from "@/hooks/useStyles";
 import { useMemo } from "react";

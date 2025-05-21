@@ -4,7 +4,7 @@ import * as SplashScreen from "expo-splash-screen";
 import React, { Suspense, useCallback, useEffect, useState } from "react";
 import * as NavigationBar from "expo-navigation-bar";
 import * as SystemUI from "expo-system-ui";
-import { ThemeProvider as MyThemeProvider, useColors } from "@/components/ThemeProvider";
+import { ThemeProvider as MyThemeProvider, useColors } from "@/contexts/ThemeContext";
 import "react-native-reanimated";
 
 import { Platform, SafeAreaView } from "react-native";
@@ -15,9 +15,11 @@ import LoadingDatabase from "@/components/LoadingDatabase";
 import { enableScreens } from "react-native-screens";
 import { StatusBar } from "expo-status-bar";
 import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
-import { SettingsProvider } from "@/components/SettingsProvieder";
 import { useFonts } from "expo-font";
 import { Barlow_400Regular, Barlow_500Medium, Barlow_600SemiBold, Barlow_700Bold } from "@expo-google-fonts/barlow";
+import { SettingsProvider } from "@/contexts/SettingsContext";
+import { NotificationsProvider } from "@/contexts/NotificationsContext";
+import Toast from "react-native-toast-message";
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
@@ -50,8 +52,12 @@ function RootStack() {
         options={{ ...defaultStackNavigationStyling, headerShown: true, headerTitle: "🐰 Select tracker" }}
       />
       <Stack.Screen
-        name="settings/exportLogs"
-        options={{ ...defaultStackNavigationStyling, headerShown: true, headerTitle: "🐰 Export Logs" }}
+        name="notifications/setupNotification"
+        options={{ ...defaultStackNavigationStyling, headerShown: true, headerTitle: "🐰 Setup notification" }}
+      />
+      <Stack.Screen
+        name="notifications/manageNotifications"
+        options={{ ...defaultStackNavigationStyling, headerShown: true, headerTitle: "🐰 Manage notifications" }}
       />
       <Stack.Screen name="+not-found" />
     </Stack>
@@ -73,10 +79,6 @@ export default function RootLayout() {
 function ThemedLayout() {
   const { theme } = useColors();
   const [loaded, error] = useFonts({
-    // HaresFontRegular: Montserrat_400Regular,
-    // HaresFontMedium: Montserrat_500Medium,
-    // HaresFontSemiBold: Montserrat_600SemiBold,
-    // HaresFontBold: Montserrat_700Bold,
     HaresFontRegular: Barlow_400Regular,
     HaresFontMedium: Barlow_500Medium,
     HaresFontSemiBold: Barlow_600SemiBold,
@@ -106,11 +108,14 @@ function ThemedLayout() {
       <Suspense fallback={<LoadingDatabase />}>
         <DatabaseProvider onLoad={handleDbLoaded}>
           <SettingsProvider>
-            <BottomSheetModalProvider>
-              <SafeAreaView style={{ flex: 0, backgroundColor: NavBarColors[theme].colors.background }} />
-              <RootStack />
-              <StatusBar style={theme === "light" ? "dark" : "light"} />
-            </BottomSheetModalProvider>
+            <NotificationsProvider>
+              <BottomSheetModalProvider>
+                <SafeAreaView style={{ flex: 0, backgroundColor: NavBarColors[theme].colors.background }} />
+                <RootStack />
+                <StatusBar style={theme === "light" ? "dark" : "light"} />
+                <Toast />
+              </BottomSheetModalProvider>
+            </NotificationsProvider>
           </SettingsProvider>
         </DatabaseProvider>
       </Suspense>

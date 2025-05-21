@@ -4,7 +4,7 @@ import useStyles from "@/hooks/useStyles";
 import { useCallback, useMemo, useRef } from "react";
 import { StyleSheet, View } from "react-native";
 import type { SingleChange } from "react-native-ui-datepicker/lib/typescript/types";
-import type { ThemedColors } from "./ThemeProvider";
+import type { ThemedColors } from "@/contexts/ThemeContext";
 import ThemedToggleButtons from "./ThemedToggleButtons";
 import { type FieldValues, type Path, type ControllerProps, Controller } from "react-hook-form";
 import { ThemedText } from "./ThemedText";

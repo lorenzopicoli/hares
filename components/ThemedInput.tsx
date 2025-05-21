@@ -1,6 +1,6 @@
 import React from "react";
 import { View, TextInput, StyleSheet, type TextInputProps, type StyleProp, type ViewStyle } from "react-native";
-import type { ThemedColors } from "./ThemeProvider";
+import type { ThemedColors } from "@/contexts/ThemeContext";
 import useStyles from "@/hooks/useStyles";
 import ThemedInputLabel from "./ThemedInputLabel";
 import { Controller, type ControllerProps, type FieldValues, type Path } from "react-hook-form";
@@ -83,7 +83,7 @@ export default function ThemedInput(props: ThemedInputProps) {
 const createStyles = (theme: ThemedColors) =>
   StyleSheet.create({
     container: {
-      marginBottom: 16,
+      width: "100%",
     },
     inputContainer: {
       flexDirection: "row",

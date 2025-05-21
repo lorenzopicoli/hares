@@ -1,5 +1,5 @@
 import { StyleSheet, View } from "react-native";
-import type { ThemedColors } from "../ThemeProvider";
+import type { ThemedColors } from "@/contexts/ThemeContext";
 import useStyles from "@/hooks/useStyles";
 import { Sizes } from "@/constants/Sizes";
 import { forwardRef, useImperativeHandle, useRef, useState } from "react";

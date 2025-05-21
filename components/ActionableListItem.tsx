@@ -1,6 +1,6 @@
 import { StyleSheet, TouchableOpacity } from "react-native";
 import { XStack, YStack } from "./Stacks";
-import type { ThemedColors } from "./ThemeProvider";
+import type { ThemedColors } from "@/contexts/ThemeContext";
 import useStyles from "@/hooks/useStyles";
 import { ThemedText } from "./ThemedText";
 import { Entypo } from "@expo/vector-icons";
@@ -12,10 +12,11 @@ export default function ActionableListItem(props: {
   subtitle?: string | ReactNode;
   onPress?: () => void;
   right?: ReactNode;
+  height?: number;
 }) {
   const { styles } = useStyles(createStyles);
   return (
-    <TouchableOpacity style={styles.container} onPress={props.onPress}>
+    <TouchableOpacity style={[styles.container, !!props.height && { height: props.height }]} onPress={props.onPress}>
       <XStack style={styles.xStack} alignItems="center" justifyContent="space-between">
         <YStack gap={0}>
           {typeof props.title === "string" ? <ThemedText>{props.title}</ThemedText> : props.title}
@@ -38,7 +39,6 @@ const createStyles = (theme: ThemedColors) =>
   StyleSheet.create({
     container: {
       padding: Sizes.medium,
-      height: Sizes.list.medium,
     },
     xStack: {
       flex: 1,

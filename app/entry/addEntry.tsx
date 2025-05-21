@@ -7,7 +7,6 @@ import { TrackerType, type EntryDateInformation, type NewTrackerEntry, type Peri
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { ThemedText } from "@/components/ThemedText";
 import { useCallback, useEffect, useMemo } from "react";
-import { useColors, type ThemedColors } from "@/components/ThemeProvider";
 import useStyles from "@/hooks/useStyles";
 import { FormThemedToggleButtons } from "@/components/ThemedToggleButtons";
 import { Spacing } from "@/components/Spacing";
@@ -26,6 +25,7 @@ import { Separator } from "@/components/Separator";
 import ActionableListItem from "@/components/ActionableListItem";
 import SectionList from "@/components/SectionList";
 import Card from "@/components/Card";
+import { useColors, type ThemedColors } from "@/contexts/ThemeContext";
 
 interface FormInputs {
   dateInformation: EntryDateInformation;
@@ -244,7 +244,7 @@ export default function AddEntryScreen() {
 
         <Spacing size="xSmall" />
         {lastEntries.length > 0 ? (
-          <Card title="Latest entries">
+          <Card title="Latest entries" headerHorizontalPadding={Sizes.medium}>
             {lastEntries.map((entry, i) => (
               <View key={entry.id} style={{ paddingHorizontal: Sizes.medium }}>
                 <EntriesListRow entry={entry} hideTrackerName style={styles.listItem} />

@@ -1,6 +1,5 @@
 import { StyleSheet } from "react-native";
 import { YStack } from "../Stacks";
-import type { ThemedColors } from "../ThemeProvider";
 import useStyles from "@/hooks/useStyles";
 import { Sizes } from "@/constants/Sizes";
 import { ThemedView } from "../ThemedView";
@@ -9,6 +8,7 @@ import { Separator } from "../Separator";
 import { forwardRef, useImperativeHandle, useRef } from "react";
 import type { BottomSheetModal } from "@gorhom/bottom-sheet";
 import { BottomSheet } from "../BottomSheet";
+import type { ThemedColors } from "@/contexts/ThemeContext";
 
 export type ScheduledExportFrequencyBottomSheetProps = {
   onFrequencyChange: (frequency: number | null) => void;

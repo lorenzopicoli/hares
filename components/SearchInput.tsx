@@ -2,7 +2,7 @@ import React, { useEffect, useRef } from "react";
 import { TextInput, View, StyleSheet, type StyleProp, type TextStyle, type TextInputProps } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import useStyles from "@/hooks/useStyles";
-import { useColors, type ThemedColors } from "./ThemeProvider";
+import { useColors, type ThemedColors } from "@/contexts/ThemeContext";
 import { Sizes } from "@/constants/Sizes";
 import { Fonts } from "@/constants/Colors";
 

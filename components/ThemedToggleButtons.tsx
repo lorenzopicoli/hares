@@ -1,6 +1,6 @@
 import React, { useMemo, useState, type PropsWithChildren } from "react";
 import { Pressable, StyleSheet, View, type StyleProp, type ViewStyle } from "react-native";
-import type { ThemedColors } from "./ThemeProvider";
+import type { ThemedColors } from "@/contexts/ThemeContext";
 import useStyles from "@/hooks/useStyles";
 import { ThemedText } from "./ThemedText";
 import { Sizes } from "@/constants/Sizes";
@@ -131,9 +131,7 @@ function ThemedToggleButtons<V>(props: ThemedToggleButtonsProps<V>) {
 
 const createStyles = (theme: ThemedColors) =>
   StyleSheet.create({
-    container: {
-      marginBottom: 16,
-    },
+    container: {},
     grid: {
       flex: 4,
       marginHorizontal: "auto",

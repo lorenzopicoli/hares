@@ -1,6 +1,6 @@
 import { StyleSheet } from "react-native";
 import { YStack } from "../Stacks";
-import { useColors, type ThemedColors } from "../ThemeProvider";
+import { useColors, type ThemedColors } from "@/contexts/ThemeContext";
 import useStyles from "@/hooks/useStyles";
 import { Entypo } from "@expo/vector-icons";
 import { Sizes } from "@/constants/Sizes";
