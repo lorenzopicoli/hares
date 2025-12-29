@@ -3,6 +3,8 @@ name: Android App APK Build
 on:
   release:
     types: [published]
+  workflow_dispatch:
+
 
 jobs:
   build:
